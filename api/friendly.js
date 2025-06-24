@@ -1,4 +1,4 @@
-// 📄 api/friendly.js — Using gpt-3.5-turbo instead of GPT-4 (June 24)
+// 📄 api/friendly.js — gpt-3.5 with stronger prompt (June 24)
 
 import express from 'express';
 import OpenAI from 'openai';
@@ -43,7 +43,7 @@ router.get('/friendly', async (req, res) => {
     });
     const visibleText = extractVisibleText(htmlResponse.data);
 
-    const prompt = `You are an expert in AI SEO analysis. Based on the following website content, return a valid JSON object with 3 sections:\n\nContent:\n"""${visibleText.slice(0, 7000)}"""\n\nReturn strictly valid JSON in this format:\n{\n  \"ai_superpowers\": [\n    { \"title\": \"...\", \"explanation\": \"...\" }\n  ],\n  \"ai_opportunities\": [\n    { \"title\": \"...\", \"explanation\": \"...\" }\n  ],\n  \"ai_engine_insights\": {\n    \"ChatGPT\": \"...\",\n    \"Claude\": \"...\",\n    \"Google Gemini\": \"...\",\n    \"Microsoft Copilot\": \"...\",\n    \"Perplexity\": \"...\"\n  }\n}`;
+    const prompt = `You are an expert AI SEO consultant. Based on the website content below, return a valid JSON report only — no explanation, no preamble. Follow this exact structure:\n\nContent:\n"""${visibleText.slice(0, 7000)}"""\n\nReturn strictly valid JSON in this format:\n{\n  \"ai_superpowers\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 5 items\n  ],\n  \"ai_opportunities\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 10 items\n  ],\n  \"ai_engine_insights\": {\n    \"ChatGPT\": \"...\",\n    \"Claude\": \"...\",\n    \"Google Gemini\": \"...\",\n    \"Microsoft Copilot\": \"...\",\n    \"Perplexity\": \"...\"\n  }\n}`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',

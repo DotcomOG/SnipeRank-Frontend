@@ -1,4 +1,4 @@
-<!-- analyze.html — Last updated: June 18, 2025 @ 2:40 PM ET -->
+<!-- analyze.html — Fixed API URL for live deployment (June 24) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-white text-black font-sans">
-
   <header class="text-center py-8">
     <h1 class="text-4xl font-bold">SnipeRank</h1>
     <h2 class="text-xl mt-1 font-medium">AI SEO Analyzer</h2>
@@ -19,7 +18,6 @@
 
     <div id="results" style="display:none;">
       <div id="page-url" class="text-xl font-semibold text-center"></div>
-      <div id="overall-score" class="text-center text-2xl font-bold my-4"></div>
 
       <section>
         <h2 class="text-xl font-bold mt-8 mb-2">What’s Working</h2>
@@ -57,28 +55,27 @@
       document.getElementById("page-url").textContent = decodeURIComponent(url);
 
       try {
-          const res = await fetch(`/api/friendly?url=${encodeURIComponent(url)}`);
+        const res = await fetch(`https://sniperank-backend.onrender.com/api/friendly?url=${encodeURIComponent(url)}`);
         const data = await res.json();
 
-        if (!data.success) throw new Error("Invalid response");
+        const parsed = data.parsed;
+        if (!parsed) throw new Error("Invalid response");
 
-        document.getElementById("overall-score").textContent = `Score: ${data.score}`;
-
-        (data.ai_strengths || []).forEach(item => {
+        (parsed.ai_superpowers || []).forEach(item => {
           const li = document.createElement("li");
-          li.textContent = item;
+          li.textContent = item.explanation;
           document.getElementById("ai-strengths").appendChild(li);
         });
 
-        (data.ai_opportunities || []).forEach(item => {
+        (parsed.ai_opportunities || []).forEach(item => {
           const li = document.createElement("li");
-          li.textContent = item;
+          li.textContent = item.explanation;
           document.getElementById("ai-opportunities").appendChild(li);
         });
 
-        (data.engine_insights || []).forEach(item => {
+        Object.entries(parsed.ai_engine_insights || {}).forEach(([engine, text]) => {
           const li = document.createElement("li");
-          li.textContent = item;
+          li.textContent = `${engine}: ${text}`;
           document.getElementById("ai-insights").appendChild(li);
         });
 

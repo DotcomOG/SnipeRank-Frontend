@@ -1,0 +1,97 @@
+<!-- full-report.html — Last updated: June 18, 2025 @ 2:25 PM ET -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Full AI SEO Report – SnipeRank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black font-sans">
+
+  <header class="text-center py-8">
+    <h1 class="text-4xl font-bold">SnipeRank</h1>
+    <h2 class="text-xl font-medium mt-1">Full AI SEO Analysis Report</h2>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-8 space-y-6">
+    <div id="fullResultUrl" class="text-xl font-semibold text-center"></div>
+    <div id="fullScore" class="text-center text-2xl font-bold my-4"></div>
+
+    <section>
+      <h2 class="text-xl font-bold mt-8 mb-2">What’s Working</h2>
+      <ul id="fullStrengths" class="list-disc list-inside space-y-3"></ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-bold mt-8 mb-2">Needs Attention</h2>
+      <ul id="fullOpportunities" class="list-disc list-inside space-y-3"></ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-bold mt-8 mb-2">AI Engine Insights</h2>
+      <ul id="fullEngineInsights" class="list-disc list-inside space-y-3"></ul>
+    </section>
+
+    <section class="mt-12 border-t border-gray-300 pt-8">
+      <h3 class="text-2xl font-semibold mb-4 text-center">Request a Free Consultation</h3>
+      <form method="POST" action="https://formspree.io/f/mayzkzed" class="space-y-4 max-w-xl mx-auto">
+        <input type="text" id="name" name="name" placeholder="Your Full Name" class="w-full p-2 rounded border text-black" required />
+        <input type="email" id="email" name="email" placeholder="Your Email Address" class="w-full p-2 rounded border text-black" required />
+        <input type="tel" name="phone" placeholder="Phone (required)" class="w-full p-2 rounded border text-black" required />
+        <input type="text" name="company" placeholder="Company / Organization (Optional)" class="w-full p-2 rounded border text-black" />
+        <textarea name="notes" placeholder="Your message (Optional)" class="w-full p-2 rounded border text-black h-32"></textarea>
+        <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 w-full">Submit</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    async function runFullReport() {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get("url");
+      const name = params.get("name") || "";
+      const email = params.get("email") || "";
+
+      document.getElementById("name").value = decodeURIComponent(name);
+      document.getElementById("email").value = decodeURIComponent(email);
+      document.getElementById("fullResultUrl").textContent = decodeURIComponent(url);
+
+      try {
+        const res = await fetch(`/api/full?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>Analysis failed. Try again.</p>";
+          return;
+        }
+
+        document.getElementById("fullScore").textContent = `Score: ${data.score}`;
+
+        (data.ai_strengths || []).forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          document.getElementById("fullStrengths").appendChild(li);
+        });
+
+        (data.ai_opportunities || []).forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          document.getElementById("fullOpportunities").appendChild(li);
+        });
+
+        (data.engine_insights || []).forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          document.getElementById("fullEngineInsights").appendChild(li);
+        });
+      } catch (err) {
+        console.error(err);
+        document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>Error loading report.</p>";
+      }
+    }
+
+    runFullReport();
+  </script>
+</body>
+</html>

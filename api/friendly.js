@@ -1,63 +1,102 @@
-// 📄 api/friendly.js — gpt-3.5 with stronger prompt (June 24)
+<!-- analyze.html — Final version reading data.parsed (June 24) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI SEO Report – SnipeRank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black font-sans">
+  <header class="text-center py-8">
+    <h1 class="text-4xl font-bold">SnipeRank</h1>
+    <h2 class="text-xl mt-1 font-medium">AI SEO Analyzer</h2>
+  </header>
 
-import express from 'express';
-import OpenAI from 'openai';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
+  <main class="max-w-4xl mx-auto px-6 py-8 space-y-6">
+    <div id="loading" class="text-center text-lg font-medium text-gray-600">Please wait — analyzing your site...</div>
 
-const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    <div id="results" style="display:none;">
+      <div id="page-url" class="text-xl font-semibold text-center"></div>
 
-function extractVisibleText(html) {
-  const $ = cheerio.load(html);
-  $('script, style, noscript').remove();
-  return $('body').text().replace(/\s+/g, ' ').trim();
-}
+      <section>
+        <h2 class="text-xl font-bold mt-8 mb-2">What’s Working</h2>
+        <ul id="ai-strengths" class="list-disc list-inside space-y-3"></ul>
+      </section>
 
-function isValidJson(str) {
-  try {
-    JSON.parse(str);
-    return true;
-  } catch {
-    return false;
-  }
-}
+      <section>
+        <h2 class="text-xl font-bold mt-8 mb-2">Needs Attention</h2>
+        <ul id="ai-opportunities" class="list-disc list-inside space-y-3"></ul>
+      </section>
 
-function cleanResponse(text) {
-  const jsonStart = text.indexOf('{');
-  const jsonEnd = text.lastIndexOf('}');
-  if (jsonStart === -1 || jsonEnd === -1) return null;
-  const jsonString = text.slice(jsonStart, jsonEnd + 1);
-  return isValidJson(jsonString) ? JSON.parse(jsonString) : null;
-}
+      <section>
+        <h2 class="text-xl font-bold mt-8 mb-2">AI Engine Insights</h2>
+        <ul id="ai-insights" class="list-disc list-inside space-y-3"></ul>
+      </section>
 
-router.get('/friendly', async (req, res) => {
-  const url = req.query.url;
-  if (!url || !/^https?:\/\//.test(url)) {
-    return res.status(400).json({ error: 'Invalid or missing URL parameter' });
-  }
+      <section class="mt-12 border-t border-gray-300 pt-8">
+        <h3 class="text-2xl font-semibold mb-4 text-center">Continue to Full Report</h3>
+        <form id="contact-form" class="space-y-4 max-w-xl mx-auto">
+          <input type="text" id="name" name="name" placeholder="Your Full Name" class="w-full p-2 rounded border text-black" required />
+          <input type="email" id="email" name="email" placeholder="Your Email Address" class="w-full p-2 rounded border text-black" required />
+          <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 w-full">Continue</button>
+        </form>
+      </section>
+    </div>
+  </main>
 
-  try {
-    const htmlResponse = await axios.get(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SnipeRankBot/1.0)' }
+  <script>
+    async function runAnalysis() {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get("url");
+
+      if (!url) return;
+
+      document.getElementById("page-url").textContent = decodeURIComponent(url);
+
+      try {
+        const res = await fetch(`/api/friendly?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+
+        const parsed = data.parsed;
+        if (!parsed) throw new Error("Invalid response");
+
+        (parsed.ai_superpowers || []).forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item.explanation;
+          document.getElementById("ai-strengths").appendChild(li);
+        });
+
+        (parsed.ai_opportunities || []).forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item.explanation;
+          document.getElementById("ai-opportunities").appendChild(li);
+        });
+
+        Object.entries(parsed.ai_engine_insights || {}).forEach(([engine, text]) => {
+          const li = document.createElement("li");
+          li.textContent = `${engine}: ${text}`;
+          document.getElementById("ai-insights").appendChild(li);
+        });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("results").style.display = "block";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("loading").textContent = "Analysis failed. Please try again.";
+      }
+    }
+
+    document.getElementById("contact-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const url = new URLSearchParams(window.location.search).get("url");
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const redirectURL = `full-report.html?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+      window.location.href = redirectURL;
     });
-    const visibleText = extractVisibleText(htmlResponse.data);
 
-    const prompt = `You are an expert AI SEO consultant. Based on the website content below, return a valid JSON report only — no explanation, no preamble. Follow this exact structure:\n\nContent:\n"""${visibleText.slice(0, 7000)}"""\n\nReturn strictly valid JSON in this format:\n{\n  \"ai_superpowers\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 5 items\n  ],\n  \"ai_opportunities\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 10 items\n  ],\n  \"ai_engine_insights\": {\n    \"ChatGPT\": \"...\",\n    \"Claude\": \"...\",\n    \"Google Gemini\": \"...\",\n    \"Microsoft Copilot\": \"...\",\n    \"Perplexity\": \"...\"\n  }\n}`;
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7
-    });
-
-    const raw = completion.choices[0]?.message?.content || '';
-    const parsed = cleanResponse(raw);
-    res.json({ raw, parsed });
-  } catch (err) {
-    console.error('Analysis error:', err.message);
-    res.status(500).json({ error: 'Analysis failed. Try again.' });
-  }
-});
-
-export default router;
+    runAnalysis();
+  </script>
+</body>
+</html>

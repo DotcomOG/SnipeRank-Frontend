@@ -1,3 +1,5 @@
+// 📄 api/friendly.js — Using gpt-3.5-turbo instead of GPT-4 (June 24)
+
 import express from 'express';
 import OpenAI from 'openai';
 import axios from 'axios';
@@ -44,7 +46,7 @@ router.get('/friendly', async (req, res) => {
     const prompt = `You are an expert in AI SEO analysis. Based on the following website content, return a valid JSON object with 3 sections:\n\nContent:\n"""${visibleText.slice(0, 7000)}"""\n\nReturn strictly valid JSON in this format:\n{\n  \"ai_superpowers\": [\n    { \"title\": \"...\", \"explanation\": \"...\" }\n  ],\n  \"ai_opportunities\": [\n    { \"title\": \"...\", \"explanation\": \"...\" }\n  ],\n  \"ai_engine_insights\": {\n    \"ChatGPT\": \"...\",\n    \"Claude\": \"...\",\n    \"Google Gemini\": \"...\",\n    \"Microsoft Copilot\": \"...\",\n    \"Perplexity\": \"...\"\n  }\n}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo',
+      model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7
     });

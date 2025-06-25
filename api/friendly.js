@@ -1,4 +1,4 @@
-// 📄 api/friendly.js — GPT-3.5 with redirect handling (June 24)
+// 📄 api/friendly.js — Clean GPT-3.5 version with redirect handling (June 24)
 
 import express from 'express';
 import OpenAI from 'openai';

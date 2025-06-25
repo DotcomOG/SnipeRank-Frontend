@@ -1,4 +1,4 @@
-<!-- analyze.html — Paul Rand typographic redesign (June 24) -->
+<!-- analyze.html — Paul Rand redesign + emoji headers (June 24) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,13 +40,9 @@
       margin-bottom: 1rem;
     }
 
-    ul {
-      padding-left: 1.2rem;
-    }
-
-    li {
-      margin-bottom: 1rem;
-      line-height: 1.6;
+    .insight-block {
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
     }
 
     .loading {
@@ -97,18 +93,18 @@
       <div id="page-url" class="section"></div>
 
       <section class="section">
-        <h2>What’s Working</h2>
-        <ul id="ai-strengths"></ul>
+        <h2>What's Working 💪</h2>
+        <div id="ai-strengths"></div>
       </section>
 
       <section class="section">
-        <h2>Needs Attention</h2>
-        <ul id="ai-opportunities"></ul>
+        <h2>Needs Attention 🚨</h2>
+        <div id="ai-opportunities"></div>
       </section>
 
       <section class="section">
-        <h2>AI Engine Insights</h2>
-        <ul id="ai-insights"></ul>
+        <h2>AI Insights 🤖</h2>
+        <div id="ai-insights"></div>
       </section>
 
       <form id="contact-form">
@@ -135,21 +131,24 @@
         if (!parsed) throw new Error("Invalid response");
 
         (parsed.ai_superpowers || []).forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = item.explanation;
-          document.getElementById("ai-strengths").appendChild(li);
+          const div = document.createElement("div");
+          div.className = "insight-block";
+          div.textContent = item.explanation;
+          document.getElementById("ai-strengths").appendChild(div);
         });
 
         (parsed.ai_opportunities || []).forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = item.explanation;
-          document.getElementById("ai-opportunities").appendChild(li);
+          const div = document.createElement("div");
+          div.className = "insight-block";
+          div.textContent = item.explanation;
+          document.getElementById("ai-opportunities").appendChild(div);
         });
 
         Object.entries(parsed.ai_engine_insights || {}).forEach(([engine, text]) => {
-          const li = document.createElement("li");
-          li.textContent = `${engine}: ${text}`;
-          document.getElementById("ai-insights").appendChild(li);
+          const div = document.createElement("div");
+          div.className = "insight-block";
+          div.textContent = `${engine}: ${text}`;
+          document.getElementById("ai-insights").appendChild(div);
         });
 
         document.getElementById("loading").style.display = "none";

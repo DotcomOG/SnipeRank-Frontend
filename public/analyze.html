@@ -1,47 +1,122 @@
-<!-- analyze.html — Fixed API URL for live deployment (June 24) -->
+<!-- analyze.html — Paul Rand typographic redesign (June 24) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI SEO Report – SnipeRank</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI SEO Report — SnipeRank</title>
+  <style>
+    body {
+      font-family: Helvetica, sans-serif;
+      background-color: white;
+      color: black;
+      margin: 0;
+      padding: 5vh 2rem;
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    header h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    header h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-top: 0.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section h2 {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .loading {
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    form {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    input {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: 1px solid #000;
+      width: 100%;
+    }
+
+    button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      color: #fff;
+      background: #000;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #333;
+    }
+  </style>
 </head>
-<body class="bg-white text-black font-sans">
-  <header class="text-center py-8">
-    <h1 class="text-4xl font-bold">SnipeRank</h1>
-    <h2 class="text-xl mt-1 font-medium">AI SEO Analyzer</h2>
+<body>
+  <header>
+    <h1>SnipeRank</h1>
+    <h2>AI SEO Analyzer</h2>
   </header>
 
-  <main class="max-w-4xl mx-auto px-6 py-8 space-y-6">
-    <div id="loading" class="text-center text-lg font-medium text-gray-600">Please wait — analyzing your site...</div>
+  <main>
+    <div id="loading" class="loading">Analyzing your site — please wait...</div>
 
     <div id="results" style="display:none;">
-      <div id="page-url" class="text-xl font-semibold text-center"></div>
+      <div id="page-url" class="section"></div>
 
-      <section>
-        <h2 class="text-xl font-bold mt-8 mb-2">What’s Working</h2>
-        <ul id="ai-strengths" class="list-disc list-inside space-y-3"></ul>
+      <section class="section">
+        <h2>What’s Working</h2>
+        <ul id="ai-strengths"></ul>
       </section>
 
-      <section>
-        <h2 class="text-xl font-bold mt-8 mb-2">Needs Attention</h2>
-        <ul id="ai-opportunities" class="list-disc list-inside space-y-3"></ul>
+      <section class="section">
+        <h2>Needs Attention</h2>
+        <ul id="ai-opportunities"></ul>
       </section>
 
-      <section>
-        <h2 class="text-xl font-bold mt-8 mb-2">AI Engine Insights</h2>
-        <ul id="ai-insights" class="list-disc list-inside space-y-3"></ul>
+      <section class="section">
+        <h2>AI Engine Insights</h2>
+        <ul id="ai-insights"></ul>
       </section>
 
-      <section class="mt-12 border-t border-gray-300 pt-8">
-        <h3 class="text-2xl font-semibold mb-4 text-center">Continue to Full Report</h3>
-        <form id="contact-form" class="space-y-4 max-w-xl mx-auto">
-          <input type="text" id="name" name="name" placeholder="Your Full Name" class="w-full p-2 rounded border text-black" required />
-          <input type="email" id="email" name="email" placeholder="Your Email Address" class="w-full p-2 rounded border text-black" required />
-          <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 w-full">Continue</button>
-        </form>
-      </section>
+      <form id="contact-form">
+        <h2>Continue to Full Report</h2>
+        <input type="text" id="name" name="name" placeholder="Your Full Name" required />
+        <input type="email" id="email" name="email" placeholder="Your Email Address" required />
+        <button type="submit">Continue</button>
+      </form>
     </div>
   </main>
 
@@ -49,7 +124,6 @@
     async function runAnalysis() {
       const params = new URLSearchParams(window.location.search);
       const url = params.get("url");
-
       if (!url) return;
 
       document.getElementById("page-url").textContent = decodeURIComponent(url);
@@ -57,7 +131,6 @@
       try {
         const res = await fetch(`https://sniperank-backend.onrender.com/api/friendly?url=${encodeURIComponent(url)}`);
         const data = await res.json();
-
         const parsed = data.parsed;
         if (!parsed) throw new Error("Invalid response");
 

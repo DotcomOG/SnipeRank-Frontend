@@ -1,4 +1,4 @@
-// 📄 api/friendly.js — Clean GPT-3.5 version with redirect handling (June 24)
+// 📄 api/friendly.js — Expanded prompt with 2-line minimums (June 24)
 
 import express from 'express';
 import OpenAI from 'openai';
@@ -44,7 +44,7 @@ router.get('/friendly', async (req, res) => {
     });
     const visibleText = extractVisibleText(htmlResponse.data);
 
-    const prompt = `You are an expert AI SEO consultant. Based on the website content below, return a valid JSON report only — no explanation, no preamble. Follow this exact structure:\n\nContent:\n"""${visibleText.slice(0, 7000)}"""\n\nReturn strictly valid JSON in this format:\n{\n  \"ai_superpowers\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 5 items\n  ],\n  \"ai_opportunities\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 10 items\n  ],\n  \"ai_engine_insights\": {\n    \"ChatGPT\": \"...\",\n    \"Claude\": \"...\",\n    \"Google Gemini\": \"...\",\n    \"Microsoft Copilot\": \"...\",\n    \"Perplexity\": \"...\"\n  }\n}`;
+    const prompt = `You are an expert AI SEO consultant. Based on the website content below, return a strictly valid JSON report only — no explanations, no intro. Use this format:\n\nContent:\n"""${visibleText.slice(0, 7000)}"""\n\nOutput structure:\n{\n  \"ai_superpowers\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 5 items\n  ],\n  \"ai_opportunities\": [\n    { \"title\": \"...\", \"explanation\": \"...\" } // 10 items\n  ],\n  \"ai_engine_insights\": {\n    \"ChatGPT\": \"...\",\n    \"Claude\": \"...\",\n    \"Google Gemini\": \"...\",\n    \"Microsoft Copilot\": \"...\",\n    \"Perplexity\": \"...\"\n  }\n}\n\nImportant guidelines:\n- Each explanation must be at least two full lines of text when viewed on a desktop screen.\n- There is no maximum.\n- Do not use bullets.\n- Use natural, consultative tone.\n- Vary sentence structure.\n- Never begin every line the same way.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',

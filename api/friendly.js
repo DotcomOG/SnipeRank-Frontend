@@ -1,4 +1,4 @@
-// 📄 api/friendly.js — Final GPT-3.5 version (June 24)
+// 📄 api/friendly.js — GPT-3.5 with redirect handling (June 24)
 
 import express from 'express';
 import OpenAI from 'openai';
@@ -39,7 +39,8 @@ router.get('/friendly', async (req, res) => {
 
   try {
     const htmlResponse = await axios.get(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SnipeRankBot/1.0)' }
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SnipeRankBot/1.0)' },
+      maxRedirects: 5
     });
     const visibleText = extractVisibleText(htmlResponse.data);
 

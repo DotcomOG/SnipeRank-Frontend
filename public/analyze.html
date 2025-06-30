@@ -1,174 +1,56 @@
-<!-- analyze.html — Paul Rand redesign + emoji headers (June 24) -->
+<!-- 📅 Updated: June 30, 2025 at 3:10 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI SEO Report — SnipeRank</title>
-  <style>
-    body {
-      font-family: Helvetica, sans-serif;
-      background-color: white;
-      color: black;
-      margin: 0;
-      padding: 5vh 2rem;
-      max-width: 760px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    header h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    header h2 {
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin-top: 0.25rem;
-      margin-bottom: 2.5rem;
-    }
-
-    .section {
-      margin-bottom: 2.5rem;
-    }
-
-    .section h2 {
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    .insight-block {
-      margin-bottom: 1.5rem;
-      line-height: 1.7;
-    }
-
-    .loading {
-      font-size: 1.2rem;
-      color: #555;
-    }
-
-    form {
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid #ccc;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    input {
-      padding: 0.8rem;
-      font-size: 1rem;
-      border: 1px solid #000;
-      width: 100%;
-    }
-
-    button {
-      padding: 0.8rem;
-      font-size: 1rem;
-      color: #fff;
-      background: #000;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #333;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>SnipeRank</h1>
-    <h2>AI SEO Analyzer</h2>
-  </header>
-
-  <main>
-    <div id="loading" class="loading">Analyzing your site — please wait...</div>
-
-    <div id="results" style="display:none;">
-      <div id="page-url" class="section"></div>
-
-      <section class="section">
-        <h2>What's Working 💪</h2>
-        <div id="ai-strengths"></div>
-      </section>
-
-      <section class="section">
-        <h2>Needs Attention 🚨</h2>
-        <div id="ai-opportunities"></div>
-      </section>
-
-      <section class="section">
-        <h2>AI Insights 🤖</h2>
-        <div id="ai-insights"></div>
-      </section>
-
-      <form id="contact-form">
-        <h2>Continue to Full Report</h2>
-        <input type="text" id="name" name="name" placeholder="Your Full Name" required />
-        <input type="email" id="email" name="email" placeholder="Your Email Address" required />
-        <button type="submit">Continue</button>
-      </form>
-    </div>
-  </main>
-
-  <script>
-    async function runAnalysis() {
-      const params = new URLSearchParams(window.location.search);
-      const url = params.get("url");
-      if (!url) return;
-
-      document.getElementById("page-url").textContent = decodeURIComponent(url);
-
-      try {
-        const res = await fetch(`https://sniperank-backend.onrender.com/api/friendly?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
-        const parsed = data.parsed;
-        if (!parsed) throw new Error("Invalid response");
-
-        (parsed.ai_superpowers || []).forEach(item => {
-          const div = document.createElement("div");
-          div.className = "insight-block";
-          div.textContent = item.explanation;
-          document.getElementById("ai-strengths").appendChild(div);
-        });
-
-        (parsed.ai_opportunities || []).forEach(item => {
-          const div = document.createElement("div");
-          div.className = "insight-block";
-          div.textContent = item.explanation;
-          document.getElementById("ai-opportunities").appendChild(div);
-        });
-
-        Object.entries(parsed.ai_engine_insights || {}).forEach(([engine, text]) => {
-          const div = document.createElement("div");
-          div.className = "insight-block";
-          div.textContent = `${engine}: ${text}`;
-          document.getElementById("ai-insights").appendChild(div);
-        });
-
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("results").style.display = "block";
-      } catch (err) {
-        console.error(err);
-        document.getElementById("loading").textContent = "Analysis failed. Please try again.";
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnipeRank – AI SEO Analyzer</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        font-family: Helvetica, sans-serif;
+        background: white;
+        color: black;
+        padding: 2rem;
       }
-    }
+      h1, h2 {
+        text-align: center;
+        margin: 0;
+      }
+      form {
+        max-width: 500px;
+        margin: 2rem auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        border-top: 1px solid #ccc;
+        padding-top: 2rem;
+      }
+      input, textarea, button {
+        padding: 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🤖 SnipeRank 🤖</h1>
+    <h2>AI SEO Analyzer</h2>
 
-    document.getElementById("contact-form").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const url = new URLSearchParams(window.location.search).get("url");
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const redirectURL = `full-report.html?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
-      window.location.href = redirectURL;
-    });
+    <section id="summary-results">
+      <!-- AI-generated summary content will appear here -->
+    </section>
 
-    runAnalysis();
-  </script>
-</body>
+    <form id="contact-form">
+      <h3>Your Full Report Is Almost Ready</h3>
+      <p>Please complete the form below. <strong>Your full detailed report will be emailed to you shortly.</strong></p>
+      <input type="text" id="name" name="name" placeholder="Full Name" required />
+      <input type="email" id="email" name="email" placeholder="Email Address" required />
+      <input type="tel" id="phone" name="phone" placeholder="Phone Number" required />
+      <textarea id="notes" name="notes" placeholder="Notes or special instructions (optional)"></textarea>
+      <button type="submit">Request My Full Report</button>
+    </form>
+
+    <script src="scripts/analyze.js"></script>
+  </body>
 </html>

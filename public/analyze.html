@@ -1,123 +1,123 @@
-<!-- 📅 Updated: June 30, 2025 at 2:20 PM EDT -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SnipeRank – AI SEO Analyzer</title>
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-      body {
-        font-family: Helvetica, sans-serif;
-        background: white;
-        color: black;
-        padding: 2rem;
-      }
-      h1, h2 {
-        text-align: center;
-        margin: 0;
-      }
-      .section-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        margin-top: 2rem;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 0.5rem;
-      }
-      ul {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      li {
-        margin-bottom: 1rem;
-      }
-      form {
-        max-width: 500px;
-        margin: 3rem auto 1rem auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        border-top: 1px solid #ccc;
-        padding-top: 2rem;
-      }
-      input, textarea, button {
-        padding: 0.75rem;
-        font-size: 1rem;
-        border: 1px solid #ccc;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>🤖 SnipeRank 🤖</h1>
-    <h2>AI SEO Analyzer</h2>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnipeRank – AI SEO Analyzer</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body {
+      font-family: Helvetica, sans-serif;
+      padding: 2rem;
+      background: white;
+      color: black;
+    }
+    h1, h2 {
+      text-align: center;
+      margin: 0 0 1.5rem 0;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-full-width {
+      margin-top: 1rem;
+    }
+    .form-button-wrapper {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+    button[type="submit"] {
+      padding: 6px 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .full-report-form {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 1rem;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 SnipeRank 🤖</h1>
+  <h2>AI SEO Analyzer</h2>
 
-    <section id="summary-results">
-      <div class="section-title">✅ What’s Working</div>
-      <ul id="whats-working"></ul>
+  <section id="summary-results">
+    <p style="color: gray; text-align: center;">Loading analysis...</p>
+  </section>
 
-      <div class="section-title">🚨 Needs Attention</div>
-      <ul id="needs-attention"></ul>
+  <section id="full-report-request" class="full-report-form">
+    <h2>Want the Full Report?</h2>
+    <p>The Full SnipeRank Report shows how AI engines truly interpret your site — and how to fix what they miss.</p>
 
-      <div class="section-title">📡 AI Engine Insights</div>
-      <ul id="engine-insights"></ul>
-    </section>
-
-    <section id="full-report-request" class="full-report-form">
-      <h2>Want the Full Report?</h2>
-      <p>The summary above is just a glimpse. The <strong>Full SnipeRank Report</strong> gives you a complete breakdown of how AI search engines like ChatGPT, Gemini, Claude, and Perplexity perceive and rank your site — including what’s missing, what’s misunderstood, and how to fix it.</p>
-      <p>You’ll receive:</p>
-      <ul>
-        <li>A personalized, human-reviewed audit with AI-focused recommendations</li>
-        <li>Clear time and cost estimates to resolve key issues</li>
-        <li>Insights into how your brand is interpreted by modern AI engines</li>
-      </ul>
-      <section id="full-report-request" class="full-report-form">
-        <h2>Want the Full Report?</h2>
-        <p>The Full SnipeRank Report shows how AI engines truly interpret your site — and how to fix what they miss. Fill out the form below to receive your custom report.</p>
-
-        <form id="fullReportForm">
-          <label for="name">Full Name <span style="color:red">*</span></label>
+    <form id="fullReportForm">
+      <div class="form-grid">
+        <div>
+          <label for="name">Full Name *</label>
           <input type="text" id="name" name="name" required />
-
-          <label for="email">Email Address <span style="color:red">*</span></label>
+        </div>
+        <div>
+          <label for="company">Company Name</label>
+          <input type="text" id="company" name="company" />
+        </div>
+        <div>
+          <label for="email">Email Address *</label>
           <input type="email" id="email" name="email" required />
-
-          <label for="phone">Phone Number <span style="color:red">*</span></label>
+        </div>
+        <div>
+          <label for="phone">Phone Number *</label>
           <input type="tel" id="phone" name="phone" required />
+        </div>
+      </div>
 
-          <button type="submit">Send My Full Report</button>
-        </form>
+      <div class="form-full-width">
+        <label for="message">What challenges are you looking to address?</label>
+        <textarea id="message" name="message" rows="4"></textarea>
+      </div>
 
-        <script>
-        document.getElementById('fullReportForm').addEventListener('submit', async function (e) {
-          e.preventDefault(); // Prevent page reload
+      <div class="form-button-wrapper">
+        <button type="submit">Send My Full Report</button>
+      </div>
 
-          const name = document.getElementById('name').value.trim();
-          const email = document.getElementById('email').value.trim();
-          const phone = document.getElementById('phone').value.trim();
-          const formMessage = document.getElementById('formMessage');
+      <div id="formMessage" style="margin-top: 1rem;"></div>
+    </form>
+  </section>
 
-          const response = await fetch('/api/send-report-request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone })
-          });
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUrl = urlParams.get("url");
 
-          const result = await response.json();
+      if (!targetUrl) {
+        document.getElementById("summary-results").innerHTML =
+          "<p style='color:red'>No URL provided. Please return to the homepage and enter a site to analyze.</p>";
+        return;
+      }
 
-          if (response.ok) {
-            formMessage.innerText = "✅ Your full report request has been received!";
-            formMessage.style.color = "green";
-          } else {
-            formMessage.innerText = "❌ Error: " + (result.error || "Something went wrong.");
-            formMessage.style.color = "red";
-          }
-        });
-        </script>
-        
-        <div id="formMessage" style="margin-top: 1rem;"></div>
-      </section>
-
-    <script src="scripts/analyze.js"></script>
-  </body>
+      try {
+        const res = await fetch(`https://sniperank-backend.onrender.com/api/analyze?url=${encodeURIComponent(targetUrl)}`);
+        const html = await res.text();
+        document.getElementById("summary-results").innerHTML = html;
+      } catch (err) {
+        console.error("Render fetch error:", err);
+        document.getElementById("summary-results").innerHTML =
+          "<p style='color:red'>Error loading analysis. Please try again later.</p>";
+      }
+    });
+  </script>
+</body>
 </html>

@@ -1,4 +1,4 @@
-<!-- GitHub connect on July 23 V2 -->
+<!-- GitHub connect on July 23 V3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,33 +46,5 @@
       <li>Perplexity doesn’t surface your site in competitive queries.</li>
     </ul>
   </section>
-<script>
-  document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const company = document.getElementById("company").value.trim();
-    const message = document.getElementById("message").value.trim();
-    const formMessage = document.getElementById("formMessage");
-
-    try {
-      const res = await fetch("/api/send-report-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, company, message })
-      });
-
-      const data = await res.json();
-      formMessage.innerText = data.message || "Thanks! We’ll be in touch.";
-      formMessage.style.color = "green";
-    } catch (err) {
-      formMessage.innerText = "Something went wrong. Please try again.";
-      formMessage.style.color = "red";
-    }
-  });
-</script>
-
 </body>
 </html>

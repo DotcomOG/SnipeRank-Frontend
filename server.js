@@ -1,5 +1,4 @@
-// server.js — Fixed version with analyze.html route
-// // Force deploy 12:47 PM
+// server.js — Updated with routes for analyze.html and report.html
 
 import express from "express";
 import cors from "cors";
@@ -20,6 +19,7 @@ const __dirname = path.dirname(__filename);
 app.use(cors({
   origin: "https://sniperank.vercel.app"
 }));
+
 app.use(express.json());
 app.use(express.static("public"));
 
@@ -29,9 +29,14 @@ app.get("/", (req, res) => {
   res.sendFile("index.html", { root: "public" });
 });
 
-// ✅ Add this route to explicitly serve analyze.html
+// ✅ Serve analyze.html (frontend with form + JS)
 app.get("/analyze.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "analyze.html"));
+});
+
+// ✅ Serve report.html (backend short report only)
+app.get("/report.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "report.html"));
 });
 
 app.listen(PORT, () => {

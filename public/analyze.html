@@ -47,27 +47,29 @@
     </ul>
   </section>
 <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get("url");
+  document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-    if (!targetUrl) {
-      document.getElementById("summary-results").innerHTML =
-        "<p style='color:red'>No URL provided.</p>";
-      return;
-    }
-
-    const requestUrl = `https://sniperank-backend.onrender.com/analyze.html?url=${encodeURIComponent(targetUrl)}`;
-    console.log("FETCHING FROM RENDER:", requestUrl);
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const company = document.getElementById("company").value.trim();
+    const message = document.getElementById("message").value.trim();
+    const formMessage = document.getElementById("formMessage");
 
     try {
-      const res = await fetch(requestUrl);
-      const html = await res.text();
-      document.getElementById("summary-results").innerHTML = html;
+      const res = await fetch("/api/send-report-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, company, message })
+      });
+
+      const data = await res.json();
+      formMessage.innerText = data.message || "Thanks! We’ll be in touch.";
+      formMessage.style.color = "green";
     } catch (err) {
-      console.error("Fetch error:", err);
-      document.getElementById("summary-results").innerHTML =
-        "<p style='color:red'>Failed to load report.</p>";
+      formMessage.innerText = "Something went wrong. Please try again.";
+      formMessage.style.color = "red";
     }
   });
 </script>

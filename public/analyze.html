@@ -46,5 +46,31 @@
       <li>Perplexity doesn’t surface your site in competitive queries.</li>
     </ul>
   </section>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUrl = urlParams.get("url");
+
+    if (!targetUrl) {
+      document.getElementById("summary-results").innerHTML =
+        "<p style='color:red'>No URL provided.</p>";
+      return;
+    }
+
+    const requestUrl = `https://sniperank-backend.onrender.com/analyze.html?url=${encodeURIComponent(targetUrl)}`;
+    console.log("FETCHING FROM RENDER:", requestUrl);
+
+    try {
+      const res = await fetch(requestUrl);
+      const html = await res.text();
+      document.getElementById("summary-results").innerHTML = html;
+    } catch (err) {
+      console.error("Fetch error:", err);
+      document.getElementById("summary-results").innerHTML =
+        "<p style='color:red'>Failed to load report.</p>";
+    }
+  });
+</script>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!-- Force redeploy: 11:40 AM July 23 -->
+<!-- Force redeploy: 3:10 PM July 23 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,7 +98,7 @@
   </section>
 
   <script>
-    // Load short report from Render
+    // Load short report from new Render backend
     document.addEventListener("DOMContentLoaded", async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const targetUrl = urlParams.get("url");
@@ -109,7 +109,7 @@
         return;
       }
 
-      const requestUrl = `https://sniperank-backend.onrender.com/analyze.html?url=${encodeURIComponent(targetUrl)}`;
+      const requestUrl = `https://sniperank-backend-new.onrender.com/analyze.html?url=${encodeURIComponent(targetUrl)}`;
       console.log("FETCHING SHORT REPORT FROM:", requestUrl);
 
       try {

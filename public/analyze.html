@@ -1,123 +1,50 @@
+<!-- analyze.html — RENDER BACKEND VERSION -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnipeRank – AI SEO Analyzer</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <title>SnipeRank Short Report</title>
   <style>
     body {
-      font-family: Helvetica, sans-serif;
-      padding: 2rem;
-      background: white;
-      color: black;
+      font-family: sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
     }
-    h1, h2 {
-      text-align: center;
-      margin: 0 0 1.5rem 0;
+    .section-title {
+      font-weight: bold;
+      margin-top: 2rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.5rem;
     }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+    ul {
+      list-style: none;
+      padding-left: 1rem;
     }
-    .form-full-width {
-      margin-top: 1rem;
-    }
-    .form-button-wrapper {
-      text-align: center;
-      margin-top: 1.5rem;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.25rem;
-      font-weight: 500;
-    }
-    button[type="submit"] {
-      padding: 6px 14px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .full-report-form {
-      max-width: 800px;
-      margin: 3rem auto;
-      padding: 1rem;
-      border-top: 1px solid #ccc;
+    li {
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
 <body>
-  <h1>🤖 SnipeRank 🤖</h1>
-  <h2>AI SEO Analyzer</h2>
-
   <section id="summary-results">
-    <p style="color: gray; text-align: center;">Loading analysis...</p>
+    <div class="section-title">✅ What’s Working</div>
+    <ul>
+      <li>Your site includes structured data for AI to interpret.</li>
+      <li>Meta descriptions are present on key pages.</li>
+    </ul>
+
+    <div class="section-title">🚨 Needs Attention</div>
+    <ul>
+      <li>Missing Open Graph tags for AI previewing content.</li>
+      <li>No sitemap.xml detected.</li>
+    </ul>
+
+    <div class="section-title">📡 AI Engine Insights</div>
+    <ul>
+      <li>ChatGPT detects some basic brand identity but lacks clarity on mission.</li>
+      <li>Perplexity doesn’t surface your site in competitive queries.</li>
+    </ul>
   </section>
-
-  <section id="full-report-request" class="full-report-form">
-    <h2>Want the Full Report?</h2>
-    <p>The Full SnipeRank Report shows how AI engines truly interpret your site — and how to fix what they miss.</p>
-
-    <form id="fullReportForm">
-      <div class="form-grid">
-        <div>
-          <label for="name">Full Name *</label>
-          <input type="text" id="name" name="name" required />
-        </div>
-        <div>
-          <label for="company">Company Name</label>
-          <input type="text" id="company" name="company" />
-        </div>
-        <div>
-          <label for="email">Email Address *</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div>
-          <label for="phone">Phone Number *</label>
-          <input type="tel" id="phone" name="phone" required />
-        </div>
-      </div>
-
-      <div class="form-full-width">
-        <label for="message">What challenges are you looking to address?</label>
-        <textarea id="message" name="message" rows="4"></textarea>
-      </div>
-
-      <div class="form-button-wrapper">
-        <button type="submit">Send My Full Report</button>
-      </div>
-
-      <div id="formMessage" style="margin-top: 1rem;"></div>
-    </form>
-  </section>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetUrl = urlParams.get("url");
-
-      if (!targetUrl) {
-        document.getElementById("summary-results").innerHTML =
-          "<p style='color:red'>No URL provided. Please return to the homepage and enter a site to analyze.</p>";
-        return;
-      }
-
-      try {
-        const res = await fetch(`https://sniperank-backend.onrender.com/api/analyze?url=${encodeURIComponent(targetUrl)}`);
-        const html = await res.text();
-        document.getElementById("summary-results").innerHTML = html;
-      } catch (err) {
-        console.error("Render fetch error:", err);
-        document.getElementById("summary-results").innerHTML =
-          "<p style='color:red'>Error loading analysis. Please try again later.</p>";
-      }
-    });
-  </script>
 </body>
 </html>

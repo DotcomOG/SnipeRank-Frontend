@@ -1,46 +1,11 @@
-// server.js — Final verified version
-
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-import friendlyRoute from "./api/friendly.js";
-
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Handle __dirname in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ✅ Allow frontend fetch from Vercel
-app.use(cors({
-  origin: "https://sniperank.vercel.app"
-}));
-
-app.use(express.json());
-app.use(express.static("public"));
-
-// ✅ API routes (email handler, etc.)
-app.use("/api", friendlyRoute);
-
-// ✅ Serve homepage
-app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "public" });
-});
-
-// ✅ Serve analyze.html with JS + form
-
-app.get("/analyze.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "analyze.html"));
-});
-
 // ✅ Dynamic short report response for /report.html
-// ✅ Dynamic short report route — no query param required
 app.get("/report.html", (req, res) => {
+  const targetUrl = req.query.url;
+
+  if (!targetUrl) {
+    return res.status(400).send("Missing 'url' query parameter.");
+  }
+
   const html = `
     <div class="section-title">✅ What’s Working</div>
     <ul><li>Your site includes structured data for AI to interpret.</li></ul>
@@ -53,9 +18,4 @@ app.get("/report.html", (req, res) => {
   `;
 
   res.send(html);
-});
-
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
 });

@@ -29,6 +29,10 @@ app.get("/", (req, res) => {
   res.sendFile("index.html", { root: "public" });
 });
 
+app.get("/report.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "report.html"));
+});
+
 // ✅ Serve analyze.html (frontend with form + JS)
 app.get("/analyze.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "analyze.html"));

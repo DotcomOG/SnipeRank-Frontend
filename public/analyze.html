@@ -1,7 +1,8 @@
+<!-- 📄 analyze.html — Final Clean Version -->
+
 <!DOCTYPE html>
 <html lang="en">
-<!-- LIVE TEST 2:15 PM -->
-  <head>
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SnipeRank – AI SEO Analyzer</title>
@@ -57,7 +58,7 @@
   <h2>AI SEO Analyzer</h2>
 
   <section id="summary-results">
-    <p style="color: gray; text-align: center;">[Loading your short report...]</p>
+    <p style="text-align: center; color: gray;">Loading analysis...</p>
   </section>
 
   <section id="full-report-request" class="full-report-form">
@@ -98,18 +99,18 @@
   </section>
 
   <script>
-    // Load short report from new Render backend
+    // Load short report
     document.addEventListener("DOMContentLoaded", async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const targetUrl = urlParams.get("url");
 
       if (!targetUrl) {
         document.getElementById("summary-results").innerHTML =
-          "<p style='color:red'>No URL provided.</p>";
+          "<p style='color:red; text-align:center;'>No URL provided.</p>";
         return;
       }
 
-      const requestUrl = `https://sniperank-backend.onrender.com/report.html`;
+      const requestUrl = `https://sniperank-backend-newjuly23.vercel.app/report.html?url=${encodeURIComponent(targetUrl)}`;
       console.log("FETCHING SHORT REPORT FROM:", requestUrl);
 
       try {
@@ -119,11 +120,11 @@
       } catch (err) {
         console.error("Fetch error:", err);
         document.getElementById("summary-results").innerHTML =
-          "<p style='color:red'>Failed to load report.</p>";
+          "<p style='color:red; text-align:center;'>Failed to load report.</p>";
       }
     });
 
-    // Handle full report form submission
+    // Full report form submission
     document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
@@ -150,7 +151,5 @@
       }
     });
   </script>
-
-<!-- FORCE DEPLOY: test vercel.json -->
 </body>
 </html>

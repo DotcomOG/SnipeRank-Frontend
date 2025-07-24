@@ -1,45 +1,22 @@
-// server.js — Updated with routes for analyze.html and report.html
-
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-import friendlyRoute from "./api/friendly.js";
-
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Needed when using ES modules with __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-app.use(cors({
-  origin: "https://sniperank.vercel.app"
-}));
-
-app.use(express.json());
-app.use(express.static("public"));
-
-app.use("/api", friendlyRoute);
-
-app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "public" });
-});
-
-
-// ✅ Serve analyze.html (frontend with form + JS)
-app.get("/analyze.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "analyze.html"));
-});
-
-// ✅ Serve report.html (backend short report only)
+// ✅ Dynamically serve short report HTML based on ?url=
 app.get("/report.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "report.html"));
-});
+  const targetUrl = req.query.url;
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  if (!targetUrl) {
+    return res.status(400).send("Missing 'url' query parameter.");
+  }
+
+  // TODO: Replace this section with actual analysis logic
+  const html = `
+    <div class="section-title">✅ What’s Working</div>
+    <ul><li>Your site includes structured data for AI to interpret.</li></ul>
+
+    <div class="section-title">🚨 Needs Attention</div>
+    <ul><li>No sitemap.xml detected.</li></ul>
+
+    <div class="section-title">📡 AI Engine Insights</div>
+    <ul><li>ChatGPT sees some brand identity, but it's unclear.</li></ul>
+  `;
+
+  res.send(html);
 });

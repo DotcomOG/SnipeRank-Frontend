@@ -1,0 +1,155 @@
+<!-- 📄 analyze.html — Final Clean Version -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnipeRank – AI SEO Analyzer</title>
+  <style>
+    body {
+      font-family: Helvetica, sans-serif;
+      background: white;
+      color: black;
+      padding: 2rem;
+    }
+    h1, h2 {
+      text-align: center;
+      margin: 0 0 1.5rem 0;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-full-width {
+      margin-top: 1rem;
+    }
+    .form-button-wrapper {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+    button[type="submit"] {
+      padding: 6px 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .full-report-form {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 1rem;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 SnipeRank 🤖</h1>
+  <h2>AI SEO Analyzer</h2>
+
+  <section id="summary-results">
+    <p style="text-align: center; color: gray;">Loading analysis...</p>
+  </section>
+
+  <section id="full-report-request" class="full-report-form">
+    <h2>Want the Full Report?</h2>
+    <p>The Full SnipeRank Report shows how AI engines truly interpret your site — and how to fix what they miss.</p>
+
+    <form id="fullReportForm">
+      <div class="form-grid">
+        <div>
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" name="name" required />
+        </div>
+        <div>
+          <label for="company">Company Name</label>
+          <input type="text" id="company" name="company" />
+        </div>
+        <div>
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div>
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" required />
+        </div>
+      </div>
+
+      <div class="form-full-width">
+        <label for="message">What challenges are you looking to address?</label>
+        <textarea id="message" name="message" rows="4"></textarea>
+      </div>
+
+      <div class="form-button-wrapper">
+        <button type="submit">Send My Full Report</button>
+      </div>
+
+      <div id="formMessage" style="margin-top: 1rem;"></div>
+    </form>
+  </section>
+
+  <script>
+    // Load short report
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUrl = urlParams.get("url");
+
+      if (!targetUrl) {
+        document.getElementById("summary-results").innerHTML =
+          "<p style='color:red; text-align:center;'>No URL provided.</p>";
+        return;
+      }
+
+      const requestUrl = `https://sniperank-backend-newjuly23.vercel.app/report.html?url=${encodeURIComponent(targetUrl)}`;
+      console.log("FETCHING SHORT REPORT FROM:", requestUrl);
+
+      try {
+        const res = await fetch(requestUrl);
+        const html = await res.text();
+        document.getElementById("summary-results").innerHTML = html;
+      } catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById("summary-results").innerHTML =
+          "<p style='color:red; text-align:center;'>Failed to load report.</p>";
+      }
+    });
+
+    // Full report form submission
+    document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const company = document.getElementById("company").value.trim();
+      const message = document.getElementById("message").value.trim();
+      const formMessage = document.getElementById("formMessage");
+
+      try {
+        const res = await fetch("/api/send-report-request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, phone, company, message })
+        });
+
+        const data = await res.json();
+        formMessage.innerText = data.message || "Thanks! We’ll be in touch.";
+        formMessage.style.color = "green";
+      } catch (err) {
+        formMessage.innerText = "Something went wrong. Please try again.";
+        formMessage.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>

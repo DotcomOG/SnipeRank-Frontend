@@ -17,8 +17,9 @@ app.get('/', (req, res) => {
 
 app.get("/report.html", (req, res) => {
   const targetUrl = req.query.url;
-  if (!targetUrl) {
-    return res.status(400).send("Missing 'url' query parameter.");
+  // ... generate short report HTML based on targetUrl
+  res.send(html);
+});
   }
   const html = `
     <div class="section-title">✅ What's Working</div>

@@ -33,18 +33,14 @@ app.get("/", (req, res) => {
 });
 
 // ✅ Serve analyze.html with JS + form
+
 app.get("/analyze.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "analyze.html"));
 });
 
 // ✅ Dynamic short report response for /report.html
+// ✅ Dynamic short report route — no query param required
 app.get("/report.html", (req, res) => {
-  const targetUrl = req.query.url;
-
-  if (!targetUrl) {
-    return res.status(400).send("Missing 'url' query parameter.");
-  }
-
   const html = `
     <div class="section-title">✅ What’s Working</div>
     <ul><li>Your site includes structured data for AI to interpret.</li></ul>
@@ -58,6 +54,7 @@ app.get("/report.html", (req, res) => {
 
   res.send(html);
 });
+
 
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);

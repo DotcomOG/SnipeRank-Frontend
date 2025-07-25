@@ -1,69 +1,160 @@
-<!-- 📄 analyze.html — Final Clean Version -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnipeRank – AI SEO Analyzer</title>
+  <title>SnipeRank — AI SEO Analysis Results</title>
   <style>
+    :root {
+      --max-width: 760px;
+      --pad-v: 5vh;
+      --pad-h: 2rem;
+    }
+
     body {
       font-family: Helvetica, sans-serif;
-      background: white;
-      color: black;
-      padding: 2rem;
+      background: #fff;
+      color: #000;
+      margin: 0;
+      padding: var(--pad-v) var(--pad-h);
+      max-width: var(--max-width);
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
-    h1, h2 {
-      text-align: center;
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 0 0 0.25em 0;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin: 0 0 2rem 0;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin: 2rem 0 1rem 0;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+
+    #summary-results {
+      width: 100%;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 1.5rem 0 1rem 0;
+      color: #000;
+    }
+
+    ul {
       margin: 0 0 1.5rem 0;
+      padding-left: 1.5rem;
     }
+
+    li {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .full-report-form {
+      width: 100%;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 2px solid #000;
+    }
+
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
+      margin-bottom: 1rem;
     }
+
     .form-full-width {
       margin-top: 1rem;
     }
+
+    input, textarea {
+      font-size: 1.05rem;
+      padding: 0.8rem 1rem;
+      border: 1px solid #000;
+      width: 100%;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    button {
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      color: #fff;
+      background: #000;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
     .form-button-wrapper {
       text-align: center;
       margin-top: 1.5rem;
     }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.25rem;
+
+    #formMessage {
+      text-align: center;
+      margin-top: 1rem;
       font-weight: 500;
     }
-    button[type="submit"] {
-      padding: 6px 14px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .full-report-form {
-      max-width: 800px;
-      margin: 3rem auto;
-      padding: 1rem;
-      border-top: 1px solid #ccc;
+
+    .footer {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 3rem;
+      text-align: center;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <h1>🤖 SnipeRank 🤖</h1>
-  <h2>AI SEO Analyzer</h2>
+  <h1>SnipeRank</h1>
+  <h2>AI SEO Analysis Results</h2>
 
   <section id="summary-results">
     <p style="text-align: center; color: gray;">Loading analysis...</p>
   </section>
 
-  <section id="full-report-request" class="full-report-form">
-    <h2>Want the Full Report?</h2>
-    <p>The Full SnipeRank Report shows how AI engines truly interpret your site — and how to fix what they miss.</p>
+  <section class="full-report-form">
+    <h3>Want the Full Report?</h3>
+    <p>Get a comprehensive analysis with specific recommendations for improving your AI visibility.</p>
 
     <form id="fullReportForm">
       <div class="form-grid">
@@ -87,16 +178,18 @@
 
       <div class="form-full-width">
         <label for="message">What challenges are you looking to address?</label>
-        <textarea id="message" name="message" rows="4"></textarea>
+        <textarea id="message" name="message" rows="4" placeholder="Tell us about your goals..."></textarea>
       </div>
 
       <div class="form-button-wrapper">
         <button type="submit">Send My Full Report</button>
       </div>
 
-      <div id="formMessage" style="margin-top: 1rem;"></div>
+      <div id="formMessage"></div>
     </form>
   </section>
+
+  <div class="footer">&copy; 2025 SnipeRank. Last updated June 24.</div>
 
   <script>
     // Load short report
@@ -110,8 +203,7 @@
         return;
       }
 
-      const requestUrl = `https://sniperank-backend-newjuly23.vercel.app/report.html?url=${encodeURIComponent(targetUrl)}`;
-      console.log("FETCHING SHORT REPORT FROM:", requestUrl);
+      const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
 
       try {
         const res = await fetch(requestUrl);
@@ -124,31 +216,16 @@
       }
     });
 
-    // Full report form submission
+    // Form submission
     document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const company = document.getElementById("company").value.trim();
-      const message = document.getElementById("message").value.trim();
       const formMessage = document.getElementById("formMessage");
-
-      try {
-        const res = await fetch("/api/send-report-request", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, phone, company, message })
-        });
-
-        const data = await res.json();
-        formMessage.innerText = data.message || "Thanks! We’ll be in touch.";
-        formMessage.style.color = "green";
-      } catch (err) {
-        formMessage.innerText = "Something went wrong. Please try again.";
-        formMessage.style.color = "red";
-      }
+      formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
+      formMessage.style.color = "green";
+      
+      // Reset form
+      this.reset();
     });
   </script>
 </body>

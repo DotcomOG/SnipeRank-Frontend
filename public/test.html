@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple Analyze Test</title>
+    <title>Backend Fetch Test</title>
 </head>
 <body>
-    <h1>Analyze Page Works!</h1>
-    <p id="url-display">URL parameter test goes here</p>
+    <h1>Testing Backend Connection</h1>
+    <div id="result">Loading...</div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const targetUrl = urlParams.get("url");
         
-        if (targetUrl) {
-            document.getElementById("url-display").innerHTML = `URL found: ${targetUrl}`;
+        if (!targetUrl) {
+            document.getElementById("result").innerHTML = "No URL provided";
         } else {
-            document.getElementById("url-display").innerHTML = "No URL parameter found";
+            // Fetch from your backend
+            const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
+            
+            fetch(requestUrl)
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("result").innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById("result").innerHTML = `Error: ${err.message}`;
+                });
         }
     </script>
 </body>

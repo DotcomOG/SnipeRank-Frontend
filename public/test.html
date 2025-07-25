@@ -5,6 +5,17 @@
 </head>
 <body>
     <h1>Analyze Page Works!</h1>
-    <p>URL parameter test goes here</p>
+    <p id="url-display">URL parameter test goes here</p>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get("url");
+        
+        if (targetUrl) {
+            document.getElementById("url-display").innerHTML = `URL found: ${targetUrl}`;
+        } else {
+            document.getElementById("url-display").innerHTML = "No URL parameter found";
+        }
+    </script>
 </body>
 </html>

@@ -105,29 +105,43 @@
         </form>
     </section>
 
-    <script>
-        // Load short report
-        document.addEventListener("DOMContentLoaded", async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetUrl = urlParams.get("url");
+   <script>
+    // Load short report
+    document.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get("url");
 
-            if (!targetUrl) {
-                document.getElementById("summary-results").innerHTML =
-                    "<p style='color:red; text-align:center;'>No URL provided.</p>";
-                return;
-            }
+        if (!targetUrl) {
+            document.getElementById("summary-results").innerHTML =
+                "<p style='color:red; text-align:center;'>No URL provided.</p>";
+            return;
+        }
 
-            const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
+        const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
+        
+        // Add debugging
+        console.log("Fetching from:", requestUrl);
+        document.getElementById("summary-results").innerHTML = "Attempting to fetch...";
 
-            try {
-                const res = await fetch(requestUrl);
-                const html = await res.text();
-                document.getElementById("summary-results").innerHTML = html;
-            } catch (err) {
-                console.error("Fetch error:", err);
-                document.getElementById("summary-results").innerHTML =
-                    "<p style='color:red; text-align:center;'>Failed to load report.</p>";
-            }
-        });
+        try {
+            const res = await fetch(requestUrl);
+            console.log("Response status:", res.status);
+            const html = await res.text();
+            console.log("Response received:", html.substring(0, 100));
+            document.getElementById("summary-results").innerHTML = html;
+        } catch (err) {
+            console.error("Fetch error:", err);
+            document.getElementById("summary-results").innerHTML =
+                `<p style='color:red; text-align:center;'>Error: ${err.message}</p>`;
+        }
+    });
 
-        // Form submiss
+    // Form submission
+    document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const formMessage = document.getElementById("formMessage");
+        formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
+        formMessage.style.color = "green";
+        this.reset();
+    });
+</script>

@@ -1,232 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnipeRank — AI SEO Analysis Results</title>
-  <style>
-    :root {
-      --max-width: 760px;
-      --pad-v: 5vh;
-      --pad-h: 2rem;
-    }
-
-    body {
-      font-family: Helvetica, sans-serif;
-      background: #fff;
-      color: #000;
-      margin: 0;
-      padding: var(--pad-v) var(--pad-h);
-      max-width: var(--max-width);
-      margin-left: auto;
-      margin-right: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    h1 {
-      font-size: 4rem;
-      font-weight: 700;
-      margin: 0 0 0.25em 0;
-      line-height: 1;
-      letter-spacing: -1px;
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin: 0 0 2rem 0;
-    }
-
-    h3 {
-      font-size: 1.2rem;
-      font-weight: 500;
-      margin: 2rem 0 1rem 0;
-    }
-
-    p {
-      font-size: 1.1rem;
-      line-height: 1.75;
-      margin-bottom: 1rem;
-    }
-
-    #summary-results {
-      width: 100%;
-      margin: 2rem 0;
-      padding: 1.5rem;
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-    }
-
-    .section-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin: 1.5rem 0 1rem 0;
-      color: #000;
-    }
-
-    ul {
-      margin: 0 0 1.5rem 0;
-      padding-left: 1.5rem;
-    }
-
-    li {
-      margin-bottom: 1rem;
-      line-height: 1.6;
-    }
-
-    .full-report-form {
-      width: 100%;
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 2px solid #000;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-full-width {
-      margin-top: 1rem;
-    }
-
-    input, textarea {
-      font-size: 1.05rem;
-      padding: 0.8rem 1rem;
-      border: 1px solid #000;
-      width: 100%;
-      background: transparent;
-      box-sizing: border-box;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-
-    button {
-      font-size: 1rem;
-      font-weight: 500;
-      padding: 0.8rem 1.5rem;
-      border: none;
-      color: #fff;
-      background: #000;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-
-    button:hover {
-      background: #333;
-    }
-
-    .form-button-wrapper {
-      text-align: center;
-      margin-top: 1.5rem;
-    }
-
-    #formMessage {
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: 500;
-    }
-
-    .footer {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 3rem;
-      text-align: center;
-      width: 100%;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnipeRank – AI SEO Analyzer</title>
+    <style>
+        body {
+            font-family: Helvetica, sans-serif;
+            background: white;
+            color: black;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            text-align: center;
+            margin: 0 0 1.5rem 0;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-full-width {
+            margin-top: 1rem;
+        }
+        .form-button-wrapper {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #000;
+            color: white;
+            border: none;
+        }
+        .full-report-form {
+            margin: 3rem auto;
+            padding: 2rem;
+            border-top: 2px solid #000;
+        }
+        #summary-results {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f9f9f9;
+        }
+    </style>
 </head>
 <body>
-  <h1>SnipeRank</h1>
-  <h2>AI SEO Analysis Results</h2>
+    <h1>🤖 SnipeRank 🤖</h1>
+    <h2>AI SEO Analysis Results</h2>
 
-  <section id="summary-results">
-    <p style="text-align: center; color: gray;">Loading analysis...</p>
-  </section>
+    <section id="summary-results">
+        <p style="text-align: center; color: gray;">Loading analysis...</p>
+    </section>
 
-  <section class="full-report-form">
-    <h3>Want the Full Report?</h3>
-    <p>Get a comprehensive analysis with specific recommendations for improving your AI visibility.</p>
+    <section class="full-report-form">
+        <h2>Want the Full Report?</h2>
+        <p>Get a comprehensive analysis with specific recommendations for improving your AI visibility.</p>
 
-    <form id="fullReportForm">
-      <div class="form-grid">
-        <div>
-          <label for="name">Full Name *</label>
-          <input type="text" id="name" name="name" required />
-        </div>
-        <div>
-          <label for="company">Company Name</label>
-          <input type="text" id="company" name="company" />
-        </div>
-        <div>
-          <label for="email">Email Address *</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div>
-          <label for="phone">Phone Number *</label>
-          <input type="tel" id="phone" name="phone" required />
-        </div>
-      </div>
+        <form id="fullReportForm">
+            <div class="form-grid">
+                <div>
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required />
+                </div>
+                <div>
+                    <label for="company">Company Name</label>
+                    <input type="text" id="company" name="company" />
+                </div>
+                <div>
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required />
+                </div>
+                <div>
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required />
+                </div>
+            </div>
 
-      <div class="form-full-width">
-        <label for="message">What challenges are you looking to address?</label>
-        <textarea id="message" name="message" rows="4" placeholder="Tell us about your goals..."></textarea>
-      </div>
+            <div class="form-full-width">
+                <label for="message">What challenges are you looking to address?</label>
+                <textarea id="message" name="message" rows="4" placeholder="Tell us about your goals..."></textarea>
+            </div>
 
-      <div class="form-button-wrapper">
-        <button type="submit">Send My Full Report</button>
-      </div>
+            <div class="form-button-wrapper">
+                <button type="submit">Send My Full Report</button>
+            </div>
 
-      <div id="formMessage"></div>
-    </form>
-  </section>
+            <div id="formMessage" style="margin-top: 1rem; text-align: center;"></div>
+        </form>
+    </section>
 
-  <div class="footer">&copy; 2025 SnipeRank. Last updated June 24.</div>
 
-  <script>
+Good idea! **Just copy the working script section** and paste it back to replace what got messed up.
+
+**You need this exact script section:**
+
+```html
+<script>
     // Load short report
     document.addEventListener("DOMContentLoaded", async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetUrl = urlParams.get("url");
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get("url");
 
-      if (!targetUrl) {
-        document.getElementById("summary-results").innerHTML =
-          "<p style='color:red; text-align:center;'>No URL provided.</p>";
-        return;
-      }
+        if (!targetUrl) {
+            document.getElementById("summary-results").innerHTML =
+                "<p style='color:red; text-align:center;'>No URL provided.</p>";
+            return;
+        }
 
-      const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
+        const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
 
-      try {
-        const res = await fetch(requestUrl);
-        const html = await res.text();
-        document.getElementById("summary-results").innerHTML = html;
-      } catch (err) {
-        console.error("Fetch error:", err);
-        document.getElementById("summary-results").innerHTML =
-          "<p style='color:red; text-align:center;'>Failed to load report.</p>";
-      }
+        try {
+            const res = await fetch(requestUrl);
+            const html = await res.text();
+            document.getElementById("summary-results").innerHTML = html;
+        } catch (err) {
+            console.error("Fetch error:", err);
+            document.getElementById("summary-results").innerHTML =
+                "<p style='color:red; text-align:center;'>Failed to load report.</p>";
+        }
     });
 
     // Form submission
     document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-      const formMessage = document.getElementById("formMessage");
-      formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
-      formMessage.style.color = "green";
-      
-      // Reset form
-      this.reset();
+        e.preventDefault();
+        const formMessage = document.getElementById("formMessage");
+        formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
+        formMessage.style.color = "green";
+        this.reset();
     });
-  </script>
-</body>
-</html>
+</script>

@@ -1,8 +1,8 @@
 <!--
-  SnipeRank - AI SEO Analysis Results Page (Clean Professional Design)
-  Version: 1.4.2
+  SnipeRank - AI SEO Analysis Results Page (Paul Rand Inspired Design)
+  Version: 1.5.0
   Last Updated: July 26, 2025
-  Changes: Complete JavaScript rewrite to fix loading issues, improved error handling
+  Changes: Added Paul Rand inspired color palette, improved visual markers and typography
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -82,8 +82,8 @@
       margin: 3rem 0 1.5rem 0;
       color: #000;
       letter-spacing: -0.5px;
-      border-bottom: 2px solid #000;
-      padding-bottom: 0.5rem;
+      border-bottom: 3px solid #E53E3E;
+      padding-bottom: 0.75rem;
       position: relative;
     }
 
@@ -92,27 +92,28 @@
       position: absolute;
       left: 0;
       top: -0.5rem;
-      width: 3rem;
-      height: 2px;
-      background: #000;
+      width: 4rem;
+      height: 3px;
+      background: linear-gradient(90deg, #3182CE 0%, #E53E3E 50%, #F56500 100%);
     }
 
-    /* Clean design elements for different sections */
+    /* Paul Rand inspired design elements */
     .insights-marker {
       display: inline-block;
-      width: 3px;
+      width: 4px;
       height: 1.2rem;
-      background: linear-gradient(45deg, #000 0%, #666 100%);
+      background: linear-gradient(45deg, #3182CE 0%, #2B6CB0 100%);
       margin-right: 0.75rem;
       vertical-align: text-top;
       margin-top: 0.1rem;
+      border-radius: 2px;
     }
 
     .opportunity-marker {
       display: inline-block;
       width: 0;
       height: 0;
-      border-left: 6px solid #000;
+      border-left: 8px solid #E53E3E;
       border-top: 6px solid transparent;
       border-bottom: 6px solid transparent;
       margin-right: 0.75rem;
@@ -122,13 +123,37 @@
 
     .strength-marker {
       display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #000;
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(45deg, #38A169 0%, #2F855A 100%);
       border-radius: 50%;
       margin-right: 0.75rem;
-      margin-top: 0.4rem;
+      margin-top: 0.35rem;
       vertical-align: text-top;
+      box-shadow: 0 1px 3px rgba(56, 161, 105, 0.3);
+    }
+
+    /* Additional Paul Rand color accents */
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 0 0 0.25em 0;
+      line-height: 1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #000 0%, #3182CE 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .form-button-wrapper button {
+      background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
+      transition: all 0.3s ease;
+    }
+
+    .form-button-wrapper button:hover {
+      background: linear-gradient(135deg, #C53030 0%, #9C2A2A 100%);
+      transform: translateY(-1px);
     }
 
     ul {

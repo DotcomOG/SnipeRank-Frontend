@@ -151,19 +151,24 @@
     .ai-insights-list li {
       display: flex;
       align-items: flex-start;
-      padding: 0.75rem;
+      padding: 1rem;
       background: #f9f9f9;
       border-left: 3px solid #000;
       margin-bottom: 1rem;
       font-size: 1rem;
     }
 
-    .insight-icon {
-      width: 16px;
-      height: 16px;
+    .engine-logo {
+      width: 18px;
+      height: 18px;
       margin-right: 0.5rem;
       margin-top: 0.1rem;
       flex-shrink: 0;
+    }
+
+    .engine-name {
+      font-weight: 600;
+      margin-right: 0.25rem;
     }
 
     .new-analysis-section {
@@ -290,80 +295,6 @@
   <section class="ai-engines-section">
     <div class="section-title">🤖 AI Engine Insights</div>
     
-    <div class="ai-engines-grid">
-      <!-- ChatGPT -->
-      <div class="ai-engine-card">
-        <svg class="ai-engine-logo" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" fill="#10A37F"/>
-          <path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div class="ai-engine-info">
-          <div class="ai-engine-name">ChatGPT</div>
-          <div class="ai-engine-company">OpenAI</div>
-        </div>
-      </div>
-
-      <!-- Gemini -->
-      <div class="ai-engine-card">
-        <svg class="ai-engine-logo" viewBox="0 0 24 24">
-          <defs>
-            <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#4285F4"/>
-              <stop offset="25%" style="stop-color:#34A853"/>
-              <stop offset="50%" style="stop-color:#FBBC04"/>
-              <stop offset="75%" style="stop-color:#EA4335"/>
-              <stop offset="100%" style="stop-color:#4285F4"/>
-            </linearGradient>
-          </defs>
-          <polygon points="12,2 22,8 22,16 12,22 2,16 2,8" fill="url(#geminiGrad)"/>
-          <circle cx="12" cy="12" r="3" fill="white"/>
-        </svg>
-        <div class="ai-engine-info">
-          <div class="ai-engine-name">Gemini</div>
-          <div class="ai-engine-company">Google</div>
-        </div>
-      </div>
-
-      <!-- Copilot -->
-      <div class="ai-engine-card">
-        <svg class="ai-engine-logo" viewBox="0 0 24 24">
-          <rect width="24" height="24" rx="4" fill="#0078D4"/>
-          <path d="M7 8h10v2H7zM7 11h10v2H7zM7 14h6v2H7z" fill="white"/>
-          <circle cx="19" cy="15" r="2" fill="#FFB900"/>
-        </svg>
-        <div class="ai-engine-info">
-          <div class="ai-engine-name">Copilot</div>
-          <div class="ai-engine-company">Microsoft</div>
-        </div>
-      </div>
-
-      <!-- Perplexity -->
-      <div class="ai-engine-card">
-        <svg class="ai-engine-logo" viewBox="0 0 24 24">
-          <rect width="24" height="24" rx="12" fill="#1FB6FF"/>
-          <path d="M8 8l8 8M16 8l-8 8" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="12" cy="12" r="2" fill="white"/>
-        </svg>
-        <div class="ai-engine-info">
-          <div class="ai-engine-name">Perplexity</div>
-          <div class="ai-engine-company">Perplexity AI</div>
-        </div>
-      </div>
-
-      <!-- Claude -->
-      <div class="ai-engine-card">
-        <svg class="ai-engine-logo" viewBox="0 0 24 24">
-          <rect width="24" height="24" rx="4" fill="#D97706"/>
-          <path d="M12 4a8 8 0 100 16 8 8 0 000-16zm0 2a6 6 0 110 12 6 6 0 010-12z" fill="white"/>
-          <circle cx="12" cy="12" r="3" fill="#D97706"/>
-        </svg>
-        <div class="ai-engine-info">
-          <div class="ai-engine-name">Claude</div>
-          <div class="ai-engine-company">Anthropic</div>
-        </div>
-      </div>
-    </div>
-
     <ul class="ai-insights-list" id="aiInsightsList">
       <!-- AI insights will be populated here by JavaScript -->
     </ul>
@@ -438,7 +369,7 @@
         const html = await res.text();
         document.getElementById("summary-results").innerHTML = html;
 
-        // Add AI insights if they exist in the response
+        // Add AI insights with logos after the main content loads
         addAIInsights();
       } catch (err) {
         console.error("Fetch error:", err);
@@ -451,25 +382,40 @@
     function addAIInsights() {
       const insightsList = document.getElementById("aiInsightsList");
       
-      // Sample AI insights - replace with actual data from your API
+      // Sample AI insights with official logos
       const insights = [
-        "Your content structure is well-optimized for ChatGPT's understanding and indexing.",
-        "Gemini may have difficulty parsing your site's schema markup implementation.",
-        "Microsoft Copilot can effectively surface your business information in search results.",
-        "Perplexity AI shows strong citation potential for your expertise-based content.",
-        "Claude can easily understand your content hierarchy and topic clustering."
+        {
+          engine: "ChatGPT",
+          logo: `<svg class="engine-logo" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" fill="#74AA9C"/></svg>`,
+          text: "Your content structure is well-optimized for ChatGPT's understanding and indexing."
+        },
+        {
+          engine: "Gemini",
+          logo: `<svg class="engine-logo" viewBox="0 0 24 24"><defs><linearGradient id="geminiGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4285F4"/><stop offset="25%" style="stop-color:#34A853"/><stop offset="50%" style="stop-color:#FBBC04"/><stop offset="75%" style="stop-color:#EA4335"/><stop offset="100%" style="stop-color:#4285F4"/></linearGradient></defs><polygon points="12,2 22,8 22,16 12,22 2,16 2,8" fill="url(#geminiGrad2)"/><circle cx="12" cy="12" r="3" fill="white"/></svg>`,
+          text: "Gemini may have difficulty parsing your site's schema markup implementation."
+        },
+        {
+          engine: "Copilot",
+          logo: `<svg class="engine-logo" viewBox="0 0 24 24"><path d="M1.8 12a10.2 10.2 0 1 1 20.4 0 10.2 10.2 0 0 1-20.4 0z" fill="#0078d4"/><path d="M8.4 9.6h7.2v1.2H8.4zm0 2.4h7.2v1.2H8.4zm0 2.4h4.8v1.2H8.4z" fill="#fff"/><circle cx="18" cy="15" r="1.5" fill="#FFB900"/></svg>`,
+          text: "Microsoft Copilot can effectively surface your business information in search results."
+        },
+        {
+          engine: "Perplexity",
+          logo: `<svg class="engine-logo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#20808D"/><path d="M8 8l8 8M16 8l-8 8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="white"/></svg>`,
+          text: "Perplexity AI shows strong citation potential for your expertise-based content."
+        },
+        {
+          engine: "Claude",
+          logo: `<svg class="engine-logo" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6S2.4 17.302 2.4 12 6.698 2.4 12 2.4zm0 3.6a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 1.8a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4z" fill="#CC785C"/></svg>`,
+          text: "Claude can easily understand your content hierarchy and topic clustering."
+        }
       ];
-
-      const engines = ['ChatGPT', 'Gemini', 'Copilot', 'Perplexity', 'Claude'];
       
-      insights.forEach((insight, index) => {
+      insights.forEach((insight) => {
         const li = document.createElement('li');
         li.innerHTML = `
-          <svg class="insight-icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="#10A37F"/>
-            <path d="M12 6v12M6 12h12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <strong>${engines[index]}:</strong> ${insight}
+          ${insight.logo}
+          <span><span class="engine-name">${insight.engine}:</span> ${insight.text}</span>
         `;
         insightsList.appendChild(li);
       });

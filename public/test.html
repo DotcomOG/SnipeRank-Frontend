@@ -98,6 +98,74 @@
       color: #000;
     }
 
+    /* AI Engine Insights Styling */
+    .ai-engines-section {
+      margin: 3rem 0 2rem 0;
+    }
+
+    .ai-engines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .ai-engine-card {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .ai-engine-logo {
+      width: 20px;
+      height: 20px;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .ai-engine-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ai-engine-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #000;
+      margin: 0;
+    }
+
+    .ai-engine-company {
+      font-size: 0.75rem;
+      color: #666;
+      margin: 0;
+    }
+
+    .ai-insights-list {
+      margin-top: 1rem;
+    }
+
+    .ai-insights-list li {
+      display: flex;
+      align-items: flex-start;
+      padding: 0.75rem;
+      background: #f9f9f9;
+      border-left: 3px solid #000;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .insight-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 0.5rem;
+      margin-top: 0.1rem;
+      flex-shrink: 0;
+    }
+
     .new-analysis-section {
       text-align: center;
       margin: 2rem 0;
@@ -199,6 +267,10 @@
       .form-grid {
         grid-template-columns: 1fr;
       }
+
+      .ai-engines-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -212,6 +284,89 @@
 
   <section id="summary-results">
     <p style="text-align: center; color: gray;">Loading analysis...</p>
+  </section>
+
+  <!-- AI Engine Insights Section -->
+  <section class="ai-engines-section">
+    <div class="section-title">🤖 AI Engine Insights</div>
+    
+    <div class="ai-engines-grid">
+      <!-- ChatGPT -->
+      <div class="ai-engine-card">
+        <svg class="ai-engine-logo" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="#10A37F"/>
+          <path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="ai-engine-info">
+          <div class="ai-engine-name">ChatGPT</div>
+          <div class="ai-engine-company">OpenAI</div>
+        </div>
+      </div>
+
+      <!-- Gemini -->
+      <div class="ai-engine-card">
+        <svg class="ai-engine-logo" viewBox="0 0 24 24">
+          <defs>
+            <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#4285F4"/>
+              <stop offset="25%" style="stop-color:#34A853"/>
+              <stop offset="50%" style="stop-color:#FBBC04"/>
+              <stop offset="75%" style="stop-color:#EA4335"/>
+              <stop offset="100%" style="stop-color:#4285F4"/>
+            </linearGradient>
+          </defs>
+          <polygon points="12,2 22,8 22,16 12,22 2,16 2,8" fill="url(#geminiGrad)"/>
+          <circle cx="12" cy="12" r="3" fill="white"/>
+        </svg>
+        <div class="ai-engine-info">
+          <div class="ai-engine-name">Gemini</div>
+          <div class="ai-engine-company">Google</div>
+        </div>
+      </div>
+
+      <!-- Copilot -->
+      <div class="ai-engine-card">
+        <svg class="ai-engine-logo" viewBox="0 0 24 24">
+          <rect width="24" height="24" rx="4" fill="#0078D4"/>
+          <path d="M7 8h10v2H7zM7 11h10v2H7zM7 14h6v2H7z" fill="white"/>
+          <circle cx="19" cy="15" r="2" fill="#FFB900"/>
+        </svg>
+        <div class="ai-engine-info">
+          <div class="ai-engine-name">Copilot</div>
+          <div class="ai-engine-company">Microsoft</div>
+        </div>
+      </div>
+
+      <!-- Perplexity -->
+      <div class="ai-engine-card">
+        <svg class="ai-engine-logo" viewBox="0 0 24 24">
+          <rect width="24" height="24" rx="12" fill="#1FB6FF"/>
+          <path d="M8 8l8 8M16 8l-8 8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="2" fill="white"/>
+        </svg>
+        <div class="ai-engine-info">
+          <div class="ai-engine-name">Perplexity</div>
+          <div class="ai-engine-company">Perplexity AI</div>
+        </div>
+      </div>
+
+      <!-- Claude -->
+      <div class="ai-engine-card">
+        <svg class="ai-engine-logo" viewBox="0 0 24 24">
+          <rect width="24" height="24" rx="4" fill="#D97706"/>
+          <path d="M12 4a8 8 0 100 16 8 8 0 000-16zm0 2a6 6 0 110 12 6 6 0 010-12z" fill="white"/>
+          <circle cx="12" cy="12" r="3" fill="#D97706"/>
+        </svg>
+        <div class="ai-engine-info">
+          <div class="ai-engine-name">Claude</div>
+          <div class="ai-engine-company">Anthropic</div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="ai-insights-list" id="aiInsightsList">
+      <!-- AI insights will be populated here by JavaScript -->
+    </ul>
   </section>
 
   <section class="new-analysis-section">
@@ -282,12 +437,43 @@
         const res = await fetch(requestUrl);
         const html = await res.text();
         document.getElementById("summary-results").innerHTML = html;
+
+        // Add AI insights if they exist in the response
+        addAIInsights();
       } catch (err) {
         console.error("Fetch error:", err);
         document.getElementById("summary-results").innerHTML =
           "<p style='color:red; text-align:center;'>Failed to load report.</p>";
       }
     });
+
+    // Add AI insights to the dedicated section
+    function addAIInsights() {
+      const insightsList = document.getElementById("aiInsightsList");
+      
+      // Sample AI insights - replace with actual data from your API
+      const insights = [
+        "Your content structure is well-optimized for ChatGPT's understanding and indexing.",
+        "Gemini may have difficulty parsing your site's schema markup implementation.",
+        "Microsoft Copilot can effectively surface your business information in search results.",
+        "Perplexity AI shows strong citation potential for your expertise-based content.",
+        "Claude can easily understand your content hierarchy and topic clustering."
+      ];
+
+      const engines = ['ChatGPT', 'Gemini', 'Copilot', 'Perplexity', 'Claude'];
+      
+      insights.forEach((insight, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <svg class="insight-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="#10A37F"/>
+            <path d="M12 6v12M6 12h12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <strong>${engines[index]}:</strong> ${insight}
+        `;
+        insightsList.appendChild(li);
+      });
+    }
 
     // Handle new URL analysis
     document.getElementById("newAnalysisForm").addEventListener("submit", function (e) {

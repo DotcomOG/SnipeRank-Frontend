@@ -7,6 +7,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SnipeRank – AI SEO Analyzer</title>
@@ -148,11 +149,11 @@
 
     <div id="contactForm" class="hidden mt-12 pt-8">
       <h3 class="text-2xl font-semibold mb-4">Request a Free AI SEO Consultation</h3>
-      <form class="space-y-4">
-        <input type="text" placeholder="Name" class="w-full p-2 rounded border text-black" />
-        <input type="email" placeholder="Email" class="w-full p-2 rounded border text-black" />
-        <input type="tel" placeholder="Phone (optional)" class="w-full p-2 rounded border text-black" />
-        <textarea placeholder="Your message" class="w-full p-2 rounded border text-black h-32"></textarea>
+      <form id="contactFormElement" class="space-y-4">
+        <input type="text" name="name" placeholder="Name" class="w-full p-2 rounded border text-black" />
+        <input type="email" name="email" placeholder="Email" class="w-full p-2 rounded border text-black" />
+        <input type="tel" name="phone" placeholder="Phone (optional)" class="w-full p-2 rounded border text-black" />
+<textarea name="message" placeholder="Your message" class="w-full p-2 rounded border text-black h-32"></textarea>
         <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Send</button>
       </form>
     </div>

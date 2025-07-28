@@ -147,14 +147,13 @@
       <ul id="opportunitiesList" class="list-disc list-inside space-y-2"></ul>
     </div>
 
-  <div id="contactForm" class="hidden mt-12 pt-8">
-  <h3 class="text-2xl font-semibold mb-4">Request a Free AI SEO Consultation</h3>
-  <form id="contactFormElement" class="space-y-4">
-    <input type="text" name="name" placeholder="Name" class="w-full p-2 rounded border text-black" />
-    <input type="email" name="email" placeholder="Email" class="w-full p-2 rounded border text-black" />
-    <input type="tel" name="phone" placeholder="Phone (optional)" class="w-full p-2 rounded border text-black" />
-    <textarea name="message" placeholder="Your message" class="w-full p-2 rounded border text-black h-32"></textarea>
-    <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Send</button>
+<div id="contactForm" class="hidden mt-12 pt-8">
+  <h3 class="text-2xl font-semibold mb-4 text-center">Get Your Full AI SEO Report</h3>
+  <p class="text-center mb-4 text-gray-600">Thanks! We'll email your full report within 24 hours.</p>
+  <form id="contactFormElement" class="space-y-4 max-w-xl mx-auto">
+    <input type="text" name="name" placeholder="Name" class="w-full p-2 rounded border text-black" required />
+    <input type="email" name="email" placeholder="Email" class="w-full p-2 rounded border text-black" required />
+    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full">Get My Full Report</button>
   </form>
 </div>
 
@@ -177,6 +176,25 @@
         }
       });
 
+urlInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleAnalyze();
+  }
+});
+
+// ADD THE CONTACT FORM CODE HERE:
+document.getElementById('contactFormElement').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const name = formData.get('name');
+  const email = formData.get('email');
+  const analyzedUrl = document.getElementById('resultUrl').textContent.replace('Analyzed URL: ', '');
+  
+  window.location.href = `full-report.html?url=${encodeURIComponent(analyzedUrl)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+});
+
+      
       function handleAnalyze() {
         const url = urlInput.value.trim();
         if (!url) return alert('Please enter a valid URL.');

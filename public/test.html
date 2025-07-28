@@ -447,27 +447,21 @@
     });
 
     // Form submission - check if form exists first
-    const fullReportForm = document.getElementById("fullReportForm");
-    if (fullReportForm) {
-      fullReportForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        
-        const formMessage = document.getElementById("formMessage");
-        const submitButton = this.querySelector('button[type="submit"]');
-        
-        // Show loading state
-        submitButton.textContent = "Sending...";
-        submitButton.disabled = true;
-        
-        try {
-          const formData = new FormData(this);
-          const response = await fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
+// Handle new URL analysis
+document.getElementById("newAnalysisForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  let url = document.getElementById("newUrl").value.trim();
+  
+  if (!url) return;
+  
+  if (!/^https?:\/\//i.test(url)) {
+    url = "https://" + url;
+  }
+  
+  window.location.href = `test.html?url=${encodeURIComponent(url)}`;
+});
+
+    
           
           if (response.ok) {
             formMessage.innerHTML = "✅ Success! Your full AI SEO analysis will be emailed to you within 24 hours.";

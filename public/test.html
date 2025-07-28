@@ -1,8 +1,8 @@
 <!--
-  SnipeRank - AI SEO Analysis Results Page (Paul Rand Inspired Design)
-  Version: 1.5.0
+  SnipeRank - AI SEO Analysis Results Page (New Formspree Integration)
+  Version: 1.9.0
   Last Updated: July 26, 2025
-  Changes: Added Paul Rand inspired color palette, improved visual markers and typography
+  Changes: Updated to new Formspree endpoint xqalqjqd, complete email report system ready
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -13,7 +13,7 @@
   <style>
     :root {
       --max-width: 760px;
-      --pad-v: 5vh;
+      --pad-v: 3vh;
       --pad-h: 2rem;
     }
 
@@ -196,22 +196,45 @@
       min-width: 250px;
     }
 
-    .full-report-form {
+    .consultation-section {
       width: 100%;
       margin-top: 3rem;
       padding-top: 2rem;
-      border-top: 2px solid #000;
+      border-top: 3px solid #E53E3E;
+      text-align: center;
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
+    .consultation-cta {
+      margin: 2rem 0;
     }
 
-    .form-full-width {
-      margin-top: 1rem;
+    .schedule-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
+      color: white;
+      padding: 1rem 2rem;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+    }
+
+    .schedule-button:hover {
+      background: linear-gradient(135deg, #C53030 0%, #9C2A2A 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+    }
+
+    .consultation-note {
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+      color: #666;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
     }
 
     input, textarea {
@@ -280,19 +303,16 @@
       .new-analysis-form input {
         max-width: 100%;
       }
-      
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
 <body>
   <h1>SnipeRank</h1>
   <h2>AI SEO Analysis Results</h2>
+  <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Powered by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none; font-weight: 500;">Quontora</a></p>
 
-  <div id="analyzed-url">
-    <p>Analysis for: <strong id="current-url"></strong></p>
+  <div id="analyzed-url" style="margin-bottom: 0.5rem;">
+    <p style="margin: 0; font-size: 1rem;">Analysis for: <strong id="current-url"></strong></p>
   </div>
 
   <!-- ALL CONTENT BELOW IS DYNAMIC FROM YOUR BACKEND API -->
@@ -308,44 +328,22 @@
     </form>
   </section>
 
-  <section class="full-report-form">
-    <h3>Want the Full Report?</h3>
-    <p>Get a comprehensive analysis with specific recommendations for improving your AI visibility.</p>
-
-    <form id="fullReportForm">
-      <div class="form-grid">
-        <div>
-          <label for="name">Full Name *</label>
-          <input type="text" id="name" name="name" required />
-        </div>
-        <div>
-          <label for="company">Company Name</label>
-          <input type="text" id="company" name="company" />
-        </div>
-        <div>
-          <label for="email">Email Address *</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div>
-          <label for="phone">Phone Number *</label>
-          <input type="tel" id="phone" name="phone" required />
-        </div>
-      </div>
-
-      <div class="form-full-width">
-        <label for="message">What challenges are you looking to address?</label>
-        <textarea id="message" name="message" rows="4" placeholder="We can help you reach you're goals"></textarea>
-      </div>
-
-      <div class="form-button-wrapper">
-        <button type="submit">Send My Full Report</button>
-      </div>
-
-      <div id="formMessage"></div>
-    </form>
+  <section class="consultation-section">
+    <h3>Ready to Improve Your AI Visibility?</h3>
+    <p>After reviewing your analysis, book a free 30-minute consultation to discuss your specific opportunities and next steps.</p>
+    
+    <div class="consultation-cta">
+      <a href="#" id="scheduleBtn" class="schedule-button" target="_blank">
+        Schedule Free Consultation
+      </a>
+    </div>
+    
+    <p class="consultation-note">
+      <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
+    </p>
   </section>
 
-  <div class="footer">&copy; 2025 SnipeRank. Last updated July 26.</div>
+  <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">Quontora</a>. Last updated July 26.</div>
 
   <script>
     // Load short report
@@ -359,8 +357,9 @@
         return;
       }
 
-      // Display the URL being analyzed
+      // Display the URL being analyzed and set hidden form field
       document.getElementById("current-url").textContent = targetUrl;
+      document.getElementById("analyzedUrlField").value = targetUrl;
 
       const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
 
@@ -388,8 +387,8 @@
         const summaryDiv = document.getElementById("summary-results");
         let summaryHTML = summaryDiv.innerHTML;
         
-        // Replace emoji markers with clean design elements FIRST
-        summaryHTML = summaryHTML.replace(/✅/g, '<span class="strength-marker"></span>');
+        // Replace checkmark emojis (✅) with nothing (remove green circles)
+        summaryHTML = summaryHTML.replace(/✅/g, '');
         summaryHTML = summaryHTML.replace(/🚨/g, '<span class="opportunity-marker"></span>');
         summaryHTML = summaryHTML.replace(/🤖/g, '<span class="insights-marker"></span>');
         
@@ -445,17 +444,50 @@
       window.location.href = `test.html?url=${encodeURIComponent(url)}`;
     });
 
-    // Form submission
-    document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-      const formMessage = document.getElementById("formMessage");
-      formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
-      formMessage.style.color = "green";
-      
-      // Reset form
-      this.reset();
-    });
+    // Form submission - check if form exists first
+    const fullReportForm = document.getElementById("fullReportForm");
+    if (fullReportForm) {
+      fullReportForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        
+        const formMessage = document.getElementById("formMessage");
+        const submitButton = this.querySelector('button[type="submit"]');
+        
+        // Show loading state
+        submitButton.textContent = "Sending...";
+        submitButton.disabled = true;
+        
+        try {
+          const formData = new FormData(this);
+          const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            formMessage.innerHTML = "✅ Success! Your full AI SEO analysis will be emailed to you within 24 hours.";
+            formMessage.style.color = "#38A169";
+            this.reset();
+            // Reset the analyzed URL field
+            const analyzedUrlField = document.getElementById("analyzedUrlField");
+            if (analyzedUrlField) {
+              analyzedUrlField.value = document.getElementById("current-url").textContent;
+            }
+          } else {
+            throw new Error('Form submission failed');
+          }
+        } catch (error) {
+          formMessage.innerHTML = "❌ Something went wrong. Please try again or email us directly.";
+          formMessage.style.color = "#E53E3E";
+        } finally {
+          submitButton.textContent = "Email My Full Report";
+          submitButton.disabled = false;
+        }
+      });
+    }
   </script>
 </body>
 </html>

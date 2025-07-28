@@ -371,8 +371,10 @@
         
         document.getElementById("summary-results").innerHTML = html;
 
-        // Enhance existing content with official logos
-        enhanceExistingAIInsights();
+        // Only enhance if we got valid content
+        if (html && html.length > 100) {
+          enhanceExistingAIInsights();
+        }
       } catch (err) {
         console.error("Fetch error details:", err);
         document.getElementById("summary-results").innerHTML =

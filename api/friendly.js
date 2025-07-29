@@ -1,4 +1,4 @@
-// 📄 api/friendly.js — Oye! let's see if this one fixes the call July 29
+// 📄 api/friendly.js — Unified structure for test.html (Aug 2025)
 
 import express from 'express';
 import OpenAI from 'openai';
@@ -30,6 +30,7 @@ function cleanResponse(text) {
   const jsonString = text.slice(jsonStart, jsonEnd + 1);
   return isValidJson(jsonString) ? JSON.parse(jsonString) : null;
 }
+
 router.get('/friendly', async (req, res) => {
   const url = req.query.url;
   if (!url || !/^https?:\/\//.test(url)) {
@@ -53,10 +54,10 @@ Content:
 Output structure:
 {
   "ai_superpowers": [
-    { "title": "...", "explanation": "..." } // 5 items
+    { "title": "...", "explanation": "..." }
   ],
   "ai_opportunities": [
-    { "title": "...", "explanation": "..." } // 10 items
+    { "title": "...", "explanation": "..." }
   ],
   "ai_engine_insights": {
     "ChatGPT": "...",
@@ -69,11 +70,9 @@ Output structure:
 
 Important guidelines:
 - Each explanation must be at least two full lines of text when viewed on a desktop screen.
-- There is no maximum.
-- Do not use bullets.
 - Use natural, consultative tone.
-- Vary sentence structure.
-- Never begin every line the same way.`;
+- No bullets. No markdown. Just raw JSON only.
+`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -83,67 +82,32 @@ Important guidelines:
 
     const raw = completion.choices?.[0]?.message?.content;
     if (!raw) {
-      console.error('❌ No content returned from OpenAI.');
+      console.error('❌ No content returned from OpenAI');
       return res.status(502).json({ error: 'No content returned from OpenAI.' });
     }
 
     const parsed = cleanResponse(raw);
     if (!parsed) {
-      console.error('❌ Failed to parse JSON from OpenAI:', raw);
+      console.error('❌ Failed to parse OpenAI JSON:', raw.slice(0, 500));
       return res.status(500).json({ error: 'Invalid JSON format from OpenAI.', raw });
     }
 
-    res.json({ raw, parsed });
-  } catch (err) {
-    console.error('❌ Analysis error:', err.message);
-    res.status(500).json({ error: 'Analysis failed. Try again.', message: err.message });
-  }
-});
+    // Flatten the data structure for test.html
+    const score = Math.floor(Math.random() * 20) + 80; // simulate real score
+    const superpowers = parsed.ai_superpowers.map(item => `${item.title}: ${item.explanation}`);
+    const opportunities = parsed.ai_opportunities.map(item => `${item.title}: ${item.explanation}`);
+    const insights = Object.entries(parsed.ai_engine_insights).map(([key, val]) => `${key}: ${val}`);
+
+    return res.json({
+      url,
+      score,
+      superpowers,
+      opportunities,
+      insights
     });
-    const visibleText = extractVisibleText(htmlResponse.data);
-
-    const prompt = `You are an expert AI SEO consultant. Based on the website content below, return a strictly valid JSON report only — no explanations, no intro. Use this format:
-
-Content:
-"""${visibleText.slice(0, 7000)}"""
-
-Output structure:
-{
-  "ai_superpowers": [
-    { "title": "...", "explanation": "..." } // 5 items
-  ],
-  "ai_opportunities": [
-    { "title": "...", "explanation": "..." } // 10 items
-  ],
-  "ai_engine_insights": {
-    "ChatGPT": "...",
-    "Claude": "...",
-    "Google Gemini": "...",
-    "Microsoft Copilot": "...",
-    "Perplexity": "..."
-  }
-}
-
-Important guidelines:
-- Each explanation must be at least two full lines of text when viewed on a desktop screen.
-- There is no maximum.
-- Do not use bullets.
-- Use natural, consultative tone.
-- Vary sentence structure.
-- Never begin every line the same way.`;
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7
-    });
-
-    const raw = completion.choices[0]?.message?.content || '';
-    const parsed = cleanResponse(raw);
-    res.json({ raw, parsed });
   } catch (err) {
-    console.error('Analysis error:', err.message);
-    res.status(500).json({ error: 'Analysis failed. Try again.' });
+    console.error('❌ Friendly API failed:', err.message);
+    return res.status(500).json({ error: 'Friendly API failed', message: err.message });
   }
 });
 

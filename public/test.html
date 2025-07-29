@@ -184,8 +184,43 @@ urlInput.addEventListener('keydown', (e) => {
 });
 
 // ADD THE CONTACT FORM CODE HERE:
-document.getElementById('contactFormElement').addEventListener('submit', function(e) {
-  e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('urlInputModal');
+  const urlInput = document.getElementById('urlInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const loadingMessage = document.getElementById('loadingMessage');
+  const resultContainer = document.getElementById('resultContainer');
+  const contactForm = document.getElementById('contactForm');
+
+  submitBtn.addEventListener('click', handleAnalyze);
+  urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAnalyze();
+    }
+  });
+
+
+
+  // ✅ Paste here
+  document.getElementById('contactFormElement').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const analyzedUrl = document.getElementById('resultUrl').textContent.replace('Analyzed URL: ', '');
+
+    window.location.href = `full-report.html?url=${encodeURIComponent(analyzedUrl)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+  });
+
+  function handleAnalyze() {
+    // ...
+  }
+
+  function renderReport(data) {
+    // ...
+  }
+}); 
   const formData = new FormData(this);
   const name = formData.get('name');
   const email = formData.get('email');

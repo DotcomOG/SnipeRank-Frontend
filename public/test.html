@@ -361,25 +361,43 @@
       document.getElementById("current-url").textContent = targetUrl;
       document.getElementById("analyzedUrlField").value = targetUrl;
 
-      const requestUrl = `https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`;
+      const requestUrl = `/api/friendly?url=${encodeURIComponent(targetUrl)}`;
 
-      try {
-        const res = await fetch(requestUrl);
-        const html = await res.text();
-        
-        console.log("Backend response received:", html.length, "characters");
-        
-        document.getElementById("summary-results").innerHTML = html;
-
-        // Only enhance if we got valid content
-        if (html && html.length > 100) {
-          enhanceExistingAIInsights();
-        }
-      } catch (err) {
-        console.error("Fetch error details:", err);
-        document.getElementById("summary-results").innerHTML =
-          "<p style='color:red; text-align:center;'>Failed to load report. Check console for details.</p>";
-      }
+function formatDataAsHTML(data) {
+  let html = '<div>';
+  
+  if (data.score) {
+    html += `<p style="text-align: center; font-size: 1.2em; margin-bottom: 2rem;"><strong>Overall Score: ${data.score}/100</strong></p>`;
+  }
+  
+  if (data.superpowers && data.superpowers.length > 0) {
+    html += '<h3 class="section-title">AI Superpowers</h3><ul>';
+    data.superpowers.forEach(item => {
+      html += `<li><span class="strength-marker"></span>${item}</li>`;
+    });
+    html += '</ul>';
+  }
+  
+  if (data.opportunities && data.opportunities.length > 0) {
+    html += '<h3 class="section-title">SEO Opportunities</h3><ul>';
+    data.opportunities.forEach(item => {
+      html += `<li><span class="opportunity-marker"></span>${item}</li>`;
+    });
+    html += '</ul>';
+  }
+  
+  if (data.insights && data.insights.length > 0) {
+    html += '<h3 class="section-title">AI Engine Insights</h3><ul>';
+    data.insights.forEach(item => {
+      html += `<li><span class="insights-marker"></span>${item}</li>`;
+    });
+    html += '</ul>';
+  }
+  
+  html += '</div>';
+  return html;
+}
+  
     });
 
     // Enhance existing AI insights with logos and replace emojis

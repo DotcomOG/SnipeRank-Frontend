@@ -346,10 +346,19 @@
   <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">Quontora</a>. Last updated July 26.</div>
 
   <script>
+
+    // Test API connection
+console.log("Testing API connection...");
+fetch('/api/friendly?url=https://example.com')
+  .then(res => res.json())
+  .then(data => console.log("API test successful:", data))
+  .catch(err => console.error("API test failed:", err));
+
+    
     // Load short report
     document.addEventListener("DOMContentLoaded", async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const targetUrl = urlParams.get("url");
+      const targetUrl = urlParams.get("url") || "https://example.com"; // fallback for testing
 
       if (!targetUrl) {
         document.getElementById("summary-results").innerHTML =

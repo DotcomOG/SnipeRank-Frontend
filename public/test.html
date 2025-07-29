@@ -354,66 +354,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("current-url").textContent = targetUrl;
   
   try {
-    const res = await fetch(`/api/friendly?url=${encodeURIComponent(targetUrl)}`);
-    const data = await res.json();
+    // Use your working backend
+    const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
+    const html = await res.text();
     
-    console.log("API Response:", data);
+    console.log("Got response from backend");
+    document.getElementById("summary-results").innerHTML = html;
     
-    if (data.parsed) {
-      const parsed = data.parsed;
-      
-      // Clear loading message
-      document.getElementById("summary-results").innerHTML = '';
-      
-      // Add superpowers
-      if (parsed.ai_superpowers && parsed.ai_superpowers.length > 0) {
-        const section = document.createElement('div');
-        section.innerHTML = '<h3 class="section-title">AI Superpowers</h3><ul></ul>';
-        const ul = section.querySelector('ul');
-        
-        parsed.ai_superpowers.forEach(item => {
-          const li = document.createElement("li");
-          li.innerHTML = `<span class="strength-marker"></span><strong>${item.title}:</strong> ${item.explanation}`;
-          ul.appendChild(li);
-        });
-        
-        document.getElementById("summary-results").appendChild(section);
-      }
-      
-      // Add opportunities
-      if (parsed.ai_opportunities && parsed.ai_opportunities.length > 0) {
-        const section = document.createElement('div');
-        section.innerHTML = '<h3 class="section-title">SEO Opportunities</h3><ul></ul>';
-        const ul = section.querySelector('ul');
-        
-        parsed.ai_opportunities.forEach(item => {
-          const li = document.createElement("li");
-          li.innerHTML = `<span class="opportunity-marker"></span><strong>${item.title}:</strong> ${item.explanation}`;
-          ul.appendChild(li);
-        });
-        
-        document.getElementById("summary-results").appendChild(section);
-      }
-      
-      // Add engine insights
-      if (parsed.ai_engine_insights) {
-        const section = document.createElement('div');
-        section.innerHTML = '<h3 class="section-title">AI Engine Insights</h3><ul></ul>';
-        const ul = section.querySelector('ul');
-        
-        Object.entries(parsed.ai_engine_insights).forEach(([engine, insight]) => {
-          const li = document.createElement("li");
-          li.innerHTML = `<span class="insights-marker"></span><strong>${engine}:</strong> ${insight}`;
-          ul.appendChild(li);
-        });
-        
-        document.getElementById("summary-results").appendChild(section);
-      }
-    }
   } catch (err) {
     console.error("Error:", err);
     document.getElementById("summary-results").innerHTML = 
-      "<p style='color:red; text-align:center;'>Failed to load analysis</p>";
+      "<p style='color:red; text-align:center;'>Error loading analysis</p>";
   }
 });
 
@@ -426,8 +377,6 @@ document.getElementById("newAnalysisForm").addEventListener("submit", function (
   window.location.href = `test.html?url=${encodeURIComponent(url)}`;
 });
 </script>
-
-
   
 </body>
 </html>

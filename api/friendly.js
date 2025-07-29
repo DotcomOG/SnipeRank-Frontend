@@ -46,7 +46,7 @@ router.get('/friendly', async (req, res) => {
 
     const visibleText = extractVisibleText(htmlResponse.data);
 
-    const prompt = `You are an expert AI SEO consultant. Based on the website content below, return a strictly valid JSON report only — no explanations, no intro. Use this format:
+const prompt = `You are a world-class AI SEO consultant with deep expertise in how AI search engines analyze and rank content. Based on the website content below, return a strictly valid JSON report only — no explanations, no intro. Use this format:
 
 Content:
 """${visibleText.slice(0, 7000)}"""
@@ -54,10 +54,10 @@ Content:
 Output structure:
 {
   "ai_superpowers": [
-    { "title": "...", "explanation": "..." }
+    { "title": "...", "explanation": "..." } // 10 items
   ],
   "ai_opportunities": [
-    { "title": "...", "explanation": "..." }
+    { "title": "...", "explanation": "..." } // 20 items
   ],
   "ai_engine_insights": {
     "ChatGPT": "...",
@@ -68,11 +68,20 @@ Output structure:
   }
 }
 
-Important guidelines:
-- Each explanation must be at least two full lines of text when viewed on a desktop screen.
-- Do not use bullets.
-- Use natural, consultative tone.
-- Vary sentence structure.`;
+Critical requirements:
+- Provide exactly 10 ai_superpowers and exactly 20 ai_opportunities
+- Each explanation must be 3-5 full lines of rich, detailed analysis when viewed on a desktop screen
+- The final sentence of each explanation must specify the exact measurable outcome or competitive advantage the client will gain when this optimization is implemented
+- Use sophisticated, consultative language that demonstrates deep AI SEO expertise
+- Vary sentence structure, opening phrases, and analytical approaches across all explanations
+- Never repeat similar phrasing, concepts, or recommendation patterns
+- Focus on actionable, specific insights rather than generic advice
+- Reference current AI search behavior patterns and ranking factors
+- Include technical depth while remaining accessible to business stakeholders
+- Each title should be compelling and specific, avoiding generic phrases
+- Prioritize insights that differentiate from traditional SEO approaches
+- Address how each factor specifically impacts AI model understanding and content retrieval
+- For engine insights, provide platform-specific optimization strategies that leverage each AI's unique characteristics`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',

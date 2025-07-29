@@ -1,4 +1,4 @@
-// 📄 api/friendly.js — Unified structure for test.html (Aug 2025)
+// 📄 api/friendly.js — Fixed version July 29
 
 import express from 'express';
 import OpenAI from 'openai';
@@ -70,9 +70,9 @@ Output structure:
 
 Important guidelines:
 - Each explanation must be at least two full lines of text when viewed on a desktop screen.
+- Do not use bullets.
 - Use natural, consultative tone.
-- No bullets. No markdown. Just raw JSON only.
-`;
+- Vary sentence structure.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -82,32 +82,20 @@ Important guidelines:
 
     const raw = completion.choices?.[0]?.message?.content;
     if (!raw) {
-      console.error('❌ No content returned from OpenAI');
+      console.error('❌ No content returned from OpenAI.');
       return res.status(502).json({ error: 'No content returned from OpenAI.' });
     }
 
     const parsed = cleanResponse(raw);
     if (!parsed) {
-      console.error('❌ Failed to parse OpenAI JSON:', raw.slice(0, 500));
+      console.error('❌ Failed to parse JSON from OpenAI:', raw);
       return res.status(500).json({ error: 'Invalid JSON format from OpenAI.', raw });
     }
 
-    // Flatten the data structure for test.html
-    const score = Math.floor(Math.random() * 20) + 80; // simulate real score
-    const superpowers = parsed.ai_superpowers.map(item => `${item.title}: ${item.explanation}`);
-    const opportunities = parsed.ai_opportunities.map(item => `${item.title}: ${item.explanation}`);
-    const insights = Object.entries(parsed.ai_engine_insights).map(([key, val]) => `${key}: ${val}`);
-
-    return res.json({
-      url,
-      score,
-      superpowers,
-      opportunities,
-      insights
-    });
+    res.json({ raw, parsed });
   } catch (err) {
-    console.error('❌ Friendly API failed:', err.message);
-    return res.status(500).json({ error: 'Friendly API failed', message: err.message });
+    console.error('❌ Analysis error:', err.message);
+    res.status(500).json({ error: 'Analysis failed. Try again.', message: err.message });
   }
 });
 

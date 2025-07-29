@@ -81,7 +81,6 @@
       margin: 3rem 0 1.5rem 0;
       color: #000;
       letter-spacing: -0.5px;
-      border-bottom: 3px solid #E53E3E;
       padding-bottom: 0.75rem;
       position: relative;
     }
@@ -177,7 +176,7 @@
       text-align: center;
       margin: 2rem 0;
       padding: 1rem;
-      border-top: 1px solid #ddd;
+      
       width: 100%;
     }
 
@@ -199,7 +198,7 @@
       width: 100%;
       margin-top: 3rem;
       padding-top: 2rem;
-      border-top: 3px solid #E53E3E;
+      
       text-align: center;
     }
 
@@ -319,13 +318,15 @@
     <p style="text-align: center; color: gray;">Loading analysis...</p>
   </section>
 
-  <section class="new-analysis-section">
-    <h3>Analyze Another Website</h3>
-    <form id="newAnalysisForm" class="new-analysis-form">
-      <input type="text" id="newUrl" placeholder="Enter another URL..." required />
-      <button type="submit">Analyze</button>
-    </form>
-  </section>
+<!--
+<section class="new-analysis-section">
+  <h3>Analyze Another Website</h3>
+  <form id="newAnalysisForm" class="new-analysis-form">
+    <input type="text" id="newUrl" placeholder="Enter another URL..." required />
+    <button type="submit">Analyze</button>
+  </form>
+</section>
+-->
 
   <section class="consultation-section">
     <h3>Ready to Improve Your AI Visibility?</h3>
@@ -368,6 +369,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+/*
 // Handle new analysis form
 document.getElementById("newAnalysisForm").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -376,6 +378,9 @@ document.getElementById("newAnalysisForm").addEventListener("submit", function (
   if (!/^https?:\/\//i.test(url)) url = "https://" + url;
   window.location.href = `test.html?url=${encodeURIComponent(url)}`;
 });
+*/
+
+  
 </script>
   
 </body>

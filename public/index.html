@@ -61,20 +61,18 @@
       background: transparent;
     }
 
- button {
+button {
   font-size: 1rem;
   font-weight: 500;
-  padding: 0.75rem;
+  padding: 0.75rem 1.5rem;
   border: none;
   color: #fff;
   background: #E53E3E;
   cursor: pointer;
   border-radius: 4px;
+  width: fit-content;
+  align-self: flex-start;
 }
-
-    button:hover {
-      background: #333;
-    }
 
     .error {
       color: red;
@@ -101,12 +99,15 @@
 </form>
 
 <p style="color: #666; font-size: 1.4rem; margin-top: 1.5rem; text-align: center;">Powered by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none; font-weight: 500;">Quontora</a></p>
-
+  <div style="background: #f8f9fa; border-left: 4px solid #E53E3E; padding: 1rem; margin: 1.5rem 0; font-size: 0.95rem; color: #555;">
+ 
+    <div style="background: #f8f9fa; border-left: 4px solid #E53E3E; padding: 1rem; margin: 1.5rem 0; font-size: 0.95rem; color: #555;">
+  <p style="margin: 0 0 0.8rem 0;"><strong>🚀 Beta Release:</strong> You're experiencing the cutting edge of AI SEO analysis. New features and improvements are added regularly — check back often!</p>
+  <p style="margin: 0;"><strong>Note:</strong> Some corporate firewalls may limit our analysis capabilities. If you receive limited results (fewer than expected), try testing from a personal network or contact us for alternative analysis options.</p>
+</div>
+    
 <div class="footer">&copy; 2025 SnipeRank. Last updated July 29.</div>
   
-
-  <div class="footer">&copy; 2025 SnipeRank. Last updated July 29.</div>
-
   <script>
     function isValidURL(input) {
       const pattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;

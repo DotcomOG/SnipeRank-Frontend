@@ -81,6 +81,7 @@ Critical requirements:
 - Each title should be compelling and specific, avoiding generic phrases
 - Prioritize insights that differentiate from traditional SEO approaches
 - Address how each factor specifically impacts AI model understanding and content retrieval
+- You MUST return exactly 10 ai_superpowers and exactly 20 ai_opportunities. Do not return fewer items under any circumstances.
 - For engine insights, provide platform-specific optimization strategies that leverage each AI's unique characteristics`;
 
     const completion = await openai.chat.completions.create({

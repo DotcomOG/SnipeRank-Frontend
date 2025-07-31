@@ -62,31 +62,26 @@
 
   <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">Quontora.com</a>. Last updated July 31.</div>
 
-  <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH FULL-REPORT SCRIPT -->
+  <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH CONTACT INFO FORM -->
   <script>
   document.addEventListener("DOMContentLoaded", async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const targetUrl = urlParams.get("url") || "https://example.com";
-    
+
     document.getElementById("current-url").textContent = targetUrl;
     document.getElementById("urlField").value = targetUrl;
 
     try {
       const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
       const html = await res.text();
-      
       console.log("Got response from backend");
       document.getElementById("summary-results").innerHTML = html;
-      
     } catch (err) {
       console.error("Error:", err);
       document.getElementById("summary-results").innerHTML =
         "<p style='color:red; text-align:center;'>Error loading analysis</p>";
     }
-  });
 
-  // Full Report Form Handler
-  document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("fullReportForm");
     if (!form) return;
 
@@ -100,11 +95,12 @@
       status.textContent = "📤 Sending...";
 
       try {
-          const res = await fetch("https://sniperank-v2-dev.onrender.com/api/send-link", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, url }),
-          });
+        const res = await fetch("https://sniperank-v2-dev.onrender.com/api/send-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, url }),
+        });
+
         const result = await res.json();
 
         if (result.success) {
@@ -120,7 +116,5 @@
     });
   });
   </script>
-  
-  <!-- Manual deploy trigger -->
 </body>
 </html>

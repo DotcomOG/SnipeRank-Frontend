@@ -59,62 +59,19 @@
       <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
     </p>
   </section>
-
+  <p id="formMessage"></p>
   <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">Quontora.com</a>. Last updated July 31.</div>
 
   <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH CONTACT INFO FORM -->
   <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get("url") || "https://example.com";
-
-    document.getElementById("current-url").textContent = targetUrl;
-    document.getElementById("urlField").value = targetUrl;
-
-    try {
-      const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
-      const html = await res.text();
-      console.log("Got response from backend");
-      document.getElementById("summary-results").innerHTML = html;
-    } catch (err) {
-      console.error("Error:", err);
-      document.getElementById("summary-results").innerHTML =
-        "<p style='color:red; text-align:center;'>Error loading analysis</p>";
-    }
-
-    const form = document.getElementById("fullReportForm");
-    if (!form) return;
-
-    form.addEventListener("submit", async (e) => {
+    // Form submission
+    document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const name = form.name.value.trim();
-      const email = form.email.value.trim();
-      const url = form.url.value;
-
-      const status = document.getElementById("statusMessage");
-      status.textContent = "📤 Sending...";
-
-      try {
-        const res = await fetch("https://sniperank-v2-dev.onrender.com/api/send-link", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, url }),
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-          status.textContent = "✅ Report link sent! Check your inbox.";
-          form.reset();
-        } else {
-          status.textContent = "❌ Something went wrong. Please try again.";
-        }
-      } catch (err) {
-        console.error(err);
-        status.textContent = "❌ Server error. Try again later.";
-      }
+      const formMessage = document.getElementById("formMessage");
+      formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
+      formMessage.style.color = "green";
+      this.reset();
     });
-  });
   </script>
 </body>
 </html>

@@ -1,0 +1,24 @@
+body {
+  font-family: Helvetica, sans-serif;
+  max-width: 760px;
+  margin: auto;
+  padding: 2rem;
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}

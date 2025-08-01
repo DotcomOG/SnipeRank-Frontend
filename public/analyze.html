@@ -31,17 +31,15 @@
   <!-- Full Report Request Form -->
   <section class="consultation-section">
     <h3>Get Your Full Report</h3>
-    <form id="fullReportForm" class="new-analysis-form">
-        <input type="hidden" name="url" id="urlField" />
-      
+    <form id="fullReportForm" class="new-analysis-form" style="flex-direction: column; gap: 1rem; max-width: 500px; margin: auto;">
       <input type="text" name="name" placeholder="Your Name" required />
       <input type="email" name="email" placeholder="Your Email" required />
+      <input type="text" name="phone" placeholder="Your Phone (optional)" />
+      <input type="text" name="company" placeholder="Your Company (optional)" />
+      <textarea name="message" placeholder="Tell us what you’re looking to improve…" rows="3"></textarea>
 
-      <div class="form-button-wrapper">
-        <button type="submit">Email Me My Full Report</button>
-      </div>
-
-      <p id="statusMessage" style="text-align:center; font-size:0.95rem; color:gray;"></p>
+      <button type="submit">Get My Full Report</button>
+      <p id="formMessage" style="text-align: center;"></p>
     </form>
   </section>
 
@@ -64,15 +62,13 @@
 
   <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH CONTACT INFO FORM -->
   <script>
-    // Form submission
     document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const formMessage = document.getElementById("formMessage");
-      formMessage.innerHTML = "Thanks! We'll email your full report within 24 hours.";
+      formMessage.textContent = "✅ Thanks! Your request has been received. We’ll email your full report within 24 hours.";
       formMessage.style.color = "green";
       this.reset();
     });
   </script>
 </body>
 </html>
-<!-- deploy trigger -->

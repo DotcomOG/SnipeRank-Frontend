@@ -1,22 +1,313 @@
+
 <!--
-  Version: 1.9.2
-  Last Updated: August 1, 2025
-  Changes: form 2
+Updated index with test
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="styles.css" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SnipeRank — AI SEO Analysis Results</title>
   <style>
+    :root {
+      --max-width: 760px;
+      --pad-v: 3vh;
+      --pad-h: 2rem;
+    }
+
+    body {
+      font-family: Helvetica, sans-serif;
+      background: #fff;
+      color: #000;
+      margin: 0;
+      padding: var(--pad-v) var(--pad-h);
+      max-width: var(--max-width);
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 0 0 0.25em 0;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin: 0 0 2rem 0;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin: 2rem 0 1rem 0;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+
+    #analyzed-url {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #666;
+    }
+
+    #current-url {
+      color: #000;
+      font-weight: 500;
+    }
+
+    #summary-results {
+      width: 100%;
+      margin: 2rem 0;
+      padding: 0;
+      background: none;
+      border: none;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 3rem 0 1.5rem 0;
+      color: #000;
+      letter-spacing: -0.5px;
+      padding-bottom: 0.75rem;
+      position: relative;
+    }
+/*
+    .section-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: -0.5rem;
+      width: 4rem;
+      height: 3px;
+      background: linear-gradient(90deg, #3182CE 0%, #E53E3E 50%, #F56500 100%);
+    }
+*/
+    /* Paul Rand inspired design elements */
+    .insights-marker {
+      display: inline-block;
+      width: 4px;
+      height: 1.2rem;
+      background: linear-gradient(45deg, #3182CE 0%, #2B6CB0 100%);
+      margin-right: 0.75rem;
+      vertical-align: text-top;
+      margin-top: 0.1rem;
+      border-radius: 2px;
+    }
+
+    .opportunity-marker {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-left: 8px solid #E53E3E;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      margin-right: 0.75rem;
+      margin-top: 0.3rem;
+      vertical-align: text-top;
+    }
+
+    .strength-marker {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(45deg, #38A169 0%, #2F855A 100%);
+      border-radius: 50%;
+      margin-right: 0.75rem;
+      margin-top: 0.35rem;
+      vertical-align: text-top;
+      box-shadow: 0 1px 3px rgba(56, 161, 105, 0.3);
+    }
+
+    /* Additional Paul Rand color accents */
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 0 0 0.25em 0;
+      line-height: 1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #000 0%, #3182CE 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .form-button-wrapper button {
+      background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
+      transition: all 0.3s ease;
+    }
+
+    .form-button-wrapper button:hover {
+      background: linear-gradient(135deg, #C53030 0%, #9C2A2A 100%);
+      transform: translateY(-1px);
+    }
+
+    ul {
+      margin: 0 0 2rem 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    li {
+      margin-bottom: 1.5rem;
+      line-height: 1.75;
+      padding-left: 0;
+      font-size: 1.1rem;
+    }
+
+    li strong {
+      font-weight: 600;
+      color: #000;
+    }
+
+    .new-analysis-section {
+      text-align: center;
+      margin: 2rem 0;
+      padding: 1rem;
+      
+      width: 100%;
+    }
+
+    .new-analysis-form {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .new-analysis-form input {
+      flex: 1;
+      max-width: 400px;
+      min-width: 250px;
+    }
+
+    .consultation-section {
+      width: 100%;
+      margin-top: 3rem;
+      border-top: 1px solid #ddd;
+      padding-top: 2rem;
+      
+      text-align: center;
+    }
+
+    .consultation-cta {
+      margin: 2rem 0;
+    }
+
+    .schedule-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
+      color: white;
+      padding: 1rem 2rem;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+    }
+
+    .schedule-button:hover {
+      background: linear-gradient(135deg, #C53030 0%, #9C2A2A 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+    }
+
+    .consultation-note {
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+      color: #666;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    input, textarea {
+      font-size: 1.05rem;
+      padding: 0.8rem 1rem;
+      border: 1px solid #000;
+      width: 100%;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    button {
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      color: #fff;
+      background: #000;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    .form-button-wrapper {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    #formMessage {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+
+    .footer {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 3rem;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Logo styling for enhanced content */
+    .engine-logo {
+      width: 18px;
+      height: 18px;
+      margin-right: 0.5rem;
+      vertical-align: text-top;
+      display: inline-block;
+    }
+
+    @media (max-width: 600px) {
+      .new-analysis-form {
+        flex-direction: column;
+      }
+      
+      .new-analysis-form input {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>SnipeRank</h1>
   <h2>AI SEO Analysis Results</h2>
-  <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Powered by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none; font-weight: 500;">quontora</a></p>
+  <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Powered by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none; font-weight: 500;">Quontora</a></p>
 
   <div id="analyzed-url" style="margin-bottom: 0.5rem;">
     <p style="margin: 0; font-size: 1rem;">Analysis for: <strong id="current-url"></strong></p>
@@ -27,19 +318,15 @@
     <p style="text-align: center; color: gray;">Loading analysis...</p>
   </section>
 
-  <!-- Full Report Request Form -->
-  <section class="consultation-section">
-    <h3>Get Your Full Report</h3>
-    <form id="fullReportForm" class="new-analysis-form" style="flex-direction: column; gap: 1rem; max-width: 500px; margin: auto;">
-      <input type="text" name="name" id="name" placeholder="Your Name" autocomplete="name" />
-<input type="email" name="email" id="email" placeholder="Your Email" autocomplete="email" required />
-<input type="tel" name="phone" id="phone" placeholder="Your Phone (optional)" autocomplete="tel" />
-<input type="text" name="company" id="company" placeholder="Your Company (optional)" autocomplete="organization" />  <textarea name="message" placeholder="Tell us what you’re looking to improve…" rows="3"></textarea>
-
-      <button type="submit">Get My Full Report</button>
-      <p id="formMessage" style="text-align: center;"></p>
-    </form>
-  </section>
+<!--
+<section class="new-analysis-section">
+  <h3>Analyze Another Website</h3>
+  <form id="newAnalysisForm" class="new-analysis-form">
+    <input type="text" id="newUrl" placeholder="Enter another URL..." required />
+    <button type="submit">Analyze</button>
+  </form>
+</section>
+-->
 
   <section class="consultation-section">
     <h3>Ready to Improve Your AI Visibility?</h3>
@@ -47,27 +334,54 @@
     
     <div class="consultation-cta">
       <a href="https://calendly.com/quontora" id="scheduleBtn" class="schedule-button" target="_blank">
-        Schedule Free Consultation
-      </a>
+  Schedule Free Consultation
+</a>
     </div>
     
     <p class="consultation-note">
       <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
     </p>
   </section>
-  <p id="formMessage"></p>
-  <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">quontora.com</a>. Last updated July 31.</div>
 
-  <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH CONTACT INFO FORM -->
-  <script>
-    document.getElementById("fullReportForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const formMessage = document.getElementById("formMessage");
-      formMessage.textContent = "✅ Thanks! Your request has been received. We’ll email your full report within 24 hours.";
-      formMessage.style.color = "green";
-      this.reset();
-    });
-  </script>
-  <!-- deploy confirmation: form fix -->
+  <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">Quontora.com</a>. Last updated July 29.</div>
+
+  <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH FULL-REPORT SCRIPT -->
+  
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetUrl = urlParams.get("url") || "https://example.com";
+  
+  document.getElementById("current-url").textContent = targetUrl;
+  
+  try {
+    // Use your working backend
+    const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
+    const html = await res.text();
+    
+    console.log("Got response from backend");
+    document.getElementById("summary-results").innerHTML = html;
+    
+  } catch (err) {
+    console.error("Error:", err);
+    document.getElementById("summary-results").innerHTML =
+      "<p style='color:red; text-align:center;'>Error loading analysis</p>";
+  }
+});
+
+/*
+// Handle new analysis form
+document.getElementById("newAnalysisForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  let url = document.getElementById("newUrl").value.trim();
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  window.location.href = `test.html?url=${encodeURIComponent(url)}`;
+});
+*/
+
+  
+</script>
+  
 </body>
 </html>

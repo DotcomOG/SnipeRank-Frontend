@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   try {
     // Use your working backend
-    const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
+    const res = await fetch(`https://sniperank-v2-dev.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
     const html = await res.text();
     
     console.log("Got response from backend");

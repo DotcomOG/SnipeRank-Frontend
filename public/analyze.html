@@ -422,9 +422,11 @@
 
               const result = await res.json();
               if (result.success) {
-                status.textContent = "✅ Report link sent! Check your inbox.";
-                form.reset();
-              } else {
+                const reportUrl = `https://snipe-rank-frontend.vercel.app/full-report.html?url=${encodeURIComponent(payload.url)}`;
+                window.location.href = reportUrl;
+              }
+              
+              else {
                 status.textContent = "❌ Something went wrong. Please try again.";
               }
             } catch (err) {

@@ -377,48 +377,64 @@
     <!-- ALL CONTENT BELOW IS SCRIPT UPDATED WITH FULL-REPORT SCRIPT -->
     
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("fullReportForm");
-            const urlParam = new URLSearchParams(window.location.search).get("url");
-            if (form && urlParam) {
-                document.getElementById("urlField").value = urlParam;
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Load dynamic AI analysis results
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get("url") || "https://example.com";
+
+        document.getElementById("current-url").textContent = targetUrl;
+
+        try {
+          const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
+          const html = await res.text();
+          document.getElementById("summary-results").innerHTML = html;
+        } catch (err) {
+          console.error("Error loading analysis:", err);
+          document.getElementById("summary-results").innerHTML =
+            "<p style='color:red; text-align:center;'>Error loading analysis</p>";
+        }
+
+        // Full Report form handling
+        const form = document.getElementById("fullReportForm");
+        if (form && targetUrl) {
+          document.getElementById("urlField").value = targetUrl;
+
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const status = document.getElementById("formMessage");
+            status.textContent = "📤 Sending...";
+
+            const payload = {
+              name: form.name.value,
+              email: form.email.value,
+              phone: form.phone.value,
+              company: form.company.value,
+              message: form.message.value,
+              url: form.url.value,
+            };
+
+            try {
+              const res = await fetch("https://sniperank-v2-dev.onrender.com/api/send-link", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+
+              const result = await res.json();
+              if (result.success) {
+                status.textContent = "✅ Report link sent! Check your inbox.";
+                form.reset();
+              } else {
+                status.textContent = "❌ Something went wrong. Please try again.";
+              }
+            } catch (err) {
+              console.error(err);
+              status.textContent = "❌ Server error. Try again later.";
             }
-            
-            form?.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                
-                const status = document.getElementById("formMessage");
-                status.textContent = "📤 Sending...";
-                
-                const payload = {
-                    name: form.name.value,
-                    email: form.email.value,
-                    phone: form.phone.value,
-                    company: form.company.value,
-                    message: form.message.value,
-                    url: form.url.value,
-                };
-                
-                try {
-                    const res = await fetch("https://sniperank-v2-dev.onrender.com/api/send-link", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload),
-                    });
-                    
-                    const result = await res.json();
-                    if (result.success) {
-                        status.textContent = "✅ Report link sent! Check your inbox.";
-                        form.reset();
-                    } else {
-                        status.textContent = "❌ Something went wrong. Please try again.";
-                    }
-                } catch (err) {
-                    console.error(err);
-                    status.textContent = "❌ Server error. Try again later.";
-                }
-            });
-        });
+          });
+        }
+      });
     </script>
     
     /*

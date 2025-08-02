@@ -331,27 +331,30 @@
     -->
     
     <section class="consultation-section">
-        <h3>Get Your Full Report</h3>
+      <h3>Get Your Full Report</h3>
+      <form id="fullReportForm">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <input type="text" name="name" placeholder="Your Name*" required />
-            <input type="email" name="email" placeholder="Your Email*" required />
-            <input type="tel" name="phone" placeholder="Phone (optional)" />
-            <input type="text" name="company" placeholder="Company (optional)" />
+          <input type="text" name="name" placeholder="Your Name" required autocomplete="name" />
+          <input type="email" name="email" placeholder="Your Email" required autocomplete="email" />
+          <input type="tel" name="phone" placeholder="Your Phone (optional)" autocomplete="tel" />
+          <input type="text" name="company" placeholder="Your Company (optional)" autocomplete="organization" />
         </div>
-        
+
         <textarea
-            name="message"
-            placeholder="Share context or ask a specific question — we’ll address at your free consult."
-            rows="3"
-            style="width: 100%; margin-top: 1rem;"
-            ></textarea>
-        
+          name="message"
+          placeholder="Share context or ask a specific question — we’ll address at your free consult."
+          rows="3"
+          style="width: 100%; margin-top: 1rem;"
+        ></textarea>
+
+        <input type="hidden" name="url" id="urlField" />
+
         <div class="form-button-wrapper">
-            <button type="submit">Email Me My Full Report</button>
+          <button type="submit">Email Me My Full Report</button>
         </div>
-        
+
         <p id="formMessage" style="text-align: center; font-size: 0.95rem; color: gray;"></p>
-        </form>
+      </form>
     </section>
     
     <section class="consultation-section">

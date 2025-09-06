@@ -1,133 +1,1173 @@
 <!DOCTYPE html>
+<!-- SnipeRank Index Page - Final Version with Correct URL Box Design -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnipeRank — AI SEO Analyzer</title>
-  <style>
-    :root {
-      --max-width: 760px;
-      --pad-v: 5vh;
-      --pad-h: 2rem;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnipeRank — AI-Powered SEO Intelligence Platform</title>
+    <style>
+        :root {
+            --max-width: 1200px;
+            --content-width: 760px;
+            --pad-v: 3vh;
+            --pad-h: 2rem;
+            --primary: #3182CE;
+            --primary-dark: #2563EB;
+            --accent: #E53E3E;
+            --accent-green: #10B981;
+            --accent-purple: #8B5CF6;
+            --accent-orange: #F59E0B;
+            --accent-red: #EF4444;
+            --text-dark: #000;
+            --text-medium: #4a5568;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --bg-light: #f7fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Helvetica, sans-serif;
+            background: #fff;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        /* Header - matching report page exactly */
+        header {
+            padding: var(--pad-v) var(--pad-h) 0;
+            max-width: var(--content-width);
+            margin: 0 auto;
+        }
+        
+        h1.logo {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 0 0 0.25em 0;
+            line-height: 1;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #000 0%, #3182CE 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        h2.tagline {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin: 0 0 0 0;
+            color: #000;
+        }
+        
+        .powered-by {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .powered-by a {
+            color: #3182CE;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Hero Section */
+        .hero {
+            max-width: var(--content-width);
+            margin: 0 auto;
+            padding: 2rem var(--pad-h) 3rem;
+        }
+        
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-medium);
+            line-height: 1.75;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-description p {
+            margin: 0;
+        }
 
-    body {
-      font-family: Helvetica, sans-serif;
-      background: #fff;
-      color: #000;
-      margin: 0;
-      padding: var(--pad-v) var(--pad-h);
-      max-width: var(--max-width);
-      margin-left: auto;
-      margin-right: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    h1 {
-      font-size: 4rem;
-      font-weight: 700;
-      margin: 0 0 0.25em 0;
-      line-height: 1;
-      letter-spacing: -1px;
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin: 0 0 2rem 0;
-    }
-
-    p.description {
-      font-size: 1.1rem;
-      line-height: 1.75;
-      margin-bottom: 3rem;
-      max-width: 600px;
-    }
-
-    form {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    input[type="text"] {
-      font-size: 1.05rem;
-      padding: 0.8rem 1rem;
-      border: 1px solid #000;
-      width: 100%;
-      background: transparent;
-    }
-
-button {
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  color: #fff;
-  background: #E53E3E;
-  cursor: pointer;
-  border-radius: 4px;
-  width: fit-content;
-  align-self: flex-start;
-}
-
-    .error {
-      color: red;
-      font-size: 0.95rem;
-    }
-
-    .footer {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 5rem;
-    }
-  </style>
+        /* PROMINENT URL INPUT FORM - NEW DESIGN */
+        .analyze-form {
+            background: linear-gradient(135deg, #3182CE 0%, #2563EB 100%);
+            border-radius: 16px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(49, 130, 206, 0.3);
+            position: relative;
+        }
+        
+        .form-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .url-input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .url-input {
+            flex: 1;
+            min-width: 0;
+            font-size: 1.15rem;
+            padding: 1rem 1.25rem;
+            border: none;
+            background: transparent;
+            outline: none;
+        }
+        
+        .url-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .analyze-btn {
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1rem 2.5rem;
+            border: none;
+            color: white;
+            background: linear-gradient(135deg, #E53E3E 0%, #DC2626 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+        }
+        
+        .error {
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: none;
+            text-align: center;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        /* Quick Summary */
+        .summary-box {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .summary-box h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .summary-icon {
+            font-size: 1.25rem;
+            margin-top: 0.1rem;
+        }
+        
+        .summary-text {
+            flex: 1;
+        }
+        
+        .summary-text strong {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+        
+        .summary-text span {
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            line-height: 1.4;
+        }
+        
+        .quick-links {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+        
+        .quick-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .quick-links a:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Beta Notice */
+        .beta-notice {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .beta-notice h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .beta-notice p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.95;
+            margin-bottom: 0.75rem;
+        }
+        
+        .beta-notice p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Main Content */
+        .content {
+            max-width: var(--content-width);
+            margin: 0 auto;
+            padding: 0 var(--pad-h);
+        }
+        
+        /* Sections */
+        .section {
+            margin-bottom: 4rem;
+        }
+        
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+        
+        .section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--text-dark);
+        }
+        
+        .section p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+        
+        .section ul {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+        
+        .section li {
+            margin-bottom: 0.75rem;
+            color: var(--text-medium);
+            line-height: 1.7;
+        }
+        
+        /* Services */
+        .service {
+            border-left: 3px solid var(--primary);
+            padding-left: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .service h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        
+        .service p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-medium);
+        }
+        
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
+            padding: 1.5rem;
+            border-left: 3px solid var(--primary);
+            background: var(--bg-light);
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .feature h4 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature p {
+            font-size: 0.95rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* Tech Stack Grid - FIXED to 3 columns */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .tech-card {
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .tech-card h4 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+        
+        .tech-card p {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+        
+        .tech-list {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        
+        /* Results Section */
+        .results {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .results h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Pricing Section - FIXED to 3 columns */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 2rem 0 3rem;
+        }
+        
+        .pricing-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(49, 130, 206, 0.15);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+        }
+        
+        .pricing-card .badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-dark);
+        }
+        
+        .pricing-subtitle {
+            font-size: 0.75rem;
+            color: #718096;
+            margin: 0 0 0.5rem 0;
+            font-weight: 400;
+        }
+        
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+        
+        .price-desc {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            text-align: left;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--text-medium);
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-pricing {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-pricing:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        /* Early Bird Section */
+        .early-bird-section {
+            background: linear-gradient(135deg, rgba(49, 130, 206, 0.1) 0%, rgba(229, 62, 62, 0.1) 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .early-bird-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .newsletter-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 500px;
+            margin: 1.5rem auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .newsletter-form input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .newsletter-form button {
+            padding: 0.75rem 2rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .newsletter-form button:hover {
+            background: #C53030;
+            transform: translateY(-2px);
+        }
+        
+        .disclaimer {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 1rem;
+        }
+        
+        /* Footer - SMALLER */
+        footer {
+            text-align: center;
+            padding: 1rem var(--pad-h);
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-light);
+        }
+        
+        .footer-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.7rem;
+        }
+        
+        .footer-content p {
+            margin: 0.15rem 0;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 1.5rem 1rem 0;
+            }
+            
+            h1.logo {
+                font-size: 3rem;
+            }
+            
+            h2.tagline {
+                font-size: 1.1rem;
+            }
+            
+            .hero {
+                padding: 1.5rem 1rem;
+            }
+            
+            .url-input-wrapper {
+                flex-direction: column;
+            }
+            
+            .url-input {
+                min-width: 100%;
+            }
+            
+            .analyze-btn {
+                width: 100%;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-links {
+                flex-wrap: wrap;
+                flex-direction: column;
+            }
+            
+            .quick-links a {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+            }
+            
+            .newsletter-form input {
+                min-width: 100%;
+            }
+            
+            .newsletter-form button {
+                width: 100%;
+            }
+            
+            .section {
+                padding: 0 1rem;
+            }
+            
+            .beta-notice {
+                padding: 1.5rem 1rem;
+            }
+            
+            .analyze-form {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<body>
-<h1>SnipeRank</h1>
-<h2>AI SEO Analyzer</h2>
-<p style="font-size: 1.1rem; color: #444; margin: 0.5rem 0 2rem 0; line-height: 1.6; font-weight: 400;">A new way to see your website — through the lens of machines. SnipeRank reveals how AI search engines interpret your content, ranking, and identity. Not just what's broken — what matters.</p>
+    <!-- Header -->
+    <header>
+        <h1 class="logo">SnipeRank</h1>
+        <h2 class="tagline">AI SEO Analysis Platform</h2>
+        <p class="powered-by">Powered by <a href="https://quontora.com" target="_blank">quontora</a></p>
+    </header>
 
-<form id="analyze-form">
-  <input type="text" id="url" name="url" placeholder="yourdomain.com" required />
-  <button type="submit">Analyze Site</button>
-  <div id="error-message" class="error"></div>
-</form>
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-description" style="margin-top: -2rem;">
+            <p>
+                See your website through the eyes of AI. SnipeRank reveals how artificial intelligence systems interpret, 
+                rank, and understand your content — providing actionable insights that traditional SEO tools miss.
+            </p>
+        </div>
 
-<p style="font-size: 1.3rem; margin-top: 1.5rem; text-align: center;">Powered by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none; font-weight: 500;">quontora</a></p>
-     <div style="padding: 1rem; margin: 1.5rem 0; font-size: 0.75rem;">
-  <p style="margin: 0 0 0.8rem 0;"><strong>🚀 Beta Release:</strong> You're experiencing the cutting edge of AI SEO analysis. New features and improvements are added regularly — check back often!</p>
-  <p style="margin: 0;"><strong>Note:</strong> Some corporate firewalls may limit our analysis capabilities. If you receive limited results (fewer than expected), try testing from a personal network or contact us for alternative analysis options.</p>
-</div>
-    
-<div class="footer">&copy; 2025 SnipeRank. Last updated July 30.</div>
-  
-  <script>
-    function isValidURL(input) {
-      const pattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
-      return pattern.test(input);
-    }
+        <!-- PROMINENT URL INPUT FORM - NEW DESIGN -->
+        <div class="analyze-form">
+            <div class="form-header">
+                <h2>🎯 Analyze Your Website Now</h2>
+                <p>Get instant AI visibility insights — FREE during beta</p>
+            </div>
+            <form id="analyze-form">
+                <div class="url-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="url" 
+                        name="url" 
+                        class="url-input"
+                        placeholder="Enter your website URL" 
+                        required 
+                        autocomplete="url"
+                    />
+                    <button type="submit" class="analyze-btn">Analyze Site →</button>
+                </div>
+                <div id="error-message" class="error"></div>
+            </form>
+        </div>
 
-    document.getElementById("analyze-form").addEventListener("submit", function (e) {
-      e.preventDefault();
-      let url = document.getElementById("url").value.trim();
-      const errorDiv = document.getElementById("error-message");
+        <!-- Quick Summary Box -->
+        <div class="summary-box">
+            <h3>🎯 What SnipeRank Does</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-icon">🤖</span>
+                    <div class="summary-text">
+                        <strong>AI Perception Analysis</strong>
+                        <span>Understand how AI models interpret your content</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">📊</span>
+                    <div class="summary-text">
+                        <strong>Semantic SEO Scoring</strong>
+                        <span>Beyond keywords — true content understanding</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">⚡</span>
+                    <div class="summary-text">
+                        <strong>Real-Time Intelligence</strong>
+                        <span>Live analysis with actionable recommendations</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">🔍</span>
+                    <div class="summary-text">
+                        <strong>Deep Content Analysis</strong>
+                        <span>Multi-layer evaluation of your entire site</span>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-links">
+                <a href="#how-it-works">Detailed Overview ↓</a>
+                <a href="#pricing">Pricing ↓</a>
+                <a href="#whitepaper">Technical Whitepaper ↓</a>
+                <a href="#technology">Architecture & Stack ↓</a>
+            </div>
+        </div>
 
-      if (!isValidURL(url)) {
-        errorDiv.textContent = "Enter a valid domain (e.g. yoursite.com)";
-        return;
-      }
+        <!-- Beta Notice -->
+        <div class="beta-notice">
+            <h3>🚀 Beta Release - You're on the Cutting Edge!</h3>
+            <p>
+                You're experiencing the future of SEO analysis. As a beta user, you have access to our latest 
+                features and improvements as they're released. We're continuously enhancing our algorithms and 
+                adding new capabilities based on user feedback.
+            </p>
+            <p>
+                <strong>Note:</strong> Some corporate firewalls may limit our crawling capabilities. If you receive 
+                limited results, try testing from a personal network for best results.
+            </p>
+        </div>
+    </div>
 
-      if (!/^https?:\/\//i.test(url)) {
-        url = "https://" + url;
-      }
+    <!-- Main Content -->
+    <div class="content">
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="section">
+            <h2>How SnipeRank Works</h2>
+            
+            <p>
+                SnipeRank employs advanced AI and machine learning models to provide a comprehensive analysis 
+                of your website's SEO performance. Unlike traditional SEO tools that rely on keyword density 
+                and basic metrics, SnipeRank understands content the way modern AI search engines do.
+            </p>
 
-      window.location.href = "analyze.html?url=" + encodeURIComponent(url);Xcode
-    });
-  </script>
+            <h3>The SnipeRank Process</h3>
+            
+            <div class="feature-grid">
+                <div class="feature">
+                    <h4>1. Intelligent Crawling</h4>
+                    <p>Our distributed crawler system navigates your site like a human would, understanding navigation patterns, 
+                    content hierarchy, and user flow while respecting robots.txt and rate limits.</p>
+                </div>
+                
+                <div class="feature">
+                    <h4>2. Content Extraction</h4>
+                    <p>Advanced NLP models extract and categorize content, identifying key themes, entities, 
+                    and semantic relationships across your entire site structure.</p>
+                </div>
+                
+                <div class="feature">
+                    <h4>3. AI Perception Modeling</h4>
+                    <p>We simulate how AI search engines interpret your content, measuring semantic coherence, 
+                    topical authority, and content quality through transformer-based models.</p>
+                </div>
+                
+                <div class="feature">
+                    <h4>4. Technical Analysis</h4>
+                    <p>Comprehensive evaluation of Core Web Vitals, mobile responsiveness, accessibility standards, 
+                    and technical SEO factors that impact AI crawlability.</p>
+                </div>
+                
+                <div class="feature">
+                    <h4>5. Competitive Intelligence</h4>
+                    <p>Benchmark your performance against industry leaders, identifying gaps and opportunities 
+                    in your content strategy and technical implementation.</p>
+                </div>
+                
+                <div class="feature">
+                    <h4>6. Expert Analysis & Consultation</h4>
+                    <p>Receive comprehensive reports with detailed findings that provide the foundation for 
+                    personalized consultation and strategic recommendations.</p>
+                </div>
+            </div>
+
+            <h3>Key Differentiators</h3>
+            <ul>
+                <li><strong>AI-First Approach:</strong> Built from the ground up to understand how AI systems perceive and rank content</li>
+                <li><strong>Semantic Understanding:</strong> Goes beyond keywords to understand context, intent, and topical relevance</li>
+                <li><strong>Real-Time Analysis:</strong> Live crawling and analysis provide up-to-the-minute insights</li>
+                <li><strong>Holistic Evaluation:</strong> Combines technical SEO, content quality, and user experience metrics</li>
+                <li><strong>Predictive Scoring:</strong> Machine learning models predict how changes will impact your rankings</li>
+            </ul>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section">
+            <h2>Pricing</h2>
+            <p style="text-align: center; color: var(--text-medium); margin-bottom: 2rem;">
+                <strong style="color: var(--primary);">🎉 Launch Week Special:</strong> SnipeRank is currently FREE while we perfect our scoring model. 
+                Lock in early-bird discounts for when paid plans launch!
+            </p>
+            
+            <div class="pricing-grid">
+                <!-- Free Plan -->
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <p class="pricing-subtitle">Launch Beta</p>
+                    <p class="price">$0</p>
+                    <p class="price-desc">Unlimited during launch</p>
+                    <ul class="feature-list">
+                        <li>✓ Core SnipeRank score</li>
+                        <li>✓ Key insights & opportunities</li>
+                        <li>✓ Shareable summary</li>
+                        <li>✓ Single page analysis</li>
+                        <li>✓ Limited support</li>
+                    </ul>
+                    <a href="/analyze.html" class="btn-pricing">Try Free Now</a>
+                </div>
+                
+                <!-- Starter Plan -->
+                <div class="pricing-card featured">
+                    <div class="badge">Coming Soon</div>
+                    <h3>Starter</h3>
+                    <p class="price">TBD</p>
+                    <p class="price-desc">For small sites & solo marketers</p>
+                    <ul class="feature-list">
+                        <li>✓ Full detailed reports</li>
+                        <li>✓ Up to 50 pages crawled</li>
+                        <li>✓ AI visibility insights</li>
+                        <li>✓ Step-by-step fixes</li>
+                        <li>✓ Email support</li>
+                    </ul>
+                    <a href="#newsletter" class="btn-pricing">Get Early Access</a>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="pricing-card">
+                    <h3>Pro</h3>
+                    <p class="pricing-subtitle">Agencies</p>
+                    <p class="price">TBD</p>
+                    <p class="price-desc">For agencies & consultants</p>
+                    <ul class="feature-list">
+                        <li>✓ Up to 300 pages crawled</li>
+                        <li>✓ Multiple projects</li>
+                        <li>✓ White-label reports</li>
+                        <li>✓ API access</li>
+                        <li>✓ Priority support</li>
+                    </ul>
+                    <a href="#newsletter" class="btn-pricing">Join Waitlist</a>
+                </div>
+            </div>
+            
+            <!-- Early Bird Signup -->
+            <div class="early-bird-section" id="newsletter">
+                <h3>🚀 Get Early-Bird Pricing</h3>
+                <p>Join the list for founding-member discounts when paid plans launch.</p>
+                <form class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
+                    <input type="email" placeholder="you@company.com" required>
+                    <button type="submit">Notify Me</button>
+                </form>
+                <p class="disclaimer">We'll only email about SnipeRank updates. Unsubscribe anytime.</p>
+            </div>
+        </section>
+
+        <!-- Whitepaper Section -->
+        <section id="whitepaper" class="section">
+            <h2>Technical Whitepaper</h2>
+            
+            <h3>Executive Summary</h3>
+            <p>
+                SnipeRank represents a paradigm shift in SEO analysis, moving from keyword-centric evaluation 
+                to semantic understanding powered by state-of-the-art natural language processing. This whitepaper 
+                outlines our technical architecture, methodologies, and the scientific principles underlying our approach.
+            </p>
+
+            <h3>The Challenge: SEO in the Age of AI</h3>
+            <p>
+                Traditional SEO tools were designed for keyword-matching algorithms. Today's search engines use 
+                transformer-based models (BERT, GPT, and their variants) to understand content semantically. 
+                This fundamental shift requires new analytical approaches that can model how these AI systems 
+                interpret and rank content.
+            </p>
+
+            <h3>Our Solution: Multi-Modal AI Analysis</h3>
+            <p>
+                SnipeRank employs a sophisticated ensemble of AI models to analyze websites across multiple dimensions:
+            </p>
+            
+            <ul>
+                <li><strong>Semantic Embeddings:</strong> We generate high-dimensional vector representations of your content 
+                using advanced embedding models, allowing us to measure semantic similarity and topical coherence.</li>
+                
+                <li><strong>Entity Recognition & Knowledge Graphs:</strong> Our NER systems identify and map relationships 
+                between entities, building a knowledge graph that represents your site's informational structure.</li>
+                
+                <li><strong>Transformer-Based Scoring:</strong> Custom-trained transformer models evaluate content quality, 
+                relevance, and authority using architectures similar to those employed by major search engines.</li>
+                
+                <li><strong>Behavioral Simulation:</strong> We simulate user interaction patterns to predict engagement 
+                metrics and identify UX issues that impact SEO performance.</li>
+            </ul>
+
+            <h3>Technical Architecture</h3>
+            <p>
+                Our platform is built on a microservices architecture designed for scalability and reliability:
+            </p>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>🕷️ Distributed Crawling Layer</h4>
+                    <p>Kubernetes-orchestrated crawler pods with intelligent rate limiting and retry mechanisms.</p>
+                    <div class="tech-list">Technologies: Go, Kubernetes, Redis, Kafka</div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>🧠 AI Processing Pipeline</h4>
+                    <p>GPU-accelerated inference servers running optimized transformer models.</p>
+                    <div class="tech-list">Technologies: Python, PyTorch, CUDA, TensorRT</div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>💾 Data Storage & Processing</h4>
+                    <p>Distributed data lake with real-time stream processing capabilities.</p>
+                    <div class="tech-list">Technologies: Apache Spark, Cassandra, PostgreSQL, S3</div>
+                </div>
+            </div>
+
+            <h3>Scoring Methodology</h3>
+            <p>
+                Our proprietary SnipeRank Score combines multiple weighted factors:
+            </p>
+            <ul>
+                <li>Semantic Coherence Score (25%): Measures topical consistency and relevance</li>
+                <li>Technical Excellence Score (20%): Evaluates site performance and crawlability</li>
+                <li>Content Authority Score (20%): Assesses expertise and trustworthiness signals</li>
+                <li>User Experience Score (20%): Analyzes engagement potential and accessibility</li>
+                <li>AI Readability Score (15%): Determines how well AI systems can parse and understand content</li>
+            </ul>
+
+            <h3>Privacy & Security</h3>
+            <p>
+                SnipeRank adheres to strict privacy standards. We never store sensitive data, all analysis 
+                is performed in memory, and results are encrypted at rest and in transit using AES-256 encryption.
+            </p>
+        </section>
+
+        <!-- Technology Stack Section -->
+        <section id="technology" class="section">
+            <h2>Technology Stack & Implementation</h2>
+            
+            <p>
+                Building SnipeRank required combining cutting-edge technologies across multiple domains. 
+                Our engineering team leveraged years of experience in distributed systems, machine learning, 
+                and web technologies to create a platform that operates at scale.
+            </p>
+
+            <h3>Core Technologies</h3>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>🔧 Backend Infrastructure</h4>
+                    <p>High-performance, distributed backend built for reliability and scale.</p>
+                    <div class="tech-list">
+                        <strong>Languages:</strong> Go, Python, Rust<br>
+                        <strong>Frameworks:</strong> FastAPI, Gin, Actix<br>
+                        <strong>Infrastructure:</strong> Docker, Kubernetes, Terraform
+                    </div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>🤖 Machine Learning Stack</h4>
+                    <p>State-of-the-art ML pipeline for real-time inference and training.</p>
+                    <div class="tech-list">
+                        <strong>Frameworks:</strong> PyTorch, Transformers, spaCy<br>
+                        <strong>Models:</strong> BERT, RoBERTa, Custom CNNs<br>
+                        <strong>Optimization:</strong> ONNX, TensorRT, Quantization
+                    </div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>📊 Data Processing</h4>
+                    <p>Distributed data processing for handling millions of pages.</p>
+                    <div class="tech-list">
+                        <strong>Streaming:</strong> Apache Kafka, Redis Streams<br>
+                        <strong>Batch:</strong> Apache Spark, Dask<br>
+                        <strong>Storage:</strong> PostgreSQL, Cassandra, S3
+                    </div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>🌐 Frontend & Visualization</h4>
+                    <p>Interactive, responsive interfaces for data visualization.</p>
+                    <div class="tech-list">
+                        <strong>Framework:</strong> React, Next.js<br>
+                        <strong>Visualization:</strong> D3.js, Chart.js<br>
+                        <strong>Styling:</strong> Tailwind CSS, Framer Motion
+                    </div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>🔒 Security & Monitoring</h4>
+                    <p>Enterprise-grade security and observability.</p>
+                    <div class="tech-list">
+                        <strong>Security:</strong> OAuth 2.0, JWT, Vault<br>
+                        <strong>Monitoring:</strong> Prometheus, Grafana<br>
+                        <strong>Logging:</strong> ELK Stack, Jaeger
+                    </div>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>☁️ Cloud & DevOps</h4>
+                    <p>Multi-cloud deployment with automated CI/CD.</p>
+                    <div class="tech-list">
+                        <strong>Providers:</strong> AWS, GCP, Cloudflare<br>
+                        <strong>CI/CD:</strong> GitHub Actions, ArgoCD<br>
+                        <strong>IaC:</strong> Terraform, Helm Charts
+                    </div>
+                </div>
+            </div>
+
+            <h3>Engineering Achievements</h3>
+            <ul>
+                <li><strong>Sub-second Inference:</strong> Optimized ML models deliver results in under 500ms</li>
+                <li><strong>Horizontal Scalability:</strong> Auto-scaling infrastructure handles 10,000+ concurrent analyses</li>
+                <li><strong>99.9% Uptime:</strong> Redundant systems and automatic failover ensure reliability</li>
+                <li><strong>Real-time Processing:</strong> Stream processing architecture enables live analysis</li>
+                <li><strong>Global CDN:</strong> Edge computing reduces latency for worldwide users</li>
+            </ul>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 SnipeRank. All rights reserved. Last updated <span id="update-date"></span>.</p>
+            <p>A product of <a href="https://quontora.com" target="_blank" style="color: var(--primary); text-decoration: none;">Quontora</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Set dynamic date in footer
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        const now = new Date();
+        const monthName = months[now.getMonth()];
+        const year = now.getFullYear();
+        document.getElementById('update-date').textContent = `${monthName} ${year}`;
+
+        function isValidURL(input) {
+            const pattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+            return pattern.test(input);
+        }
+
+        document.getElementById("analyze-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            const urlInput = document.getElementById("url");
+            let url = urlInput.value.trim();
+            const errorDiv = document.getElementById("error-message");
+            
+            // Reset error state
+            errorDiv.classList.remove('show');
+            
+            if (!isValidURL(url)) {
+                errorDiv.textContent = "Please enter a valid domain (e.g., example.com)";
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            // Add protocol if missing
+            if (!/^https?:\/\//i.test(url)) {
+                url = "https://" + url;
+            }
+            
+            // Redirect to analysis page
+            window.location.href = "analyze.html?url=" + encodeURIComponent(url);
+        });
+
+        // Newsletter form handler
+        function handleNewsletterSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const email = form.querySelector('input[type="email"]').value;
+            
+            // Here you would normally send to your backend
+            alert('Thanks for joining our early-bird list! We\'ll notify you when paid plans launch.');
+            form.reset();
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

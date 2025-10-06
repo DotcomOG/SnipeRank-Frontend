@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- SnipeRank Index Page - Final Version with Correct URL Box Design -->
+<!-- SnipeRank Index Page - Education-First Layout -->
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SnipeRank — AI-Powered SEO Intelligence Platform</title>
+    <title>SnipeRank — Is Your Website Ready for AI Powered Search?</title>
     <style>
         :root {
             --max-width: 1200px;
@@ -40,7 +40,44 @@
             line-height: 1.6;
         }
         
-        /* Header - matching report page exactly */
+        /* Stats Ticker - Repositioned */
+        .form-ticker {
+            background: white;
+            color: #333;
+            padding: 0.75rem 0;
+            overflow: hidden;
+            position: relative;
+            white-space: nowrap;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0;
+            margin: 2rem 0 0 0;
+        }
+        
+        .form-ticker-content {
+            display: inline-block;
+            animation: scroll-left 120s linear infinite;
+            white-space: nowrap;
+        }
+        
+        .form-ticker-item {
+            display: inline-block;
+            margin-right: 3rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .form-ticker-number {
+            color: #3182CE;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        @keyframes scroll-left {
+            0% { transform: translate3d(0%, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+        
+        /* Header */
         header {
             padding: var(--pad-v) var(--pad-h) 0;
             max-width: var(--content-width);
@@ -99,12 +136,12 @@
             margin: 0;
         }
 
-        /* PROMINENT URL INPUT FORM - NEW DESIGN */
+        /* PROMINENT URL INPUT FORM - SHORTER HEIGHT */
         .analyze-form {
             background: linear-gradient(135deg, #3182CE 0%, #2563EB 100%);
-            border-radius: 16px;
-            padding: 3rem;
-            margin: 2rem 0;
+            border-radius: 0 0 16px 16px;
+            padding: 2rem;
+            margin: 0 0 2rem 0;
             box-shadow: 0 20px 40px rgba(49, 130, 206, 0.3);
             position: relative;
         }
@@ -179,6 +216,138 @@
         
         .error.show {
             display: block;
+        }
+        
+        /* 5W's Educational Block */
+        .five-ws {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+        }
+        
+        .five-ws h3 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-dark);
+            text-align: center;
+        }
+        
+        .ws-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .w-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .w-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .w-content {
+            font-size: 1rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+        
+        .w-content strong {
+            color: var(--text-dark);
+        }
+        
+        .urgent {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+        
+        /* Proof/Stats Block - REMOVED */
+        
+        /* AI vs Traditional SEO Comparison */
+        .seo-comparison {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin: 3rem 0;
+            overflow: hidden;
+        }
+        
+        .comparison-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .comparison-header h3 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .comparison-side {
+            padding: 2rem;
+        }
+        
+        .comparison-side:first-child {
+            border-right: 1px solid var(--border);
+        }
+        
+        .comparison-side h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .comparison-side ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .comparison-side li {
+            padding: 0.5rem 0;
+            color: var(--text-medium);
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        .comparison-side li:before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .comparison-cta {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-light);
+        }
+        
+        .comparison-cta a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .comparison-cta a:hover {
+            text-decoration: underline;
         }
         
         /* Quick Summary */
@@ -280,6 +449,44 @@
             margin-bottom: 0;
         }
         
+        /* Final CTA Section */
+        .final-cta {
+            background: linear-gradient(135deg, #000 0%, #3182CE 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 4rem 0;
+            text-align: center;
+        }
+        
+        .final-cta h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .final-cta p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .final-cta .btn-final {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 3rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .final-cta .btn-final:hover {
+            background: #C53030;
+            transform: translateY(-2px);
+        }
+        
         /* Main Content */
         .content {
             max-width: var(--content-width);
@@ -372,7 +579,7 @@
             margin: 0;
         }
         
-        /* Tech Stack Grid - FIXED to 3 columns */
+        /* Tech Stack Grid */
         .tech-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -446,7 +653,7 @@
             letter-spacing: 0.5px;
         }
         
-        /* Pricing Section - FIXED to 3 columns */
+        /* Pricing Section */
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -601,7 +808,7 @@
             margin-top: 1rem;
         }
         
-        /* Footer - SMALLER */
+        /* Footer */
         footer {
             text-align: center;
             padding: 1rem var(--pad-h);
@@ -630,6 +837,15 @@
             
             .pricing-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-side:first-child {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
             }
         }
         
@@ -699,6 +915,15 @@
             .analyze-form {
                 padding: 2rem 1.5rem;
             }
+            
+            .ai-logos {
+                gap: 1rem;
+            }
+            
+            .ai-logo {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -706,7 +931,7 @@
     <!-- Header -->
     <header>
         <h1 class="logo">SnipeRank</h1>
-        <h2 class="tagline">AI SEO Analysis Platform</h2>
+        <h2 class="tagline">Is your website ready for AI powered search?</h2>
         <p class="powered-by">Powered by <a href="https://quontora.com" target="_blank">quontora</a></p>
     </header>
 
@@ -714,16 +939,36 @@
     <div class="hero">
         <div class="hero-description" style="margin-top: -2rem;">
             <p>
-                See your website through the eyes of AI. SnipeRank reveals how artificial intelligence systems interpret, 
-                rank, and understand your content — providing actionable insights that traditional SEO tools miss.
+                See how ChatGPT, Google AI, and other systems interpret your website — and get specific fixes to improve your visibility.
             </p>
         </div>
 
-        <!-- PROMINENT URL INPUT FORM - NEW DESIGN -->
+        <!-- Live LLM Stats Ticker -->
+        <div class="form-ticker">
+            <div class="form-ticker-content">
+                <span class="form-ticker-item">🔥 ChatGPT: <span class="form-ticker-number">800M</span> weekly users, <span class="form-ticker-number">69%</span> US market share</span>
+                <span class="form-ticker-item">🤖 Google Gemini: <span class="form-ticker-number">82M</span> monthly users, <span class="form-ticker-number">40%</span> US adoption</span>
+                <span class="form-ticker-item">💎 Claude AI: <span class="form-ticker-number">30M</span> monthly users, <span class="form-ticker-number">25B</span> API calls monthly</span>
+                <span class="form-ticker-item">🔍 Perplexity: <span class="form-ticker-number">110M</span> monthly visits, <span class="form-ticker-number">22M</span> active users</span>
+                <span class="form-ticker-item">⚡ <span class="form-ticker-number">1B+</span> LLM queries processed daily across all platforms</span>
+                <span class="form-ticker-item">📊 <span class="form-ticker-number">750M</span> apps will use LLMs by 2025</span>
+                <span class="form-ticker-item">💼 <span class="form-ticker-number">57%</span> of professionals use LLMs for productivity at work</span>
+                <span class="form-ticker-item">🏥 <span class="form-ticker-number">21%</span> of healthcare organizations use LLMs for patient care</span>
+                <span class="form-ticker-item">🏢 <span class="form-ticker-number">92%</span> of Fortune 500 companies now use AI/LLM tools</span>
+                <span class="form-ticker-item">🌍 <span class="form-ticker-number">190M</span> people use AI chatbots daily worldwide</span>
+                <span class="form-ticker-item">🚀 LLMs process <span class="form-ticker-number">2,206</span> queries every second globally</span>
+                <span class="form-ticker-item">🔥 ChatGPT: <span class="form-ticker-number">800M</span> weekly users, <span class="form-ticker-number">69%</span> US market share</span>
+                <span class="form-ticker-item">🤖 Google Gemini: <span class="form-ticker-number">82M</span> monthly users, <span class="form-ticker-number">40%</span> US adoption</span>
+                <span class="form-ticker-item">💎 Claude AI: <span class="form-ticker-number">30M</span> monthly users, <span class="form-ticker-number">25B</span> API calls monthly</span>
+                <span class="form-ticker-item">🔍 Perplexity: <span class="form-ticker-number">110M</span> monthly visits, <span class="form-ticker-number">22M</span> active users</span>
+            </div>
+        </div>
+
+        <!-- PROMINENT URL INPUT FORM -->
         <div class="analyze-form">
             <div class="form-header">
-                <h2>🎯 Analyze Your Website Now</h2>
-                <p>Get instant AI visibility insights — FREE during beta</p>
+                <h2>Run a Free Scan</h2>
+                <p>See what AI understands about your site in under 30 seconds</p>
             </div>
             <form id="analyze-form">
                 <div class="url-input-wrapper">
@@ -742,9 +987,74 @@
             </form>
         </div>
 
+        <!-- Key Information Block -->
+        <div class="five-ws">
+            <h3>Why This Matters Now</h3>
+            <div class="ws-content">
+                <p><strong>Who It's For:</strong> Business owners, marketers, web developers, and digital agencies who depend on online visibility and want to stay ahead of search trends.</p>
+                <br>
+                <p><strong>What It Does:</strong> An AI audit that shows how modern search systems read your website beyond just keywords.</p>
+                <br>
+                <p><strong>Why It Matters:</strong> AI now powers search results, recommendations, and answers. If AI can't understand your site, potential customers won't find you.</p>
+                <br>
+                <p><strong>Timing:</strong> <span class="urgent">Right now</span> as AI systems become the primary way people discover businesses and information online.</p>
+                <br>
+                <p><strong>How to Start:</strong> Begin with a free scan to see what AI understands about your site, and what it doesn't. <a href="#analyze-form">Run your scan →</a></p>
+            </div>
+        </div>
+
+        <!-- AI vs Traditional SEO Comparison -->
+        <div class="seo-comparison">
+            <div class="comparison-header">
+                <h3>AI SEO ≠ Traditional SEO</h3>
+            </div>
+            <div class="comparison-grid">
+                <div class="comparison-side">
+                    <h4>Traditional SEO:</h4>
+                    <ul>
+                        <li>Keywords and backlinks</li>
+                        <li>Optimized for Google crawlers</li>
+                        <li>Focused on ranking</li>
+                        <li>Keyword density matters</li>
+                        <li>Link building campaigns</li>
+                    </ul>
+                </div>
+                <div class="comparison-side">
+                    <h4>AI SEO:</h4>
+                    <ul>
+                        <li>Context and meaning</li>
+                        <li>Optimized for AI understanding</li>
+                        <li>Focused on visibility in AI answers</li>
+                        <li>Semantic relationships matter</li>
+                        <li>Content that AI can parse and recommend</li>
+                    </ul>
+                </div>
+                <div class="comparison-cta">
+                    <a href="#analyze-form">Get your AI SEO Score →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beta Notice -->
+        <div class="beta-notice">
+            <h3>Beta Release - You're on the Cutting Edge!</h3>
+            <p>
+                You're experiencing the future of SEO analysis. As a beta user, you have access to our latest 
+                features and improvements as they're released. We're continuously enhancing our algorithms and 
+                adding new capabilities based on user feedback.
+            </p>
+            <p>
+                <strong>Note:</strong> Some corporate firewalls may limit our crawling capabilities. If you receive 
+                limited results, try testing from a personal network for best results.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
         <!-- Quick Summary Box -->
         <div class="summary-box">
-            <h3>🎯 What SnipeRank Does</h3>
+            <h3>What SnipeRank Analyzes</h3>
             <div class="summary-grid">
                 <div class="summary-item">
                     <span class="summary-icon">🤖</span>
@@ -763,7 +1073,7 @@
                 <div class="summary-item">
                     <span class="summary-icon">⚡</span>
                     <div class="summary-text">
-                        <strong>Real-Time Intelligence</strong>
+                        <strong>Real Time Intelligence</strong>
                         <span>Live analysis with actionable recommendations</span>
                     </div>
                 </div>
@@ -771,7 +1081,7 @@
                     <span class="summary-icon">🔍</span>
                     <div class="summary-text">
                         <strong>Deep Content Analysis</strong>
-                        <span>Multi-layer evaluation of your entire site</span>
+                        <span>Multi layer evaluation of your entire site</span>
                     </div>
                 </div>
             </div>
@@ -783,23 +1093,6 @@
             </div>
         </div>
 
-        <!-- Beta Notice -->
-        <div class="beta-notice">
-            <h3>🚀 Beta Release - You're on the Cutting Edge!</h3>
-            <p>
-                You're experiencing the future of SEO analysis. As a beta user, you have access to our latest 
-                features and improvements as they're released. We're continuously enhancing our algorithms and 
-                adding new capabilities based on user feedback.
-            </p>
-            <p>
-                <strong>Note:</strong> Some corporate firewalls may limit our crawling capabilities. If you receive 
-                limited results, try testing from a personal network for best results.
-            </p>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="content">
         <!-- How It Works Section -->
         <section id="how-it-works" class="section">
             <h2>How SnipeRank Works</h2>
@@ -852,9 +1145,9 @@
 
             <h3>Key Differentiators</h3>
             <ul>
-                <li><strong>AI-First Approach:</strong> Built from the ground up to understand how AI systems perceive and rank content</li>
+                <li><strong>AI First Approach:</strong> Built from the ground up to understand how AI systems perceive and rank content</li>
                 <li><strong>Semantic Understanding:</strong> Goes beyond keywords to understand context, intent, and topical relevance</li>
-                <li><strong>Real-Time Analysis:</strong> Live crawling and analysis provide up-to-the-minute insights</li>
+                <li><strong>Real Time Analysis:</strong> Live crawling and analysis provide up to the minute insights</li>
                 <li><strong>Holistic Evaluation:</strong> Combines technical SEO, content quality, and user experience metrics</li>
                 <li><strong>Predictive Scoring:</strong> Machine learning models predict how changes will impact your rankings</li>
             </ul>
@@ -864,7 +1157,7 @@
         <section id="pricing" class="section">
             <h2>Pricing</h2>
             <p style="text-align: center; color: var(--text-medium); margin-bottom: 2rem;">
-                <strong style="color: var(--primary);">🎉 Launch Week Special:</strong> SnipeRank is currently FREE while we perfect our scoring model. 
+                <strong style="color: var(--primary);">Launch Week Special:</strong> SnipeRank is currently FREE while we perfect our scoring model. 
                 Lock in early-bird discounts for when paid plans launch!
             </p>
             
@@ -895,7 +1188,7 @@
                         <li>✓ Full detailed reports</li>
                         <li>✓ Up to 50 pages crawled</li>
                         <li>✓ AI visibility insights</li>
-                        <li>✓ Step-by-step fixes</li>
+                        <li>✓ Step by step fixes</li>
                         <li>✓ Email support</li>
                     </ul>
                     <a href="#newsletter" class="btn-pricing">Get Early Access</a>
@@ -910,7 +1203,7 @@
                     <ul class="feature-list">
                         <li>✓ Up to 300 pages crawled</li>
                         <li>✓ Multiple projects</li>
-                        <li>✓ White-label reports</li>
+                        <li>✓ White label reports</li>
                         <li>✓ API access</li>
                         <li>✓ Priority support</li>
                     </ul>
@@ -920,8 +1213,8 @@
             
             <!-- Early Bird Signup -->
             <div class="early-bird-section" id="newsletter">
-                <h3>🚀 Get Early-Bird Pricing</h3>
-                <p>Join the list for founding-member discounts when paid plans launch.</p>
+                <h3>Get Early Bird Pricing</h3>
+                <p>Join the list for founding member discounts when paid plans launch.</p>
                 <form class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
                     <input type="email" placeholder="you@company.com" required>
                     <button type="submit">Notify Me</button>
@@ -936,32 +1229,32 @@
             
             <h3>Executive Summary</h3>
             <p>
-                SnipeRank represents a paradigm shift in SEO analysis, moving from keyword-centric evaluation 
-                to semantic understanding powered by state-of-the-art natural language processing. This whitepaper 
+                SnipeRank represents a paradigm shift in SEO analysis, moving from keyword centric evaluation 
+                to semantic understanding powered by state of the art natural language processing. This whitepaper 
                 outlines our technical architecture, methodologies, and the scientific principles underlying our approach.
             </p>
 
             <h3>The Challenge: SEO in the Age of AI</h3>
             <p>
-                Traditional SEO tools were designed for keyword-matching algorithms. Today's search engines use 
-                transformer-based models (BERT, GPT, and their variants) to understand content semantically. 
+                Traditional SEO tools were designed for keyword matching algorithms. Today's search engines use 
+                transformer based models (BERT, GPT, and their variants) to understand content semantically. 
                 This fundamental shift requires new analytical approaches that can model how these AI systems 
                 interpret and rank content.
             </p>
 
-            <h3>Our Solution: Multi-Modal AI Analysis</h3>
+            <h3>Our Solution: Multi Modal AI Analysis</h3>
             <p>
                 SnipeRank employs a sophisticated ensemble of AI models to analyze websites across multiple dimensions:
             </p>
             
             <ul>
-                <li><strong>Semantic Embeddings:</strong> We generate high-dimensional vector representations of your content 
+                <li><strong>Semantic Embeddings:</strong> We generate high dimensional vector representations of your content 
                 using advanced embedding models, allowing us to measure semantic similarity and topical coherence.</li>
                 
                 <li><strong>Entity Recognition & Knowledge Graphs:</strong> Our NER systems identify and map relationships 
                 between entities, building a knowledge graph that represents your site's informational structure.</li>
                 
-                <li><strong>Transformer-Based Scoring:</strong> Custom-trained transformer models evaluate content quality, 
+                <li><strong>Transformer Based Scoring:</strong> Custom trained transformer models evaluate content quality, 
                 relevance, and authority using architectures similar to those employed by major search engines.</li>
                 
                 <li><strong>Behavioral Simulation:</strong> We simulate user interaction patterns to predict engagement 
@@ -975,20 +1268,20 @@
             
             <div class="tech-grid">
                 <div class="tech-card">
-                    <h4>🕷️ Distributed Crawling Layer</h4>
-                    <p>Kubernetes-orchestrated crawler pods with intelligent rate limiting and retry mechanisms.</p>
+                    <h4>Distributed Crawling Layer</h4>
+                    <p>Kubernetes orchestrated crawler pods with intelligent rate limiting and retry mechanisms.</p>
                     <div class="tech-list">Technologies: Go, Kubernetes, Redis, Kafka</div>
                 </div>
                 
                 <div class="tech-card">
-                    <h4>🧠 AI Processing Pipeline</h4>
-                    <p>GPU-accelerated inference servers running optimized transformer models.</p>
+                    <h4>AI Processing Pipeline</h4>
+                    <p>GPU accelerated inference servers running optimized transformer models.</p>
                     <div class="tech-list">Technologies: Python, PyTorch, CUDA, TensorRT</div>
                 </div>
                 
                 <div class="tech-card">
-                    <h4>💾 Data Storage & Processing</h4>
-                    <p>Distributed data lake with real-time stream processing capabilities.</p>
+                    <h4>Data Storage & Processing</h4>
+                    <p>Distributed data lake with real time stream processing capabilities.</p>
                     <div class="tech-list">Technologies: Apache Spark, Cassandra, PostgreSQL, S3</div>
                 </div>
             </div>
@@ -1026,7 +1319,7 @@
             
             <div class="tech-grid">
                 <div class="tech-card">
-                    <h4>🔧 Backend Infrastructure</h4>
+                    <h4>Backend Infrastructure</h4>
                     <p>High-performance, distributed backend built for reliability and scale.</p>
                     <div class="tech-list">
                         <strong>Languages:</strong> Go, Python, Rust<br>
@@ -1036,7 +1329,7 @@
                 </div>
                 
                 <div class="tech-card">
-                    <h4>🤖 Machine Learning Stack</h4>
+                    <h4>Machine Learning Stack</h4>
                     <p>State-of-the-art ML pipeline for real-time inference and training.</p>
                     <div class="tech-list">
                         <strong>Frameworks:</strong> PyTorch, Transformers, spaCy<br>
@@ -1046,7 +1339,7 @@
                 </div>
                 
                 <div class="tech-card">
-                    <h4>📊 Data Processing</h4>
+                    <h4>Data Processing</h4>
                     <p>Distributed data processing for handling millions of pages.</p>
                     <div class="tech-list">
                         <strong>Streaming:</strong> Apache Kafka, Redis Streams<br>
@@ -1056,7 +1349,7 @@
                 </div>
                 
                 <div class="tech-card">
-                    <h4>🌐 Frontend & Visualization</h4>
+                    <h4>Frontend & Visualization</h4>
                     <p>Interactive, responsive interfaces for data visualization.</p>
                     <div class="tech-list">
                         <strong>Framework:</strong> React, Next.js<br>
@@ -1066,7 +1359,7 @@
                 </div>
                 
                 <div class="tech-card">
-                    <h4>🔒 Security & Monitoring</h4>
+                    <h4>Security & Monitoring</h4>
                     <p>Enterprise-grade security and observability.</p>
                     <div class="tech-list">
                         <strong>Security:</strong> OAuth 2.0, JWT, Vault<br>
@@ -1076,7 +1369,7 @@
                 </div>
                 
                 <div class="tech-card">
-                    <h4>☁️ Cloud & DevOps</h4>
+                    <h4>Cloud & DevOps</h4>
                     <p>Multi-cloud deployment with automated CI/CD.</p>
                     <div class="tech-list">
                         <strong>Providers:</strong> AWS, GCP, Cloudflare<br>
@@ -1088,13 +1381,20 @@
 
             <h3>Engineering Achievements</h3>
             <ul>
-                <li><strong>Sub-second Inference:</strong> Optimized ML models deliver results in under 500ms</li>
-                <li><strong>Horizontal Scalability:</strong> Auto-scaling infrastructure handles 10,000+ concurrent analyses</li>
+                <li><strong>Sub second Inference:</strong> Optimized ML models deliver results in under 500ms</li>
+                <li><strong>Horizontal Scalability:</strong> Auto scaling infrastructure handles 10,000+ concurrent analyses</li>
                 <li><strong>99.9% Uptime:</strong> Redundant systems and automatic failover ensure reliability</li>
-                <li><strong>Real-time Processing:</strong> Stream processing architecture enables live analysis</li>
+                <li><strong>Real time Processing:</strong> Stream processing architecture enables live analysis</li>
                 <li><strong>Global CDN:</strong> Edge computing reduces latency for worldwide users</li>
             </ul>
         </section>
+
+        <!-- Final CTA Section -->
+        <div class="final-cta">
+            <h3>Be visible in the age of AI.</h3>
+            <p>Find out how AI systems see your website — and what you can do about it.</p>
+            <a href="#analyze-form" class="btn-final">Run Free Scan</a>
+        </div>
     </div>
 
     <!-- Footer -->

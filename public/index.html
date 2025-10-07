@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!-- 
+SnipeRank Homepage v2.1
+Last Updated: January 2025
+Changes: Education-first layout, LLM stats ticker, clear free vs paid distinction, per-search pricing model
+-->
 <!-- SnipeRank Index Page - Education-First Layout -->
 <html lang="en">
 <head>
@@ -218,56 +223,48 @@
             display: block;
         }
         
-        /* 5W's Educational Block */
+        /* Key Information Block - Single Box */
         .five-ws {
             background: var(--bg-light);
             border-radius: 12px;
-            padding: 2.5rem;
+            padding: 1.5rem;
             margin: 3rem 0;
         }
         
         .five-ws h3 {
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
             color: var(--text-dark);
             text-align: center;
         }
         
-        .ws-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
-        .w-item {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .w-label {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-        
-        .w-content {
-            font-size: 1rem;
+        .ws-content {
+            font-size: 0.95rem;
             color: var(--text-medium);
             line-height: 1.6;
         }
         
-        .w-content strong {
+        .ws-content p {
+            margin-bottom: 2rem;
+        }
+        
+        .ws-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .ws-content strong {
             color: var(--text-dark);
         }
         
-        .urgent {
+        .ws-content .urgent {
             color: var(--accent-red);
             font-weight: 600;
+        }
+        
+        .ws-content a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
         }
         
         /* Proof/Stats Block - REMOVED */
@@ -743,11 +740,6 @@
             padding: 0.5rem 0;
             color: var(--text-medium);
             font-size: 0.95rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .feature-list li:last-child {
-            border-bottom: none;
         }
         
         .btn-pricing {
@@ -983,7 +975,7 @@
         <div class="analyze-form">
             <div class="form-header">
                 <h2>Run a Free Scan</h2>
-                <p>See what AI understands about your site in under 30 seconds</p>
+                <p>Get your FREE basic SnipeRank score in under 30 seconds. Upgrade to detailed report ($15) for full analysis.</p>
             </div>
             <form id="analyze-form">
                 <div class="url-input-wrapper">
@@ -1171,27 +1163,30 @@
         <!-- Pricing Section -->
         <section id="pricing" class="section">
             <h2>Pricing</h2>
+            <p style="text-align: center; color: var(--text-medium); margin-bottom: 1rem;">
+                <strong style="color: var(--text-dark);">Free Basic Reports:</strong> Get your core SnipeRank score and key insights instantly<br>
+                <strong style="color: var(--text-dark);">Detailed Reports:</strong> Pay $15 for comprehensive analysis with step-by-step fixes
+            </p>
             <p style="text-align: center; color: var(--text-medium); margin-bottom: 2rem;">
-                <strong style="color: var(--primary);">Launch Special:</strong> Full SnipeRank reports are completely FREE during our launch phase. 
-                Get your complete AI visibility analysis at no cost!
+                <strong style="color: var(--primary);">Launch Special:</strong> Both basic and detailed reports are completely FREE during our launch phase!
             </p>
             
             <div class="pricing-grid">
                 <!-- Free Plan -->
                 <div class="pricing-card">
                     <div class="pricing-content">
-                        <h3>Free</h3>
-                        <p class="pricing-subtitle">Launch Beta</p>
+                        <h3>Basic Report Free</h3>
+                        <p class="pricing-subtitle">Always free</p>
                         <p class="price">$0</p>
-                        <p class="price-desc">Unlimited during launch</p>
+                        <p class="price-desc">Instant basic analysis</p>
                         <ul class="feature-list">
-                            <li>✓ Core SnipeRank score</li>
-                            <li>✓ Key insights & opportunities</li>
-                            <li>✓ Shareable summary</li>
-                            <li>✓ Single page analysis</li>
-                            <li>✓ Limited support</li>
+                            <li>Core SnipeRank score</li>
+                            <li>Key insights & opportunities</li>
+                            <li>Shareable summary</li>
+                            <li>Single page analysis</li>
+                            <li>Basic recommendations</li>
                         </ul>
-                        <a href="/analyze.html" class="btn-pricing">Try Free Now</a>
+                        <a href="#analyze-form" class="btn-pricing">Get Free Report</a>
                     </div>
                 </div>
                 
@@ -1199,19 +1194,19 @@
                 <div class="pricing-card featured">
                     <div class="badge">Free for Now</div>
                     <div class="pricing-content">
-                        <h3>Starter</h3>
-                        <p class="pricing-subtitle">Small sites & solo marketers</p>
+                        <h3>Detailed Report</h3>
+                        <p class="pricing-subtitle">Pay per analysis</p>
                         <p class="price">$15</p>
-                        <p class="price-desc">per search (free during launch)</p>
+                        <p class="price-desc">per report (free during launch)</p>
                         <ul class="feature-list">
-                            <li>✓ Full detailed reports</li>
-                            <li>✓ Up to 50 pages crawled</li>
-                            <li>✓ AI visibility insights</li>
-                            <li>✓ Step by step fixes</li>
-                            <li>✓ Email support</li>
-                            <li>✓ 10 searches per month included</li>
+                            <li>Everything in Free, plus:</li>
+                            <li>Full 50-page website crawl</li>
+                            <li>Step by step action plan</li>
+                            <li>Advanced AI visibility insights</li>
+                            <li>Priority email support</li>
+                            <li>Downloadable PDF report</li>
                         </ul>
-                        <a href="/analyze.html" class="btn-pricing">Get Free Report</a>
+                        <a href="#analyze-form" class="btn-pricing">Get Detailed Report</a>
                     </div>
                 </div>
                 
@@ -1223,14 +1218,14 @@
                         <p class="price">Contact Us</p>
                         <p class="price-desc">Custom pricing for volume</p>
                         <ul class="feature-list">
-                            <li>✓ Unlimited searches</li>
-                            <li>✓ Up to 300 pages crawled</li>
-                            <li>✓ Multiple projects</li>
-                            <li>✓ White label reports</li>
-                            <li>✓ API access</li>
-                            <li>✓ Priority support</li>
+                            <li>Unlimited searches</li>
+                            <li>Up to 300 pages crawled</li>
+                            <li>Multiple projects</li>
+                            <li>White label reports</li>
+                            <li>API access</li>
+                            <li>Priority support</li>
                         </ul>
-                        <a href="#newsletter" class="btn-pricing">Contact Sales</a>
+                        <a href="mailto:sales@quontora.com?subject=SnipeRank Pro Inquiry" class="btn-pricing">Contact Sales</a>
                     </div>
                 </div>
             </div>

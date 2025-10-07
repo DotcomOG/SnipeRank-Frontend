@@ -661,15 +661,18 @@
             margin: 2rem 0 3rem;
         }
         
-        .pricing-card {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            position: relative;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
+ .pricing-card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 0.3rem; /* reduced padding: ~5pt sides */
+    position: relative;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
         
         .pricing-card:hover {
             border-color: var(--primary);
@@ -692,6 +695,14 @@
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
+        }
+        
+        .pricing-content {
+            width: 90%;
+            margin: 0 auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .pricing-card h3 {
@@ -725,6 +736,7 @@
             padding: 0;
             margin: 0 0 2rem 0;
             text-align: left;
+            flex-grow: 1;
         }
         
         .feature-list li {
@@ -747,6 +759,9 @@
             text-decoration: none;
             font-weight: 600;
             transition: all 0.2s;
+            margin-top: auto;
+            align-self: center;
+            width: 90%;
         }
         
         .btn-pricing:hover {
@@ -992,13 +1007,13 @@
             <h3>Why This Matters Now</h3>
             <div class="ws-content">
                 <p><strong>Who It's For:</strong> Business owners, marketers, web developers, and digital agencies who depend on online visibility and want to stay ahead of search trends.</p>
-                <br>
+                
                 <p><strong>What It Does:</strong> An AI audit that shows how modern search systems read your website beyond just keywords.</p>
-                <br>
+                
                 <p><strong>Why It Matters:</strong> AI now powers search results, recommendations, and answers. If AI can't understand your site, potential customers won't find you.</p>
-                <br>
+                
                 <p><strong>Timing:</strong> <span class="urgent">Right now</span> as AI systems become the primary way people discover businesses and information online.</p>
-                <br>
+                
                 <p><strong>How to Start:</strong> Begin with a free scan to see what AI understands about your site, and what it doesn't. <a href="#analyze-form">Run your scan →</a></p>
             </div>
         </div>
@@ -1157,69 +1172,78 @@
         <section id="pricing" class="section">
             <h2>Pricing</h2>
             <p style="text-align: center; color: var(--text-medium); margin-bottom: 2rem;">
-                <strong style="color: var(--primary);">Launch Week Special:</strong> SnipeRank is currently FREE while we perfect our scoring model. 
-                Lock in early-bird discounts for when paid plans launch!
+                <strong style="color: var(--primary);">Launch Special:</strong> Full SnipeRank reports are completely FREE during our launch phase. 
+                Get your complete AI visibility analysis at no cost!
             </p>
             
             <div class="pricing-grid">
                 <!-- Free Plan -->
                 <div class="pricing-card">
-                    <h3>Free</h3>
-                    <p class="pricing-subtitle">Launch Beta</p>
-                    <p class="price">$0</p>
-                    <p class="price-desc">Unlimited during launch</p>
-                    <ul class="feature-list">
-                        <li>✓ Core SnipeRank score</li>
-                        <li>✓ Key insights & opportunities</li>
-                        <li>✓ Shareable summary</li>
-                        <li>✓ Single page analysis</li>
-                        <li>✓ Limited support</li>
-                    </ul>
-                    <a href="/analyze.html" class="btn-pricing">Try Free Now</a>
+                    <div class="pricing-content">
+                        <h3>Free</h3>
+                        <p class="pricing-subtitle">Launch Beta</p>
+                        <p class="price">$0</p>
+                        <p class="price-desc">Unlimited during launch</p>
+                        <ul class="feature-list">
+                            <li>✓ Core SnipeRank score</li>
+                            <li>✓ Key insights & opportunities</li>
+                            <li>✓ Shareable summary</li>
+                            <li>✓ Single page analysis</li>
+                            <li>✓ Limited support</li>
+                        </ul>
+                        <a href="/analyze.html" class="btn-pricing">Try Free Now</a>
+                    </div>
                 </div>
                 
                 <!-- Starter Plan -->
                 <div class="pricing-card featured">
-                    <div class="badge">Coming Soon</div>
-                    <h3>Starter</h3>
-                    <p class="price">TBD</p>
-                    <p class="price-desc">For small sites & solo marketers</p>
-                    <ul class="feature-list">
-                        <li>✓ Full detailed reports</li>
-                        <li>✓ Up to 50 pages crawled</li>
-                        <li>✓ AI visibility insights</li>
-                        <li>✓ Step by step fixes</li>
-                        <li>✓ Email support</li>
-                    </ul>
-                    <a href="#newsletter" class="btn-pricing">Get Early Access</a>
+                    <div class="badge">Free for Now</div>
+                    <div class="pricing-content">
+                        <h3>Starter</h3>
+                        <p class="pricing-subtitle">Small sites & solo marketers</p>
+                        <p class="price">$15</p>
+                        <p class="price-desc">per search (free during launch)</p>
+                        <ul class="feature-list">
+                            <li>✓ Full detailed reports</li>
+                            <li>✓ Up to 50 pages crawled</li>
+                            <li>✓ AI visibility insights</li>
+                            <li>✓ Step by step fixes</li>
+                            <li>✓ Email support</li>
+                            <li>✓ 10 searches per month included</li>
+                        </ul>
+                        <a href="/analyze.html" class="btn-pricing">Get Free Report</a>
+                    </div>
                 </div>
                 
                 <!-- Pro Plan -->
                 <div class="pricing-card">
-                    <h3>Pro</h3>
-                    <p class="pricing-subtitle">Agencies</p>
-                    <p class="price">TBD</p>
-                    <p class="price-desc">For agencies & consultants</p>
-                    <ul class="feature-list">
-                        <li>✓ Up to 300 pages crawled</li>
-                        <li>✓ Multiple projects</li>
-                        <li>✓ White label reports</li>
-                        <li>✓ API access</li>
-                        <li>✓ Priority support</li>
-                    </ul>
-                    <a href="#newsletter" class="btn-pricing">Join Waitlist</a>
+                    <div class="pricing-content">
+                        <h3>Pro</h3>
+                        <p class="pricing-subtitle">Agencies & enterprises</p>
+                        <p class="price">Contact Us</p>
+                        <p class="price-desc">Custom pricing for volume</p>
+                        <ul class="feature-list">
+                            <li>✓ Unlimited searches</li>
+                            <li>✓ Up to 300 pages crawled</li>
+                            <li>✓ Multiple projects</li>
+                            <li>✓ White label reports</li>
+                            <li>✓ API access</li>
+                            <li>✓ Priority support</li>
+                        </ul>
+                        <a href="#newsletter" class="btn-pricing">Contact Sales</a>
+                    </div>
                 </div>
             </div>
             
             <!-- Early Bird Signup -->
             <div class="early-bird-section" id="newsletter">
-                <h3>Get Early Bird Pricing</h3>
-                <p>Join the list for founding member discounts when paid plans launch.</p>
+                <h3>Stay Updated on New Features</h3>
+                <p>Get notified when we release new AI analysis capabilities and improvements.</p>
                 <form class="newsletter-form" onsubmit="handleNewsletterSubmit(event)">
                     <input type="email" placeholder="you@company.com" required>
-                    <button type="submit">Notify Me</button>
+                    <button type="submit">Keep Me Updated</button>
                 </form>
-                <p class="disclaimer">We'll only email about SnipeRank updates. Unsubscribe anytime.</p>
+                <p class="disclaimer">We'll only email about SnipeRank updates and new features. Unsubscribe anytime.</p>
             </div>
         </section>
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!-- 
-SnipeRank Homepage v2.14
-Last Updated: October 7, 2025 - 2:30 PM UTC
+SnipeRank Homepage v2.15
+Last Updated: October 7, 2025 - 2:35 PM UTC
 Changes: Education-first layout, LLM stats ticker, clear free vs paid distinction, per-search pricing model, 
-spacing optimizations, left-aligned pricing, removed checkmarks, anchor link fixes
+spacing optimizations, left-aligned pricing, removed checkmarks, anchor link fixes, scroll-up arrow
 -->
 <!-- SnipeRank Index Page - Education-First Layout -->
 <html lang="en">
@@ -933,6 +933,37 @@ spacing optimizations, left-aligned pricing, removed checkmarks, anchor link fix
                 font-size: 0.8rem;
             }
         }
+        
+        /* Scroll Up Arrow */
+        .scroll-up-arrow {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        }
+        
+        .scroll-up-arrow.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .scroll-up-arrow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -1417,6 +1448,11 @@ spacing optimizations, left-aligned pricing, removed checkmarks, anchor link fix
         </div>
     </div>
 
+    <!-- Scroll Up Arrow -->
+    <button id="scroll-up-arrow" class="scroll-up-arrow" title="Run Free Scan">
+        ↑
+    </button>
+
     <!-- Footer -->
     <footer>
         <div class="footer-content">
@@ -1474,6 +1510,29 @@ spacing optimizations, left-aligned pricing, removed checkmarks, anchor link fix
             alert('Thanks for joining our early-bird list! We\'ll notify you when paid plans launch.');
             form.reset();
         }
+
+        // Scroll up arrow functionality
+        const scrollUpArrow = document.getElementById('scroll-up-arrow');
+        
+        // Show/hide arrow based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollUpArrow.classList.add('visible');
+            } else {
+                scrollUpArrow.classList.remove('visible');
+            }
+        });
+        
+        // Handle arrow click to scroll to free scan section
+        scrollUpArrow.addEventListener('click', function() {
+            const freeScanSection = document.getElementById('free-scan-section');
+            if (freeScanSection) {
+                freeScanSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

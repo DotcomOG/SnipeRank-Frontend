@@ -1,224 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-    <!--- Aug 5 version 1.5.1 -->
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnipeRank — AI SEO Analysis Results</title>
-  <style>
-    :root {
-      --max-width: 760px;
-      --pad-v: 3vh;
-      --pad-h: 2rem;
-    }
 
-    body {
-      font-family: Helvetica, sans-serif;
-      background: #fff;
-      color: #000;
-      margin: 0;
-      padding: var(--pad-v) var(--pad-h);
-      max-width: var(--max-width);
-      margin-left: auto;
-      margin-right: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    h1 {
-      font-size: 4rem;
-      font-weight: 700;
-      margin: 0 0 0.25em 0;
-      line-height: 1;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #000 0%, #3182CE 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin: 0 0 2rem 0;
-    }
-
-    h3 {
-      font-size: 1.2rem;
-      font-weight: 500;
-      margin: 2rem 0 1rem 0;
-    }
-
-    p {
-      font-size: 1.1rem;
-      line-height: 1.75;
-      margin-bottom: 1rem;
-    }
-
-    #analyzed-url {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #666;
-    }
-
-    #current-url {
-      color: #000;
-      font-weight: 500;
-    }
-
-    #summary-results {
-      width: 100%;
-      margin: 2rem 0;
-      padding: 0;
-      background: none;
-      border: none;
-    }
-
-    .consultation-section {
-      width: 100%;
-      margin-top: 3rem;
-      border-top: 1px solid #ddd;
-      padding-top: 2rem;
-      text-align: center;
-    }
-
-    .form-button-wrapper button {
-      background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
-      transition: all 0.3s ease;
-    }
-
-    .form-button-wrapper button:hover {
-      background: linear-gradient(135deg, #C53030 0%, #9C2A2A 100%);
-      transform: translateY(-1px);
-    }
-
-    .schedule-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%);
-      color: white;
-      padding: 1rem 2rem;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1.1rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
-    }
-
-    .schedule-button:hover {
-      background: linear-gradient(135deg, #C53030 0%, #9C2A2A 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
-    }
-
-    input, textarea {
-      font-size: 1.05rem;
-      padding: 0.8rem 1rem;
-      border: 1px solid #000;
-      width: 100%;
-      background: transparent;
-      box-sizing: border-box;
-    }
-
-    .form-button-wrapper {
-      text-align: center;
-      margin-top: 1.5rem;
-    }
-
-    #formMessage {
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: 500;
-    }
-
-    .footer {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 3rem;
-      text-align: center;
-      width: 100%;
-    }
-
-    @media (max-width: 600px) {
-      .form-grid {
-        display: flex;
-        flex-direction: column;
-      }
-    }
-  </style>
-</head>
-<body>
-  <h1>SnipeRank</h1>
-  <h2>AI SEO Analysis Results</h2>
-  <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Powered by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none; font-weight: 500;">quontora</a></p>
-
-  <div id="analyzed-url" style="margin-bottom: 0.5rem;">
-    <p style="margin: 0; font-size: 1rem;">Analysis for: <strong id="current-url"></strong></p>
-  </div>
-
-  <section id="summary-results">
-    <p style="text-align: center; color: gray;">Loading analysis...</p>
-  </section>
-
-  <section class="consultation-section">
-    <h3>Get Your Full Report</h3>
-    <form id="fullReportForm">
-      <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <input type="text" name="name" placeholder="Your Name" required autocomplete="name" />
-        <input type="email" name="email" placeholder="Your Email" required autocomplete="email" />
-        <input type="tel" name="phone" placeholder="Your Phone (optional)" autocomplete="tel" />
-        <input type="text" name="company" placeholder="Your Company (optional)" autocomplete="organization" />
-      </div>
-
-      <textarea name="message" placeholder="Share context or ask a specific question — we’ll address at your free consult." rows="3" style="width: 100%; margin-top: 1rem;"></textarea>
-
-      <input type="hidden" name="url" id="urlField" />
-
-      <div class="form-button-wrapper">
-        <button type="submit">Email Me My Full Report</button>
-      </div>
-
-      <p id="formMessage" style="text-align: center; font-size: 0.95rem; color: gray;"></p>
-    </form>
-  </section>
-
-  <section class="consultation-section">
-    <h3>Ready to Improve Your AI Visibility?</h3>
-    <p>After reviewing your analysis, book a free 30-minute consultation to discuss your specific opportunities and next steps.</p>
-    <div class="consultation-cta">
-      <a href="https://calendly.com/quontora" id="scheduleBtn" class="schedule-button" target="_blank">
-        Schedule Free Consultation
-      </a>
-    </div>
-    <p class="consultation-note">
-      <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
-    </p>
-  </section>
-
-  <div class="footer">&copy; 2025 SnipeRank by <a href="https://quontora.com" target="_blank" style="color: #3182CE; text-decoration: none;">quontora.com</a>. Last updated August 4.</div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetUrl = urlParams.get("url") || "https://example.com";
-      document.getElementById("current-url").textContent = targetUrl;
-      document.getElementById("urlField").value = targetUrl;
-
-      try {
-        const res = await fetch(`https://sniperank-backend-newjuly23.onrender.com/report.html?url=${encodeURIComponent(targetUrl)}`);
-        const html = await res.text();
-        document.getElementById("summary-results").innerHTML = html.trim() || "<p style='color:red; text-align:center;'>No results found.</p>";
-      } catch (err) {
-        console.error("Error:", err);
-        document.getElementById("summary-results").innerHTML =
-          "<p style='color:red; text-align:center;'>Error loading analysis</p>";
-      }
-
-      const form = document.getElementById("fullReportForm");
-      if (form) {
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const status = document.getElementById("formMessage");
-          status.textContent = "
+              const result = await res.json();
+              if (result.success) {
+                const reportUrl = `https://snipe-rank-frontend.vercel.app/full-report.html?url=${encodeURIComponent(payload.url)}`;
+                window.location.href = reportUrl;
+              }
+              
+              else {
+                status.textContent = "❌ Something went wrong. Please try again.";
+              }
+            } catch (err) {
+              console.error(err);
+              status.textContent = "❌ Server error. Try again later.";
+            }
+          });
+        }
+      });
+    </script>
+    
+    <!--
+    /*
+    // Handle new analysis form
+    document.getElementById("newAnalysisForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    let url = document.getElementById("newUrl").value.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+    window.location.href = `test.html?url=${encodeURIComponent(url)}`;
+    });
+    */
+    -->
+    
+    <!-- 🔁 Deploy Trigger: full-report layout test @ Aug 2 -->
+</body>
+<!-- 🔁 Confirm deploy at Sat Aug  2 15:45:40 EDT 2025 -->

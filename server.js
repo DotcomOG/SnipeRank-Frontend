@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import sendLinkHandler from './api/send-link.js'; // ✅ ADD THIS HERE
+import sendLinkHandler from './api/send-link.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -246,8 +246,10 @@ app.get('/report.html', async (req, res) => {
   res.send(html);
 });
 
+
 // Register the form submission route
 app.post('/api/send-link', sendLinkHandler);  // ✅ Add this here
+
 
 // Start the server
 app.listen(PORT, () => {

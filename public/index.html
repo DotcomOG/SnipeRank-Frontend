@@ -1,3 +1,7 @@
+cd ~/SnipeRank-App
+
+# OVERWRITE the file
+cat > public/index.html <<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,101 +9,50 @@
     SnipeRank • Index Page
     Version: v2025.10.16-2
     Last updated: 2025-10-16
-    Notes:
-      - Fixed hero width alignment
-      - Clean, centered layout consistent with analyze.html
+    Notes: Fixed hero width alignment; clean, centered layout.
   -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SnipeRank — SEO for the Age of AI</title>
   <style>
-    :root {
-      --fg:#111;
-      --muted:#666;
-      --bg:#fafafa;
-      --card:#fff;
-      --accent:#0a84ff;
-      --error:#c62828;
-    }
-    html,body {
-      height:100%;
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color:var(--fg);
-      background:var(--bg);
-    }
+    :root { --fg:#111; --muted:#666; --bg:#fafafa; --card:#fff; --accent:#0a84ff; --error:#c62828; }
+    html,body{ height:100%; margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--fg); background:var(--bg); }
 
-    /* Layout Containers */
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+    .container{ max-width:900px; margin:0 auto; padding:0 24px; }
 
-    /* Hero Section */
-    .hero {
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 80px 0 60px;
-    }
-    .hero h1 {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .hero h1 span { color: var(--accent); }
-    .hero .tagline { font-size: 20px; color: #374151; margin: 0 0 4px; }
-    .hero .powered { margin: 0 0 24px; color: #6b7280; }
-    .hero .powered a { color: var(--accent); text-decoration: none; }
-    .hero .intro { font-size: 18px; line-height: 1.6; color: #111827; margin-top: 12px; }
+    .hero{ background:#fff; border-bottom:1px solid #e5e7eb; padding:80px 0 60px; }
+    .hero h1{ font-size:48px; font-weight:700; margin-bottom:8px; }
+    .hero h1 span{ color:var(--accent); }
+    .hero .tagline{ font-size:20px; color:#374151; margin:0 0 4px; }
+    .hero .powered{ margin:0 0 24px; color:#6b7280; }
+    .hero .powered a{ color:var(--accent); text-decoration:none; }
+    .hero .intro{ font-size:18px; line-height:1.6; color:#111827; margin-top:12px; }
 
-    /* Card Section */
-    .wrap { display:flex; justify-content:center; padding:48px 24px; }
-    .card {
-      width:min(720px,100%);
-      background:var(--card);
-      border:1px solid #e7e7e7;
-      border-radius:16px;
-      box-shadow:0 2px 12px rgba(0,0,0,0.04);
-      padding:28px;
-    }
-    h2 { margin-top:0; }
-    p.sub { margin:0 0 20px; color:var(--muted); }
+    .wrap{ display:flex; justify-content:center; padding:48px 24px; }
+    .card{ width:min(720px,100%); background:var(--card); border:1px solid #e7e7e7; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,.04); padding:28px; }
+    h2{ margin-top:0; }
+    p.sub{ margin:0 0 20px; color:var(--muted); }
 
-    .row { display:flex; gap:10px; align-items:center; }
-    input[type="url"]{
-      flex:1; font-size:16px; padding:12px 14px; border-radius:10px; border:1px solid #d0d0d0; outline:none;
-    }
-    input[type="url"]:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(10,132,255,0.15);
-    }
-    button{
-      padding:12px 18px; font-size:16px; border-radius:10px; border:0;
-      background:var(--accent); color:#fff; cursor:pointer;
-    }
-    button:disabled{ opacity:0.6; cursor:not-allowed; }
+    .row{ display:flex; gap:10px; align-items:center; }
+    input[type="url"]{ flex:1; font-size:16px; padding:12px 14px; border-radius:10px; border:1px solid #d0d0d0; outline:none; }
+    input[type="url"]:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(10,132,255,.15); }
+    button{ padding:12px 18px; font-size:16px; border-radius:10px; border:0; background:var(--accent); color:#fff; cursor:pointer; }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
 
     .hint{ margin-top:10px; font-size:13px; color:var(--muted); }
     .error{ margin-top:10px; color:var(--error); font-size:14px; display:none; }
     .samples{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
-    .chip{
-      background:#f1f5f9; border:1px solid #e2e8f0; color:#334155;
-      padding:6px 10px; border-radius:999px; font-size:13px; cursor:pointer;
-    }
+    .chip{ background:#f1f5f9; border:1px solid #e2e8f0; color:#334155; padding:6px 10px; border-radius:999px; font-size:13px; cursor:pointer; }
 
     footer{ margin-top:22px; font-size:12px; color:var(--muted); text-align:center; }
   </style>
 </head>
-
 <body>
-  <!-- Hero Section -->
   <header class="hero">
     <div class="container">
       <h1>Snipe<span>Rank</span></h1>
       <p class="tagline">SEO for the Age of AI</p>
       <p class="powered">Powered by <a href="#">quontora</a></p>
-
       <p class="intro">
         Search is turning into <strong>answers</strong>. Instead of scrolling ten blue links, people ask AI and move on.
         SnipeRank shows if AI can actually understand, cite, and recommend your site — with a clean 1–10 score and
@@ -108,7 +61,6 @@
     </div>
   </header>
 
-  <!-- Input Card -->
   <div class="wrap">
     <div class="card">
       <h2>Check Your Site</h2>
@@ -149,9 +101,7 @@
         });
       });
 
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
-      });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); btn.click(); }});
 
       btn.addEventListener('click', () => {
         err.style.display = 'none';
@@ -159,37 +109,24 @@
         if (!raw) return showError('Please enter a website URL.');
 
         const normalized = normalizeUrl(raw);
-        if (!normalized)
-          return showError('That doesn’t look like a valid URL. Try something like https://example.com');
+        if (!normalized) return showError('That doesn’t look like a valid URL. Try https://example.com');
 
         try { localStorage.setItem('sniperank:lastUrl', normalized); } catch(_) {}
-
         const target = `/analyze.html?url=${encodeURIComponent(normalized)}`;
         window.location.assign(target);
       });
 
-      function showError(msg) {
-        err.textContent = msg;
-        err.style.display = 'block';
+      function showError(msg){ err.textContent = msg; err.style.display = 'block'; }
+      function normalizeUrl(v){
+        let s = v; if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+        try { const u = new URL(s); if (!u.hostname || !u.hostname.includes('.')) return null; return u.href.replace(/\/$/, ''); } catch { return null; }
       }
-
-      function normalizeUrl(value) {
-        let v = value;
-        if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
-        try {
-          const u = new URL(v);
-          if (!u.hostname || !u.hostname.includes('.')) return null;
-          return u.href.replace(/\/$/, '');
-        } catch {
-          return null;
-        }
-      }
-
-      try {
-        const last = localStorage.getItem('sniperank:lastUrl');
-        if (!input.value && last) input.value = last;
-      } catch(_) {}
+      try { const last = localStorage.getItem('sniperank:lastUrl'); if (!input.value && last) input.value = last; } catch(_) {}
     })();
   </script>
 </body>
 </html>
+EOF
+
+# Verify marker exists
+grep -n 'v2025.10.16-2' public/index.html

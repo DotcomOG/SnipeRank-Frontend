@@ -2,311 +2,193 @@
 <html lang="en">
 <head>
   <!--
-    SnipeRank • Analyze Page
-    Version: v2025.10.16-1
-    Last updated: 2025-10-17
+    SnipeRank • Index Page
+    Version: v2025.10.16-2
+    Last updated: 2025-10-16
     Notes:
-      - Reads ?url=... and requests a report from the backend friendly endpoint.
-      - Backend resolution order:
-          1) window.__SR_BACKEND  (optionally injected via <script> in Vercel env)
-          2) relative "/api/friendly" (Vercel rewrite/proxy recommended)
-          3) localStorage override (sniperank:backend)
-          4) optional ?backend=https://... query param (for manual testing)
-      - Renders Score, Superpowers, Opportunities, Insights.
-      - Includes scroll-to-top button and “Analyze another site” CTA.
+      - Fixed hero width alignment
+      - Clean, centered layout consistent with analyze.html
   -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SnipeRank — Analysis</title>
+  <title>SnipeRank — SEO for the Age of AI</title>
   <style>
-    :root { --fg:#111; --muted:#666; --bg:#fafafa; --card:#fff; --accent:#0a84ff; --ok:#16a34a; --warn:#c2410c; --err:#c62828; }
-    html,body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--fg); background:var(--bg); }
-    .container{ max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
-    header.page{ padding: 18px 0 12px; border-bottom:1px solid #e5e7eb; margin-bottom: 18px; background:#fff; }
-    .brand{ font-size: 22px; font-weight: 700; letter-spacing: .2px; }
-    .brand span{ color: var(--accent); }
-    .toolbar{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:8px; }
-    .target{ color:#374151; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 70vw; }
-    .actions a, .actions button{ text-decoration:none; border:1px solid #d1d5db; background:#fff; color:#111; padding:8px 12px; border-radius:8px; font-size:14px; cursor:pointer; }
-    .actions button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
-
-    .card{ background:var(--card); border:1px solid #e7e7e7; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,.04); padding:20px; margin:14px 0; }
-    .scoreRow{ display:flex; gap:18px; align-items:center; }
-    .badge{ width:72px; height:72px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; color:#fff; }
-    .badge.good{ background: #22c55e; }
-    .badge.mid{ background: #f59e0b; }
-    .badge.low{ background: #ef4444; }
-    .lead{ font-size:18px; margin:2px 0 0; }
-    .muted{ color:var(--muted); font-size:13px; }
-    h2{ margin: 6px 0 12px; font-size:18px; }
-    ul.clean{ margin:0; padding-left:18px; }
-    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    @media (max-width: 820px){ .grid{ grid-template-columns:1fr; } }
-
-    /* Loading & error */
-    .loading{ display:flex; gap:10px; align-items:center; }
-    .spinner{ width:18px; height:18px; border-radius:50%; border:3px solid #e5e7eb; border-top-color: var(--accent); animation: spin 1s linear infinite; }
-    @keyframes spin{ to{ transform: rotate(360deg); } }
-    .error{ color: var(--err); }
-
-    /* Scroll-to-top button */
-    #scrollTopBtn {
-      position: fixed; bottom: 24px; right: 24px;
-      background: #0a84ff; color: #fff; border: none; border-radius: 50%;
-      width: 44px; height: 44px; font-size: 20px; cursor: pointer;
-      opacity: 0; pointer-events: none; transition: opacity .3s ease, transform .2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    :root {
+      --fg:#111;
+      --muted:#666;
+      --bg:#fafafa;
+      --card:#fff;
+      --accent:#0a84ff;
+      --error:#c62828;
     }
-    #scrollTopBtn.visible{ opacity:1; pointer-events: all; }
-    #scrollTopBtn:hover{ transform: translateY(-2px); }
-    footer{ margin-top: 18px; color: var(--muted); font-size: 12px; text-align:center; }
-    code.inline{ background:#f3f4f6; border:1px solid #e5e7eb; padding:2px 6px; border-radius:6px; }
+    html,body {
+      height:100%;
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color:var(--fg);
+      background:var(--bg);
+    }
+
+    /* Layout Containers */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 80px 0 60px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero .tagline { font-size: 20px; color: #374151; margin: 0 0 4px; }
+    .hero .powered { margin: 0 0 24px; color: #6b7280; }
+    .hero .powered a { color: var(--accent); text-decoration: none; }
+    .hero .intro { font-size: 18px; line-height: 1.6; color: #111827; margin-top: 12px; }
+
+    /* Card Section */
+    .wrap { display:flex; justify-content:center; padding:48px 24px; }
+    .card {
+      width:min(720px,100%);
+      background:var(--card);
+      border:1px solid #e7e7e7;
+      border-radius:16px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.04);
+      padding:28px;
+    }
+    h2 { margin-top:0; }
+    p.sub { margin:0 0 20px; color:var(--muted); }
+
+    .row { display:flex; gap:10px; align-items:center; }
+    input[type="url"]{
+      flex:1; font-size:16px; padding:12px 14px; border-radius:10px; border:1px solid #d0d0d0; outline:none;
+    }
+    input[type="url"]:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(10,132,255,0.15);
+    }
+    button{
+      padding:12px 18px; font-size:16px; border-radius:10px; border:0;
+      background:var(--accent); color:#fff; cursor:pointer;
+    }
+    button:disabled{ opacity:0.6; cursor:not-allowed; }
+
+    .hint{ margin-top:10px; font-size:13px; color:var(--muted); }
+    .error{ margin-top:10px; color:var(--error); font-size:14px; display:none; }
+    .samples{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+    .chip{
+      background:#f1f5f9; border:1px solid #e2e8f0; color:#334155;
+      padding:6px 10px; border-radius:999px; font-size:13px; cursor:pointer;
+    }
+
+    footer{ margin-top:22px; font-size:12px; color:var(--muted); text-align:center; }
   </style>
 </head>
+
 <body>
-  <header class="page">
+  <!-- Hero Section -->
+  <header class="hero">
     <div class="container">
-      <div class="brand">Snipe<span>Rank</span></div>
-      <div class="toolbar">
-        <div class="target" id="targetUrl">Analyzing…</div>
-        <div class="actions">
-          <button class="primary" id="analyzeAnother">Analyze another site</button>
-          <a id="goHome" href="/index.html">Home</a>
-        </div>
-      </div>
+      <h1>Snipe<span>Rank</span></h1>
+      <p class="tagline">SEO for the Age of AI</p>
+      <p class="powered">Powered by <a href="#">quontora</a></p>
+
+      <p class="intro">
+        Search is turning into <strong>answers</strong>. Instead of scrolling ten blue links, people ask AI and move on.
+        SnipeRank shows if AI can actually understand, cite, and recommend your site — with a clean 1–10 score and
+        no-nonsense fixes you can ship this week.
+      </p>
     </div>
   </header>
 
-  <main class="container" id="app">
-    <!-- Status card -->
-    <section class="card" id="statusCard">
-      <div class="loading"><div class="spinner"></div><div>Fetching report…</div></div>
-      <div class="error" id="statusError" style="display:none;"></div>
-      <div id="retryWrap" style="display:none; margin-top:10px;">
-        <button id="retryBtn">Retry</button>
-        <button id="switchBackendBtn" title="Use alternate backend if you have one">Set backend URL</button>
+  <!-- Input Card -->
+  <div class="wrap">
+    <div class="card">
+      <h2>Check Your Site</h2>
+      <p class="sub">Paste a URL below to analyze how AI-friendly your website really is.</p>
+
+      <div class="row" role="group" aria-label="Analyze a website">
+        <input id="urlInput" type="url" inputmode="url" placeholder="https://example.com" autocomplete="url" aria-label="Website URL" />
+        <button id="goBtn">Analyze</button>
       </div>
-    </section>
 
-    <!-- Summary -->
-    <section class="card" id="summaryCard" style="display:none;">
-      <div class="scoreRow">
-        <div id="scoreBadge" class="badge mid">–</div>
-        <div>
-          <div id="scoreLead" class="lead">AI Visibility Score: – / 10</div>
-          <div id="scoreSub" class="muted">Generated just now</div>
-        </div>
+      <div id="err" class="error" aria-live="polite"></div>
+      <div class="hint">Tip: You can paste a domain (e.g., <code>example.com</code>) — we’ll add <code>https://</code> for you.</div>
+
+      <div class="samples" aria-label="Sample sites">
+        <span class="chip" data-url="https://quontora.com">quontora.com</span>
+        <span class="chip" data-url="https://yoramezra.com">yoramezra.com</span>
+        <span class="chip" data-url="https://www.nytimes.com">nytimes.com</span>
       </div>
-    </section>
 
-    <!-- Grids -->
-    <section class="grid" id="gridWrap" style="display:none;">
-      <div class="card">
-        <h2>Superpowers (What’s working)</h2>
-        <ul id="powersList" class="clean"></ul>
-      </div>
-      <div class="card">
-        <h2>Opportunities (What’s holding you back)</h2>
-        <ul id="oppsList" class="clean"></ul>
-      </div>
-    </section>
-
-    <section class="card" id="insightsCard" style="display:none;">
-      <h2>Insights</h2>
-      <ul id="insightsList" class="clean"></ul>
-    </section>
-
-    <footer>v2025.10.16-1 • © SnipeRank</footer>
-  </main>
-
-  <!-- Scroll-to-top -->
-  <button id="scrollTopBtn" title="Back to top">↑</button>
+      <footer>v2025.10.16-2 • © SnipeRank</footer>
+    </div>
+  </div>
 
   <script>
-    // Optional: allow Vercel to inject a backend URL via an inline script in _document or env.
-    // Example: <script>window.__SR_BACKEND="https://your-render-service.onrender.com/api/friendly"</script>
+    (function () {
+      const input = document.getElementById('urlInput');
+      const btn = document.getElementById('goBtn');
+      const err = document.getElementById('err');
 
-    (function(){
-      const qs = new URLSearchParams(location.search);
-      const site = qs.get('url') || '';
-      const backendOverride = qs.get('backend'); // manual testing
-      const targetEl = document.getElementById('targetUrl');
-      const statusCard = document.getElementById('statusCard');
-      const statusErr = document.getElementById('statusError');
-      const retryWrap = document.getElementById('retryWrap');
-      const retryBtn = document.getElementById('retryBtn');
-      const switchBackendBtn = document.getElementById('switchBackendBtn');
+      const params = new URLSearchParams(location.search);
+      if (params.has('url')) input.value = params.get('url');
 
-      const summaryCard = document.getElementById('summaryCard');
-      const gridWrap = document.getElementById('gridWrap');
-      const insightsCard = document.getElementById('insightsCard');
-
-      const scoreBadge = document.getElementById('scoreBadge');
-      const scoreLead = document.getElementById('scoreLead');
-      const scoreSub = document.getElementById('scoreSub');
-      const powersList = document.getElementById('powersList');
-      const oppsList = document.getElementById('oppsList');
-      const insightsList = document.getElementById('insightsList');
-
-      const analyzeAnother = document.getElementById('analyzeAnother');
-      analyzeAnother.addEventListener('click', () => {
-        const last = site || '';
-        const href = '/index.html' + (last ? ('?url=' + encodeURIComponent(last)) : '');
-        location.assign(href);
-      });
-      document.getElementById('goHome').addEventListener('click', (e)=>{ /* left as link */ });
-
-      // Scroll-to-top
-      const scrollBtn = document.getElementById('scrollTopBtn');
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > window.innerHeight * 0.6) scrollBtn.classList.add('visible');
-        else scrollBtn.classList.remove('visible');
-      });
-      scrollBtn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
-
-      // Show target
-      if (site) {
-        try { new URL(site); targetEl.textContent = site; }
-        catch { targetEl.textContent = 'Invalid URL'; }
-      } else {
-        targetEl.textContent = 'No URL provided';
-        showError('No website URL found. Go back and enter a site to analyze.');
-        return;
-      }
-
-      // Resolve backend list (priority order)
-      const stored = safeGet('sniperank:backend');
-      const BACKENDS = [
-        backendOverride || undefined,
-        window.__SR_BACKEND || undefined,
-        originJoin('/api/friendly'),
-        stored || undefined
-      ].filter(Boolean);
-
-      // Fetch now
-      fetchReport(site, BACKENDS);
-
-      retryBtn.addEventListener('click', () => {
-        hideError();
-        fetchReport(site, BACKENDS);
-      });
-
-      switchBackendBtn.addEventListener('click', () => {
-        const current = safeGet('sniperank:backend') || '';
-        const val = prompt('Backend friendly endpoint (example: https://your-backend.onrender.com/api/friendly):', current);
-        if (!val) return;
-        try {
-          const u = new URL(val);
-          localStorage.setItem('sniperank:backend', u.href);
-          alert('Saved. Retrying with the new backend…');
-          location.reload();
-        } catch {
-          alert('That backend URL is not valid.');
-        }
-      });
-
-      function fetchReport(targetUrl, backends){
-        if (!backends.length) {
-          showError('No backend endpoint available. Ensure a Vercel rewrite to <code class="inline">/api/friendly</code> or set one via the button above.');
-          return;
-        }
-
-        setStatus('Fetching report…');
-        attempt(0);
-
-        function attempt(i){
-          const base = backends[i];
-          const full = withQuery(base, { url: targetUrl });
-          timedFetch(full, { method: 'GET' }, 30000)
-            .then(async res => {
-              if (!res.ok) throw new Error('HTTP ' + res.status);
-              const data = await res.json();
-              renderReport(data);
-              setStatus(null);
-            })
-            .catch(err => {
-              if (i < backends.length - 1) {
-                setStatus(`Trying alternate endpoint (${i+2}/${backends.length})…`);
-                attempt(i+1);
-              } else {
-                showError(`Failed to load report from all endpoints. Last error: ${err.message}.`);
-              }
-            });
-        }
-      }
-
-      function renderReport(data){
-        // Expected minimal shape:
-        // { score: number (0-10), powers: string[], opportunities: string[], insights: string[], meta?: { analyzedAt, model } }
-        const score = clamp(Number(data.score), 0, 10);
-        scoreBadge.textContent = isFinite(score) ? String(score) : '–';
-        scoreBadge.classList.remove('good','mid','low');
-        if (score >= 8) scoreBadge.classList.add('good');
-        else if (score >= 5) scoreBadge.classList.add('mid');
-        else scoreBadge.classList.add('low');
-
-        scoreLead.textContent = `AI Visibility Score: ${isFinite(score) ? score : '–'} / 10`;
-        const when = (data.meta && data.meta.analyzedAt) ? new Date(data.meta.analyzedAt).toLocaleString() : 'just now';
-        const model = (data.meta && data.meta.model) ? ` • ${data.meta.model}` : '';
-        scoreSub.textContent = `Generated ${when}${model}`;
-
-        fillList(powersList, toArray(data.powers) || toArray(data.superpowers), 'No superpowers detected.');
-        fillList(oppsList, toArray(data.opportunities) || toArray(data.issues), 'No obvious blockers detected.');
-        fillList(insightsList, toArray(data.insights) || toArray(data.notes), 'No additional insights.');
-
-        summaryCard.style.display = '';
-        gridWrap.style.display = '';
-        insightsCard.style.display = '';
-      }
-
-      /* ---------- helpers ---------- */
-      function setStatus(msg){
-        if (msg == null) { statusCard.style.display='none'; return; }
-        statusCard.style.display='';
-        statusErr.style.display='none';
-        retryWrap.style.display='none';
-        statusCard.querySelector('.loading').style.display='';
-        statusCard.querySelector('.loading').lastElementChild.textContent = msg;
-      }
-      function showError(htmlMsg){
-        statusCard.style.display='';
-        statusCard.querySelector('.loading').style.display='none';
-        statusErr.style.display='';
-        statusErr.innerHTML = htmlMsg;
-        retryWrap.style.display='';
-      }
-      function hideError(){
-        statusErr.style.display='none';
-        retryWrap.style.display='none';
-        statusCard.querySelector('.loading').style.display='';
-      }
-
-      function withQuery(base, params){
-        const u = new URL(base);
-        Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, v));
-        return u.toString();
-      }
-      function originJoin(path){
-        return new URL(path, window.location.origin).toString();
-      }
-      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-      function toArray(v){ if (!v) return []; return Array.isArray(v) ? v : [v]; }
-      function fillList(ul, items, emptyMsg){
-        ul.innerHTML = '';
-        const arr = (items || []).filter(Boolean);
-        if (!arr.length){
-          const li = document.createElement('li'); li.className='muted'; li.textContent = emptyMsg; ul.appendChild(li); return;
-        }
-        arr.forEach(t => { const li = document.createElement('li'); li.textContent = String(t); ul.appendChild(li); });
-      }
-      function safeGet(k){ try{ return localStorage.getItem(k); } catch { return null; } }
-      function timedFetch(url, opts, ms){
-        return new Promise((resolve, reject) => {
-          const ctrl = new AbortController();
-          const id = setTimeout(() => { ctrl.abort(); }, ms);
-          fetch(url, { ...opts, signal: ctrl.signal }).then(r => { clearTimeout(id); resolve(r); }, e => { clearTimeout(id); reject(e); });
+      document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          input.value = chip.dataset.url;
+          err.style.display = 'none';
+          input.focus();
         });
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
+      });
+
+      btn.addEventListener('click', () => {
+        err.style.display = 'none';
+        const raw = (input.value || '').trim();
+        if (!raw) return showError('Please enter a website URL.');
+
+        const normalized = normalizeUrl(raw);
+        if (!normalized)
+          return showError('That doesn’t look like a valid URL. Try something like https://example.com');
+
+        try { localStorage.setItem('sniperank:lastUrl', normalized); } catch(_) {}
+
+        const target = `/analyze.html?url=${encodeURIComponent(normalized)}`;
+        window.location.assign(target);
+      });
+
+      function showError(msg) {
+        err.textContent = msg;
+        err.style.display = 'block';
       }
+
+      function normalizeUrl(value) {
+        let v = value;
+        if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+        try {
+          const u = new URL(v);
+          if (!u.hostname || !u.hostname.includes('.')) return null;
+          return u.href.replace(/\/$/, '');
+        } catch {
+          return null;
+        }
+      }
+
+      try {
+        const last = localStorage.getItem('sniperank:lastUrl');
+        if (!input.value && last) input.value = last;
+      } catch(_) {}
     })();
   </script>
 </body>

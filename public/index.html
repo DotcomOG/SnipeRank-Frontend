@@ -1,195 +1,1009 @@
 <!DOCTYPE html>
+<!--
+  SnipeRank Index Page
+  Version: v2025.10.17-2 (Fixed Form Handler)
+  Last updated: 2025-10-17
+  
+  FIXES IN THIS VERSION:
+  - Wrapped form handler in DOMContentLoaded to ensure DOM is ready
+  - Added defensive null checks for all form elements
+  - Added console.log debugging for troubleshooting
+  - Added e.stopPropagation() to prevent event interference
+  - Improved validation and error messages
+  - Ensured URL properly encodes before passing to analyze.html
+  
+  HOW IT WORKS:
+  - User enters a URL (e.g., "example.com" or "https://example.com")
+  - Form validates and adds https:// if missing
+  - Redirects to: analyze.html?url=https://example.com
+  - Analyze page reads the ?url parameter and requests report from backend
+-->
 <html lang="en">
 <head>
-  <!--
-    SnipeRank • Index Page
-    Version: v2025.10.16-2
-    Last updated: 2025-10-16
-    Notes:
-      - Fixed hero width alignment
-      - Clean, centered layout consistent with analyze.html
-  -->
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SnipeRank — SEO for the Age of AI</title>
   <style>
-    :root {
-      --fg:#111;
-      --muted:#666;
-      --bg:#fafafa;
-      --card:#fff;
-      --accent:#0a84ff;
-      --error:#c62828;
+    :root{
+      --max-width:1600px; --content-width:1200px; --pad-v:3vh; --pad-h:2rem;
+      --primary:#3182CE; --primary-dark:#2563EB; --accent:#E53E3E;
+      --text-dark:#000; --text-medium:#4a5568; --text-light:#718096;
+      --border:#e2e8f0; --bg-light:#f7fafc;
     }
-    html,body {
-      height:100%;
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color:var(--fg);
-      background:var(--bg);
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Helvetica, Arial, sans-serif;background:#fff;color:#000;line-height:1.6}
+
+    /* Header */
+    header{padding:var(--pad-v) var(--pad-h) 0;max-width:var(--content-width);margin:0 auto}
+    h1.logo{
+      font-size:4rem;font-weight:700;margin:0 0 .25em 0;line-height:1;letter-spacing:-1px;
+      background:linear-gradient(135deg,#000 0%,#3182CE 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;display:inline-block
+    }
+    h2.tagline{font-size:1.5rem;font-weight:400;color:#000}
+    .powered-by{color:#666;font-size:.9rem;margin-top:.5rem}
+    .powered-by a{color:#3182CE;text-decoration:none;font-weight:500}
+
+    /* Hero */
+    .hero{max-width:var(--content-width);margin:0 auto;padding:2rem var(--pad-h) 3rem}
+
+    /* Lede */
+    .hero-description{margin:0 0 1.25rem;max-width:60ch}
+    .hero-description .lede{
+      font-size:clamp(1.15rem,1.8vw,1.35rem);line-height:1.9;color:#0b1220;
+      font-weight:600;letter-spacing:.1px
+    }
+    .hero-description .lede em{font-style:normal;color:var(--primary);font-weight:800}
+
+    /* Analyze Form */
+    .analyze-form{
+      background:linear-gradient(180deg,#f0f7ff 0%,#ffffff 70%);
+      border:2px solid rgba(49,130,206,.4);border-radius:14px;padding:1.25rem;margin:1.25rem 0 2.25rem;
+      box-shadow:0 10px 28px rgba(49,130,206,.18), 0 2px 6px rgba(0,0,0,.04);
+      max-width:700px;margin-left:auto;margin-right:auto;
+    }
+    .url-input-wrapper{display:flex;gap:.75rem;align-items:stretch;justify-content:center;}
+    .url-input{
+      width:350px;font-size:1.1rem;padding:1rem 1.1rem;border:2px solid var(--border);
+      border-radius:10px;background:#fff;transition:border-color .2s, box-shadow .2s
+    }
+    .url-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(49,130,206,.15)}
+    .analyze-btn{
+      font-size:1.1rem;font-weight:700;padding:1rem 1.5rem;border:none;color:#fff;background:var(--primary);
+      border-radius:10px;cursor:pointer;transition:transform .15s ease, background .2s;white-space:nowrap
+    }
+    .analyze-btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+    .error{color:var(--primary);font-size:.9rem;margin-top:.5rem;display:none}
+    .error.show{display:block}
+
+    /* Quick Summary */
+    .summary-box{background:var(--bg-light);border-radius:12px;padding:2rem;margin-bottom:3rem}
+    .summary-box h3{font-size:1.25rem;margin-bottom:1rem;color:var(--text-dark)}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin-bottom:1.5rem}
+    .summary-item{display:flex;align-items:flex-start;gap:.75rem}
+    .summary-icon{font-size:1.25rem;margin-top:.1rem}
+    .summary-text{flex:1}
+    .summary-text strong{display:block;font-size:.95rem;color:var(--text-dark);margin-bottom:.25rem}
+    .summary-text span{font-size:.85rem;color:var(--text-medium);line-height:1.4}
+
+    /* Quick links — properly spaced horizontal navigation */
+    .quick-links{
+      display:flex;gap:1.5rem;margin-top:1.5rem;justify-content:center;flex-wrap:wrap;
+    }
+    .quick-links a{
+      color:var(--primary);text-decoration:none;font-size:.85rem;font-weight:500;
+      padding:.6rem 1.2rem;border:1px solid var(--primary);border-radius:6px;transition:all .2s;white-space:nowrap;
+    }
+    .quick-links a:hover{background:var(--primary);color:#fff}
+
+    /* Content wrapper */
+    .content{max-width:var(--content-width);margin:0 auto;padding:0 var(--pad-h)}
+
+    /* Sections */
+    .section{margin-bottom:4rem}
+    .section h2{font-size:2rem;font-weight:700;margin-bottom:1.5rem;color:var(--text-dark)}
+    .section h3{font-size:1.3rem;font-weight:600;margin:2rem 0 1rem;color:var(--text-dark)}
+    .section p{font-size:1.05rem;line-height:1.8;color:var(--text-medium);margin-bottom:1.5rem}
+    .section ul{margin:1.5rem 0;padding-left:2rem}
+    .section li{margin-bottom:.75rem;color:var(--text-medium);line-height:1.7}
+
+    /* Feature Grid */
+    .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;margin:2rem 0}
+    .feature{padding:1.5rem;border-left:3px solid var(--primary);background:var(--bg-light);border-radius:0 8px 8px 0}
+    .feature h4{font-size:1.1rem;color:var(--text-dark);margin-bottom:.5rem}
+    .feature p{font-size:.95rem;color:var(--text-medium);line-height:1.6;margin:0}
+
+    /* Pricing — horizontal stacked rows, unified body flow */
+    .pricing-stack{display:flex;flex-direction:column;gap:1rem;margin:2rem 0 2.5rem}
+    .plan-row{
+      display:flex;gap:1.25rem;align-items:stretch;border:2px solid var(--border);border-radius:14px;background:#fff;
+      padding:1.1rem;transition:box-shadow .2s, border-color .2s
+    }
+    .plan-row:hover{border-color:var(--primary);box-shadow:0 8px 24px rgba(49,130,206,.12)}
+    .plan-badge{min-width:110px;border-right:1px dashed var(--border);padding-right:1rem;display:flex;flex-direction:column;justify-content:center;gap:.3rem}
+    .plan-badge h3{margin:0;font-size:1.35rem}
+    .plan-badge .price{font-size:1.4rem;font-weight:800;color:var(--primary)}
+    .plan-badge .subtitle{font-size:.8rem;color:#718096}
+    .plan-cta{display:flex;align-items:center;gap:.6rem}
+    .btn-pricing{display:inline-block;background:var(--primary);color:#fff;padding:.7rem 1.2rem;border-radius:10px;text-decoration:none;font-weight:700}
+    .badge-pill{display:inline-block;padding:.25rem .55rem;border:1px solid var(--primary);color:var(--primary);border-radius:999px;font-size:.75rem;font-weight:700}
+
+    .plan-row.featured{border-color:var(--primary);background:linear-gradient(135deg,#f0f9ff 0%,#ffffff 100%)}
+
+    .plan-body{flex:1;background:var(--bg-light);border:1px dashed var(--border);border-radius:10px;padding:1rem}
+    .use-intro{margin:0 0 .75rem 0;font-size:.98rem;color:#334155}
+    .feature-list{list-style:disc;padding-left:1.2rem;margin:0}
+    .feature-list li{padding:.25rem 0;border:0;color:var(--text-medium);font-size:.95rem}
+
+    /* Accordions */
+    details.sr-accordion{border:1px solid var(--border);border-radius:10px;margin:1rem 0 1.25rem;background:#fff}
+    details.sr-accordion[open]{box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    details.sr-accordion>summary{
+      cursor:pointer;list-style:none;padding:1rem 1.1rem;font-weight:700;font-size:1.15rem;color:#0f172a;
+      display:flex;align-items:center;justify-content:space-between
+    }
+    details.sr-accordion>summary::marker{display:none}
+    details.sr-accordion>summary span.chev{transition:transform .2s ease}
+    details.sr-accordion[open]>summary span.chev{transform:rotate(180deg)}
+    details.sr-accordion .accordion-body{padding:0 1.1rem 1.1rem}
+
+    /* Beta Notice — bottom */
+    .beta-notice{background:linear-gradient(135deg,#667eea 0%, #764ba2 100%);color:#fff;border-radius:12px;padding:2rem;margin:2rem 0}
+    .beta-notice h3{font-size:1.3rem;margin-bottom:1rem}
+    .beta-notice p{font-size:.95rem;line-height:1.6;opacity:.95;margin-bottom:.75rem}
+    .beta-notice p:last-child{margin-bottom:0}
+
+    /* Contact — pop */
+    .contact-pop{
+      background:radial-gradient(1200px 300px at 50% -20%, #e6f1ff 0%, #ffffff 55%),linear-gradient(135deg,#1a73e8 0%, #6a5cff 100%);
+      color:#0b1220;border-radius:16px;border:1px solid #d7e3ff;padding:1.4rem;display:grid;gap:1rem;grid-template-columns:1fr auto;align-items:center;
+      box-shadow:0 16px 48px rgba(26,115,232,.22)
+    }
+    .contact-pop h3{margin:0;font-size:1.5rem;color:#0b1220}
+    .contact-pop p{margin:.25rem 0 0;color:#1b2b55}
+    .contact-actions{display:flex;gap:.6rem;align-items:center}
+    .btn-primary{display:inline-block;background:#111;color:#fff;border:none;border-radius:999px;padding:.85rem 1.25rem;font-weight:800;text-decoration:none}
+    .btn-secondary{display:inline-block;background:#fff;color:#111;border:1px solid #111;border-radius:999px;padding:.75rem 1.1rem;font-weight:800;text-decoration:none}
+
+    /* Footer */
+    footer{text-align:center;padding:1rem var(--pad-h);margin-top:3rem;border-top:1px solid var(--border);background:var(--bg-light)}
+    .footer-content{max-width:var(--max-width);margin:0 auto;text-align:center;color:var(--text-light);font-size:.8rem}
+    .footer-content p{margin:.15rem 0}
+
+    /* Responsive tweaks */
+    @media (max-width:900px){.contact-pop{grid-template-columns:1fr;text-align:center}.contact-actions{justify-content:center;flex-wrap:wrap}}
+    @media (max-width:680px){.plan-row{flex-direction:column}.plan-badge{border-right:0;border-bottom:1px dashed var(--border);padding-bottom:.8rem;min-width:unset}}
+    @media (max-width:768px){
+      header{padding:1.5rem 1rem 0}
+      h1.logo{font-size:3rem}
+      h2.tagline{font-size:1.1rem}
+      .hero{padding:1.5rem 1rem}
+      .url-input-wrapper{flex-direction:column}
+      .url-input{width:100%}
+      .analyze-btn{width:100%}
+      .feature-grid{grid-template-columns:1fr}
+      .section{padding:0 1rem}
+      .beta-notice{padding:1.5rem 1rem}
+      .quick-links{gap:1rem}
+    }
+    @media (max-width:560px){.quick-links{flex-direction:column;align-items:center}.quick-links a{width:200px}}
+  </style>
+
+  <!-- Pricing Section Styles -->
+  <style>
+    .pricing-container {
+        max-width: 1600px;
+        width: 100%;
+        margin: 0 auto;
+        min-width: 320px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px 40px 40px 40px;
     }
 
-    /* Layout Containers */
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 24px;
+    /* Beta Banner */
+    .beta-banner {
+        background: #fffbe6;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 12px 20px;
+        margin-bottom: 40px;
+        text-align: center;
+        font-size: 15px;
+        color: #333;
     }
 
-    /* Hero Section */
-    .hero {
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 80px 0 60px;
-    }
-    .hero h1 {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .hero h1 span { color: var(--accent); }
-    .hero .tagline { font-size: 20px; color: #374151; margin: 0 0 4px; }
-    .hero .powered { margin: 0 0 24px; color: #6b7280; }
-    .hero .powered a { color: var(--accent); text-decoration: none; }
-    .hero .intro { font-size: 18px; line-height: 1.6; color: #111827; margin-top: 12px; }
-
-    /* Card Section */
-    .wrap { display:flex; justify-content:center; padding:48px 24px; }
-    .card {
-      width:min(720px,100%);
-      background:var(--card);
-      border:1px solid #e7e7e7;
-      border-radius:16px;
-      box-shadow:0 2px 12px rgba(0,0,0,0.04);
-      padding:28px;
-    }
-    h2 { margin-top:0; }
-    p.sub { margin:0 0 20px; color:var(--muted); }
-
-    .row { display:flex; gap:10px; align-items:center; }
-    input[type="url"]{
-      flex:1; font-size:16px; padding:12px 14px; border-radius:10px; border:1px solid #d0d0d0; outline:none;
-    }
-    input[type="url"]:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(10,132,255,0.15);
-    }
-    button{
-      padding:12px 18px; font-size:16px; border-radius:10px; border:0;
-      background:var(--accent); color:#fff; cursor:pointer;
-    }
-    button:disabled{ opacity:0.6; cursor:not-allowed; }
-
-    .hint{ margin-top:10px; font-size:13px; color:var(--muted); }
-    .error{ margin-top:10px; color:var(--error); font-size:14px; display:none; }
-    .samples{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
-    .chip{
-      background:#f1f5f9; border:1px solid #e2e8f0; color:#334155;
-      padding:6px 10px; border-radius:999px; font-size:13px; cursor:pointer;
+    .beta-banner strong {
+        font-weight: 600;
     }
 
-    footer{ margin-top:22px; font-size:12px; color:var(--muted); text-align:center; }
+    /* Pricing Cards - Updated for perfect alignment */
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+    }
+
+    .pricing-card {
+        padding: 32px;
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .pricing-card:last-child {
+        border-right: none;
+    }
+
+    /* Fixed height sections for perfect alignment */
+    .plan-header {
+        height: 120px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plan-name {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #111;
+    }
+
+    .plan-description {
+        font-size: 15px;
+        color: #333;
+        line-height: 1.5;
+        flex: 1;
+    }
+
+    /* Use case text - fixed height for alignment */
+    .use-case {
+        font-size: 13px;
+        color: #333;
+        font-style: italic;
+        margin-bottom: 24px;
+        line-height: 1.5;
+        height: 60px;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    /* Pricing section - fixed height */
+    .plan-price {
+        height: 80px;
+        margin-bottom: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .price-amount {
+        font-size: 48px;
+        font-weight: 400;
+        color: #111;
+        line-height: 1;
+    }
+
+    .price-period {
+        font-size: 20px;
+        color: #666;
+        font-weight: 400;
+    }
+
+    .price-billing {
+        font-size: 13px;
+        color: #333;
+        margin-top: 8px;
+    }
+
+    .tbd-price {
+        font-size: 36px;
+        font-weight: 500;
+        color: #111;
+        margin-bottom: 12px;
+    }
+
+    /* CTA section - fixed height for button alignment */
+    .cta-section {
+        height: 72px;
+        margin-bottom: 32px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cta-button {
+        width: 100%;
+        padding: 12px 20px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        box-sizing: border-box;
+    }
+
+    .cta-button:hover {
+        background: #1d4ed8;
+    }
+
+    .cta-button.secondary {
+        background: white;
+        color: #2563eb;
+        border: 2px solid #2563eb;
+    }
+
+    .cta-button.secondary:hover {
+        background: #f0f9ff;
+    }
+
+    .cta-button.disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .cta-button.disabled:hover {
+        background: #9ca3af;
+    }
+
+    .cta-note {
+        text-align: center;
+        font-size: 13px;
+        color: #999;
+        margin-top: 8px;
+    }
+
+    /* Feature Sections - flex grow to fill remaining space */
+    .features-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feature-section {
+        margin-bottom: 32px;
+    }
+
+    .feature-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+    }
+
+    .feature-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        font-size: 15px;
+        color: #333;
+        line-height: 1.4;
+    }
+
+    .feature-icon {
+        margin-right: 12px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .check {
+        color: #16a34a;
+        font-size: 16px;
+    }
+
+    .not-included {
+        color: #d1d5db;
+        font-size: 16px;
+    }
+
+    .highlight {
+        font-weight: 600;
+        color: #111;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) and (min-width: 769px) {
+        .pricing-card {
+            padding: 24px;
+        }
+        
+        .price-amount {
+            font-size: 40px;
+        }
+        
+        .plan-header {
+            height: 100px;
+        }
+
+        .use-case {
+            height: 50px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pricing-card {
+            border-right: none;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .pricing-card:last-child {
+            border-bottom: none;
+        }
+
+        .plan-header {
+            height: auto;
+            min-height: 80px;
+        }
+
+        .use-case {
+            height: auto;
+            min-height: 40px;
+        }
+
+        .plan-price {
+            height: auto;
+            min-height: 60px;
+        }
+
+        .cta-section {
+            height: auto;
+            min-height: 60px;
+        }
+
+        .pricing-container {
+            padding: 20px 20px 40px 20px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .price-amount {
+            font-size: 36px;
+        }
+    }
   </style>
 </head>
-
 <body>
-  <!-- Hero Section -->
-  <header class="hero">
-    <div class="container">
-      <h1>Snipe<span>Rank</span></h1>
-      <p class="tagline">SEO for the Age of AI</p>
-      <p class="powered">Powered by <a href="#">quontora</a></p>
+  <!-- Header -->
+  <header>
+    <h1 class="logo">SnipeRank</h1>
+    <h2 class="tagline">SEO for the Age of AI</h2>
+    <p class="powered-by">Powered by <a href="https://quontora.com" target="_blank">quontora</a></p>
+  </header>
 
-      <p class="intro">
-        Search is turning into <strong>answers</strong>. Instead of scrolling ten blue links, people ask AI and move on.
+  <!-- Hero -->
+  <div class="hero">
+    <!-- Lede -->
+    <div class="hero-description">
+      <p class="lede">
+        Search is turning into <em>answers</em>. Instead of scrolling ten blue links, people ask AI and move on.
         SnipeRank shows if AI can actually understand, cite, and recommend your site — with a clean 1–10 score and
         no-nonsense fixes you can ship this week.
       </p>
     </div>
-  </header>
 
-  <!-- Input Card -->
-  <div class="wrap">
-    <div class="card">
-      <h2>Check Your Site</h2>
-      <p class="sub">Paste a URL below to analyze how AI-friendly your website really is.</p>
-
-      <div class="row" role="group" aria-label="Analyze a website">
-        <input id="urlInput" type="url" inputmode="url" placeholder="https://example.com" autocomplete="url" aria-label="Website URL" />
-        <button id="goBtn">Analyze</button>
+    <!-- Summary -->
+    <div class="summary-box">
+      <h3>🎯 What SnipeRank Does</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-icon">🤖</span>
+          <div class="summary-text"><strong>AI Visibility Score</strong><span>Your 1–10 readiness for AI-driven search.</span></div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">📊</span>
+          <div class="summary-text"><strong>Superpowers &amp; Opportunities</strong><span>See what's working — and what's holding you back.</span></div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">⚡</span>
+          <div class="summary-text"><strong>Fast, Actionable Fixes</strong><span>Prioritized next steps you can implement now.</span></div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">🔍</span>
+          <div class="summary-text"><strong>AI Engine Lens</strong><span>How ChatGPT, Gemini &amp; Claude may interpret your site.</span></div>
+        </div>
       </div>
 
-      <div id="err" class="error" aria-live="polite"></div>
-      <div class="hint">Tip: You can paste a domain (e.g., <code>example.com</code>) — we’ll add <code>https://</code> for you.</div>
-
-      <div class="samples" aria-label="Sample sites">
-        <span class="chip" data-url="https://quontora.com">quontora.com</span>
-        <span class="chip" data-url="https://yoramezra.com">yoramezra.com</span>
-        <span class="chip" data-url="https://www.nytimes.com">nytimes.com</span>
+      <!-- Properly spaced horizontal navigation -->
+      <div class="quick-links">
+        <a href="#how-it-works">Detailed Overview</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#whitepaper">Technical Whitepaper</a>
+        <a href="#technology">Architecture &amp; Stack</a>
       </div>
-
-      <footer>v2025.10.16-2 • © SnipeRank</footer>
     </div>
+
+    <!-- URL Analyze Form -->
+    <form id="analyze-form" class="analyze-form" novalidate>
+      <div class="url-input-wrapper">
+        <input id="url" type="text" class="url-input" placeholder="example.com" aria-label="Website URL" />
+        <button type="submit" class="analyze-btn">Analyze Website</button>
+      </div>
+      <div id="error-message" class="error" role="alert"></div>
+    </form>
   </div>
 
+  <!-- Main Content -->
+  <div class="content">
+    <!-- How It Works -->
+    <section id="how-it-works" class="section">
+      <h2>How SnipeRank Works</h2>
+      <p>
+        Traditional SEO was built for keyword-matching search. Today's AI engines evaluate entities, context, and trust.
+        SnipeRank measures how clearly AI can understand and recommend your brand (AI SEO), and where to improve your
+        machine-readability and credibility signals (AI Optimization).
+      </p>
+
+      <h3>The SnipeRank Process</h3>
+      <div class="feature-grid">
+        <div class="feature"><h4>1. Intelligent Crawling</h4><p>We navigate like a human, respect robots.txt and rate limits, and map your structure and content hierarchy.</p></div>
+        <div class="feature"><h4>2. Content Extraction</h4><p>We identify topics, entities, and relationships so AI can grasp who you are and what you offer.</p></div>
+        <div class="feature"><h4>3. AI Perception Modeling</h4><p>We simulate how AI engines interpret your pages to assess semantic clarity and topical authority.</p></div>
+        <div class="feature"><h4>4. Technical Analysis</h4><p>We check Core Web Vitals, mobile readiness, accessibility, and technical SEO that affect AI crawlability.</p></div>
+        <div class="feature"><h4>5. Competitive Intelligence</h4><p>We benchmark against leaders to reveal gaps and quick wins in content and structure.</p></div>
+        <div class="feature"><h4>6. Expert Analysis &amp; Consultation</h4><p>You receive a clear report with prioritized fixes — plus a free consult to plan the fastest path to impact.</p></div>
+      </div>
+
+      <h3>Key Differentiators</h3>
+      <ul>
+        <li><strong>AI-First:</strong> Built to reflect how ChatGPT, Gemini, and Claude parse and rank information.</li>
+        <li><strong>Semantic Understanding:</strong> Beyond keywords — entities, intent, and context that AI trusts.</li>
+        <li><strong>Explainable Scoring:</strong> A simple 1–10 score with strengths, issues, and next steps.</li>
+        <li><strong>Holistic Signals:</strong> Technical SEO, content quality, and credibility in one pass.</li>
+        <li><strong>Future-Ready:</strong> Designed for assistants, voice, and multimodal search experiences.</li>
+      </ul>
+    </section>
+
+    <!-- SnipeRank Pricing Section -->
+    <section id="pricing" class="pricing-container">
+      <!-- Beta Banner -->
+      <div class="beta-banner">
+          🧪 <strong>Currently in Beta:</strong> Studio features are available for free testing. Starter version coming soon.
+      </div>
+
+      <!-- Pricing Grid -->
+      <div class="pricing-grid">
+          <!-- Starter Plan -->
+          <div class="pricing-card">
+              <div class="plan-header">
+                  <h3 class="plan-name">Starter</h3>
+                  <p class="plan-description">Get started building, experimenting, and prototyping with AI.</p>
+              </div>
+              
+              <div class="use-case">Coming soon: Perfect for founder-led sites & solo projects. Quick read on whether your homepage content makes sense to AI.</div>
+              
+              <div class="plan-price">
+                  <div class="tbd-price">Free</div>
+                  <div class="price-billing">Coming soon</div>
+              </div>
+              
+              <div class="cta-section">
+                  <a href="#" class="cta-button disabled">Coming Soon</a>
+              </div>
+              
+              <div class="features-content">
+                  <div class="feature-section">
+                      <div class="section-title">ANALYSIS</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Homepage analysis</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Core SnipeRank score</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Key insights & opportunities</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Shareable summary report</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Basic AI readiness check</span>
+                          </li>
+                      </ul>
+                  </div>
+                  
+                  <div class="feature-section">
+                      <div class="section-title">SUPPORT</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Community support</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Knowledge base access</span>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Studio Plan -->
+          <div class="pricing-card">
+              <div class="plan-header">
+                  <h3 class="plan-name">Studio</h3>
+                  <p class="plan-description">For creative studios & growing brands ready to optimize for AI.</p>
+              </div>
+              
+              <div class="use-case">Currently free in beta: Ideal for sites with 10-50 pages. Discover which pages are strong AI candidates and where messaging needs work.</div>
+              
+              <div class="plan-price">
+                  <div class="tbd-price">Free</div>
+                  <div class="price-billing">Beta version • TBD pricing later</div>
+              </div>
+              
+              <div class="cta-section">
+                  <a href="/analyze.html" class="cta-button">Try Free Beta</a>
+              </div>
+              
+              <div class="features-content">
+                  <div class="feature-section">
+                      <div class="section-title">ANALYSIS</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span><span class="highlight">Everything in Starter, plus:</span></span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Up to 10 pages crawl</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Detailed page-by-page analysis</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Content optimization suggestions</span>
+                      </ul>
+                  </div>
+                  
+                  <div class="feature-section">
+                      <div class="section-title">FEATURES</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Priority processing</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Export reports (PDF/CSV)</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Team sharing (3 users)</span>
+                          </li>
+                      </ul>
+                  </div>
+
+                  <div class="feature-section">
+                      <div class="section-title">SUPPORT</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Email support</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Onboarding session</span>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Enterprise Plan -->
+          <div class="pricing-card">
+              <div class="plan-header">
+                  <h3 class="plan-name">Enterprise</h3>
+                  <p class="plan-description">For agencies & complex sites requiring deep AI optimization.</p>
+              </div>
+              
+              <div class="use-case">Built for sites with 100+ pages. Uncover structural issues, evaluate authority signals, and track AI performance at scale.</div>
+              
+              <div class="plan-price">
+                  <div class="tbd-price">Custom</div>
+                  <div class="price-billing">Contact us for pricing</div>
+              </div>
+              
+              <div class="cta-section">
+                  <a href="#contact" class="cta-button">Contact us</a>
+              </div>
+              
+              <div class="features-content">
+                  <div class="feature-section">
+                      <div class="section-title">ANALYSIS</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span><span class="highlight">Everything in Studio, plus:</span></span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Custom pages deep crawl</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Tailored AI visibility audit (manual + automated)</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Custom report formatting / branding</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Custom AI model training</span>
+                          </li>
+                      </ul>
+                  </div>
+                  
+                  <div class="feature-section">
+                      <div class="section-title">FEATURES</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>White-label reports</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>API access</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Unlimited team members</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Multiple workspaces</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>SSO & advanced security</span>
+                          </li>
+                      </ul>
+                  </div>
+
+                  <div class="feature-section">
+                      <div class="section-title">SUPPORT</div>
+                      <ul class="feature-list">
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Dedicated account manager</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Priority phone support</span>
+                          </li>
+                          <li class="feature-item">
+                              <span class="feature-icon check">✓</span>
+                              <span>Custom training sessions</span>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </section>
+    
+    <!-- Whitepaper (accordion; label applies to whole section) -->
+    <section id="whitepaper" class="section">
+      <h2>Technical Whitepaper</h2>
+      <details class="sr-accordion">
+        <summary>Open the Technical Whitepaper <span class="chev">▾</span></summary>
+        <div class="accordion-body">
+          <h3>Executive Summary</h3>
+          <p>SnipeRank moves beyond keyword-centric SEO to AI-aware analysis. We model how modern AI systems interpret entities, context, and authority — and translate that into an explainable score with actionable recommendations.</p>
+
+          <h3>The Challenge: SEO in the Age of AI</h3>
+          <p>Search is becoming answers. AI engines use transformer models (e.g., BERT-family, GPT-class) to understand content, not just match keywords. This requires evaluating semantic clarity, entity coverage, and credibility — the core of AI SEO.</p>
+
+          <h3>Our Solution: Multi-Modal AI Analysis</h3>
+          <ul>
+            <li><strong>Semantic Embeddings:</strong> Measure topical coherence and intent alignment.</li>
+            <li><strong>Entity Recognition &amp; Knowledge Graphs:</strong> Map who/what/where so AI can recommend you correctly.</li>
+            <li><strong>Transformer-Based Scoring:</strong> Estimate perceived quality and authority from an AI lens.</li>
+            <li><strong>Behavioral Simulation:</strong> Highlight UX patterns that influence inclusion in answers.</li>
+          </ul>
+
+          <h3>Scoring Methodology</h3>
+          <ul>
+            <li>Semantic Coherence (topics &amp; intent)</li>
+            <li>Technical Excellence (speed, crawlability)</li>
+            <li>Content Authority (expertise &amp; trust)</li>
+            <li>User Experience (accessibility &amp; clarity)</li>
+            <li>AI Readability (entities, schema, structure)</li>
+          </ul>
+
+          <h3>Privacy &amp; Security</h3>
+          <p>We don't store sensitive data. Analysis is ephemeral; results are encrypted in transit and at rest.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- Technology Stack (accordion; label applies to whole section) -->
+    <section id="technology" class="section">
+      <h2>Technology Stack &amp; Implementation</h2>
+      <details class="sr-accordion">
+        <summary>Open Architecture &amp; Tech Stack <span class="chev">▾</span></summary>
+        <div class="accordion-body">
+          <p>SnipeRank combines distributed systems, NLP, and web tech to deliver fast, reliable insights for teams that don't have an SEO department — with outputs designed for marketers and comms leaders.</p>
+
+          <div class="feature-grid" style="margin-top:1rem">
+            <div class="feature"><h4>🔧 Backend Infrastructure</h4><p>Languages: Go, Python, Rust · Frameworks: FastAPI, Gin, Actix · Infra: Docker, Kubernetes, Terraform</p></div>
+            <div class="feature"><h4>🤖 Machine Learning Stack</h4><p>Frameworks: PyTorch, Transformers, spaCy · Models: BERT, RoBERTa, custom transformers · Optimization: ONNX, TensorRT, quantization</p></div>
+            <div class="feature"><h4>📊 Data Processing</h4><p>Streaming: Kafka, Redis Streams · Batch: Spark, Dask · Storage: PostgreSQL, Cassandra, S3</p></div>
+            <div class="feature"><h4>🌐 Frontend &amp; Visualization</h4><p>React/Next.js · D3.js/Chart.js · Tailwind, Framer Motion</p></div>
+            <div class="feature"><h4>🔒 Security &amp; Monitoring</h4><p>OAuth 2.0, JWT, Vault · Prometheus/Grafana · ELK, Jaeger</p></div>
+            <div class="feature"><h4>☁️ Cloud &amp; DevOps</h4><p>AWS, GCP, Cloudflare · GitHub Actions, ArgoCD · Terraform, Helm</p></div>
+          </div>
+
+          <h3 style="margin-top:1rem">Engineering Achievements</h3>
+          <ul>
+            <li><strong>Sub-second inference:</strong> Optimized models for fast feedback.</li>
+            <li><strong>Horizontal scalability:</strong> Auto-scales to handle demand spikes.</li>
+            <li><strong>High uptime:</strong> Redundant systems and failover.</li>
+            <li><strong>Real-time processing:</strong> Stream architecture for live analysis.</li>
+            <li><strong>Global delivery:</strong> Edge acceleration for low-latency results.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <!-- Beta at bottom -->
+    <div class="beta-notice">
+      <h3>🚀 Beta Release — You're Early</h3>
+      <p>You're seeing the next evolution of SEO: AI SEO and AI Optimization (AO). We're refining scoring and adding features weekly based on real feedback from early users like you.</p>
+      <p><strong>Note:</strong> Some corporate networks block crawlers. If results look limited, try a personal connection for the most complete scan.</p>
+    </div>
+
+    <!-- Contact -->
+    <section class="section" id="contact">
+      <div class="contact-pop">
+        <div>
+          <h3>Have a tricky site or a big idea?</h3>
+          <p>We love weird edge cases, complex stacks, and ambitious goals. Let's make your brand visible to AI.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="btn-primary" href="mailto:hi@quontora.com?subject=SnipeRank%20Inquiry">Email hi@quontora.com</a>
+          <a class="btn-secondary" href="https://calendly.com/quontora" target="_blank" rel="noopener">Book a 30-min call</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 SnipeRank. All rights reserved. Last updated <span id="update-date"></span>.</p>
+      <p>A product of <a href="https://quontora.com" target="_blank" style="color:var(--primary);text-decoration:none;">Quontora</a></p>
+    </div>
+  </footer>
+
+  <!-- FIXED JAVASCRIPT - Version 2025.10.17-2 -->
   <script>
-    (function () {
-      const input = document.getElementById('urlInput');
-      const btn = document.getElementById('goBtn');
-      const err = document.getElementById('err');
+    // Dynamic date
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const now = new Date();
+    const updateDateEl = document.getElementById('update-date');
+    if(updateDateEl) {
+      updateDateEl.textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+    }
 
-      const params = new URLSearchParams(location.search);
-      if (params.has('url')) input.value = params.get('url');
+    // URL validation function
+    function isValidURL(input) {
+      const pattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+      return pattern.test(input);
+    }
 
-      document.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-          input.value = chip.dataset.url;
-          err.style.display = 'none';
-          input.focus();
+    // Main form handler - wrapped in DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const analyzeForm = document.getElementById("analyze-form");
+      const urlInput = document.getElementById("url");
+      const errorDiv = document.getElementById("error-message");
+      
+      // Debug: Confirm script loaded
+      console.log('SnipeRank form handler loaded', {
+        form: !!analyzeForm,
+        input: !!urlInput,
+        error: !!errorDiv
+      });
+      
+      // Only proceed if all elements exist
+      if(analyzeForm && urlInput && errorDiv) {
+        analyzeForm.addEventListener("submit", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          let url = (urlInput.value || "").trim();
+          errorDiv.classList.remove('show');
+          
+          console.log('Form submitted with URL:', url);
+          
+          // Validation
+          if(!url) {
+            errorDiv.textContent = "Please enter a website URL";
+            errorDiv.classList.add('show');
+            return;
+          }
+          
+          if(!isValidURL(url)) {
+            errorDiv.textContent = "Please enter a valid domain (e.g., example.com)";
+            errorDiv.classList.add('show');
+            return;
+          }
+          
+          // Add protocol if missing
+          if(!/^https?:\/\//i.test(url)) {
+            url = "https://" + url;
+          }
+          
+          // Construct destination URL
+          const analyzeUrl = "analyze.html?url=" + encodeURIComponent(url);
+          console.log('Redirecting to:', analyzeUrl);
+          
+          // Navigate to analyze page
+          window.location.href = analyzeUrl;
         });
-      });
-
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
-      });
-
-      btn.addEventListener('click', () => {
-        err.style.display = 'none';
-        const raw = (input.value || '').trim();
-        if (!raw) return showError('Please enter a website URL.');
-
-        const normalized = normalizeUrl(raw);
-        if (!normalized)
-          return showError('That doesn’t look like a valid URL. Try something like https://example.com');
-
-        try { localStorage.setItem('sniperank:lastUrl', normalized); } catch(_) {}
-
-        const target = `/analyze.html?url=${encodeURIComponent(normalized)}`;
-        window.location.assign(target);
-      });
-
-      function showError(msg) {
-        err.textContent = msg;
-        err.style.display = 'block';
+      } else {
+        console.error('SnipeRank: Could not find form elements', {
+          form: !!analyzeForm,
+          input: !!urlInput,
+          error: !!errorDiv
+        });
       }
+    });
 
-      function normalizeUrl(value) {
-        let v = value;
-        if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
-        try {
-          const u = new URL(v);
-          if (!u.hostname || !u.hostname.includes('.')) return null;
-          return u.href.replace(/\/$/, '');
-        } catch {
-          return null;
+    // Newsletter form handler (if you add this later)
+    function handleNewsletterSubmit(event) {
+      event.preventDefault();
+      alert("Thanks for joining our early-bird list! We'll notify you when paid plans launch.");
+      event.target.reset();
+    }
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if(target) {
+          target.scrollIntoView({behavior: 'smooth', block: 'start'});
         }
-      }
-
-      try {
-        const last = localStorage.getItem('sniperank:lastUrl');
-        if (!input.value && last) input.value = last;
-      } catch(_) {}
-    })();
+      });
+    });
   </script>
 </body>
 </html>

@@ -195,7 +195,76 @@ async function analyzeWebsite(url) {
   }
 }
 
-// SEO report endpoint
+// Calculate AI Visibility Score (0-10)
+function calculateScore(analysis) {
+  // Start with base score of 5
+  let score = 5;
+  
+  // Each working item adds points
+  score += Math.min(analysis.working.length * 0.5, 2.5);
+  
+  // Too many issues reduce score
+  score -= Math.min(analysis.needsAttention.length * 0.3, 3);
+  
+  // Ensure score is between 0-10
+  return Math.max(0, Math.min(10, Math.round(score)));
+}
+
+// NEW: JSON API endpoint for frontend
+app.get('/api/friendly', async (req, res) => {
+  const targetUrl = req.query.url;
+  
+  // Validate URL parameter
+  if (!targetUrl) {
+    return res.status(400).json({ 
+      error: 'Missing URL parameter',
+      message: 'Please provide a url query parameter'
+    });
+  }
+  
+  // Validate URL format
+  try {
+    new URL(targetUrl);
+  } catch (err) {
+    return res.status(400).json({ 
+      error: 'Invalid URL format',
+      message: 'Please provide a valid URL (e.g., https://example.com)'
+    });
+  }
+
+  try {
+    // Analyze the website
+    const analysis = await analyzeWebsite(targetUrl);
+    
+    // Calculate score
+    const score = calculateScore(analysis);
+    
+    // Format response for frontend
+    const response = {
+      score: score,
+      powers: analysis.working.map(item => `${item.title}: ${item.description}`),
+      opportunities: analysis.needsAttention.map(item => `${item.title}: ${item.description}`),
+      insights: analysis.insights.map(item => item.description),
+      meta: {
+        analyzedAt: new Date().toISOString(),
+        model: 'SnipeRank v2.0',
+        url: targetUrl
+      }
+    };
+    
+    // Return JSON
+    res.json(response);
+    
+  } catch (error) {
+    console.error('API error:', error);
+    res.status(500).json({ 
+      error: 'Analysis failed',
+      message: 'Unable to analyze the website. Please try again later.'
+    });
+  }
+});
+
+// SEO report endpoint (HTML - kept for compatibility)
 app.get('/report.html', async (req, res) => {
   const targetUrl = req.query.url;
   
@@ -246,12 +315,11 @@ app.get('/report.html', async (req, res) => {
   res.send(html);
 });
 
-
 // Register the form submission route
-app.post('/api/send-link', sendLinkHandler);  // ✅ Add this here
-
+app.post('/api/send-link', sendLinkHandler);
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`API endpoint available at: http://localhost:${PORT}/api/friendly`);
 });

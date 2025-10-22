@@ -1,203 +1,452 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html — v2025.10.22-approve — Approved analyzer with progress -->
-  <!-- Flow: index -> analyze (this file) -> full-report -->
-  <!-- Fetches from /api/friendly?url=... and renders Score, Superpowers, Opportunities, Insights -->
+  <!-- analyze.html - v3.1.3 - Production version with fixed progress bar -->
+  <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields -->
+  <!-- Compatible with: server.js v2.6.0+ (/api/score and /report.html?report=analyze endpoints) -->
+  <!-- Last updated: August 2, 2025 -->
+  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SnipeRank — AI Visibility Report</title>
-  <meta name="description" content="AI Visibility Score and actionable AI-SEO insights for your site." />
+  <title>SnipeRank - AI SEO Analysis</title>
   <style>
     :root{
-      --max:980px; --pad:20px; --muted:#6b7280; --text:#111827; --bg:#ffffff;
-      --card:#ffffff; --shadow:0 10px 30px rgba(0,0,0,.08); --border:#e5e7eb; --accent:#2563eb;
-      --chip:#f3f4f6; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --light:#f9fafb;
-      --radius:16px;
+      --max-width:760px; --pad-v:3vh; --pad-h:2rem;
+      --muted:#666; --border:#e5e5e5;
+      --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
+      --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
+      --btn-red:#dc3545; --btn-red-hover:#c82333;
     }
     *{box-sizing:border-box}
-    body{margin:0; font:16px/1.5 ui-sans-serif,system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif; color:var(--text); background:var(--light);}
-    header{
-      position:sticky; top:0; background:rgba(255,255,255,.9); backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border); z-index:10;
-    }
-    .bar{max-width:var(--max); margin:0 auto; padding:10px var(--pad); display:flex; align-items:center; gap:14px;}
-    .brand{font-weight:800; letter-spacing:.2px}
-    .dot{width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; margin-right:6px}
-    .url{color:var(--muted); font-size:.93rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-    .actions{margin-left:auto; display:flex; gap:8px}
-    .btn{
-      appearance:none; border:1px solid var(--border); background:#fff; padding:8px 12px; border-radius:10px; cursor:pointer;
-      font-weight:600;
-    }
-    .btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
-    .wrap{max-width:var(--max); margin:22px auto; padding:0 var(--pad) 60px}
-    .scoreCard{
-      display:flex; gap:16px; align-items:center; background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin-bottom:16px;
-    }
-    .badge{
-      width:48px; height:48px; border-radius:50%; display:grid; place-items:center; color:#fff; font-weight:800;
-      background:linear-gradient(135deg,#f59e0b,#f97316);
-    }
-    .meta{display:flex; flex-direction:column; gap:2px}
-    .meta .title{font-weight:800}
-    .meta .sub{color:var(--muted); font-size:.9rem}
-    .progress{
-      width:100%; height:10px; background:#eef2ff; border-radius:999px; overflow:hidden; margin-left:auto; max-width:320px
-    }
-    .progress > div{height:100%; width:0%; background:var(--accent); transition:width .3s ease}
-    .grid{display:grid; grid-template-columns:1fr; gap:16px; margin-top:16px}
-    @media(min-width:860px){ .grid{grid-template-columns:1fr 1fr} }
-    .card{
-      background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px;
-    }
-    h3{margin:0 0 8px}
-    ul{margin:0; padding-left:20px}
-    .insights{margin-top:16px}
-    .muted{color:var(--muted)}
-    .pill{display:inline-block; background:var(--chip); border:1px solid var(--border); padding:2px 8px; border-radius:999px; font-size:.85rem; color:#374151}
-    .err{color:var(--bad); background:#fff1f2; border:1px solid #fecaca; padding:12px 14px; border-radius:12px; display:none; margin-top:12px}
-    .hide{display:none}
-    footer{max-width:var(--max); margin:28px auto 60px; padding:0 var(--pad); color:var(--muted); font-size:.92rem}
-    a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
+    h1{font-size:4rem;font-weight:700;margin:0 0 .25em;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    h2{font-size:1.6rem;font-weight:700;margin:0 0 1rem}
+    p{font-size:1.075rem;line-height:1.65;margin:0 0 1rem}
+
+    .info-row{width:100%;display:flex;gap:1rem;align-items:center;justify-content:space-between;margin:.25rem 0 1rem}
+    .powered-by,.for-url{color:var(--muted);font-size:.95rem}
+    .powered-by a{color:#3182CE;text-decoration:none;font-weight:600}
+    .for-url strong{color:#000}
+
+    .card{width:100%;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff}
+    .score-card{padding:1rem;margin-bottom:2.25rem}
+    .score-top{display:flex;align-items:center;gap:.75rem;justify-content:space-between;flex-wrap:wrap}
+    .score-main{display:flex;align-items:baseline;gap:.5rem}
+    .score-number{font-size:2.25rem;font-weight:800}
+    .score-band{color:var(--muted);font-size:.95rem}
+    .btn-row{display:flex;gap:.5rem;align-items:center}
+    .btn-ghost{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem;transition:.2s}
+    .btn-ghost:hover{background:#f2f2f2}
+    .btn-primary{background:var(--btn-red);color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;display:inline-block;text-decoration:none;text-align:center}
+    .btn-primary:hover{background:var(--btn-red-hover)}
+    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+    .pillar{border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;font-size:.98rem;background:#fff}
+    .pillar .label{font-weight:600}
+    .badge{font-weight:700;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:.85rem;background:#fafafa}
+    .highlights{margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--border)}
+    .highlights h4{margin:0 0 .55rem;font-size:1.2rem;font-weight:800}
+    .highlights ul{margin:0;padding-left:1rem}
+    .highlights li{margin:.45rem 0;line-height:1.5}
+
+    #summary-results .section-title{font-size:1.25rem!important;font-weight:700!important;margin:2rem 0 .6rem!important}
+    #summary-results p{line-height:1.68!important;margin:0 0 .9rem!important;font-size:1.05rem!important;white-space:pre-line}
+    #summary-results ul{margin:0 0 1.1rem 1.1rem!important;padding-left:.2rem!important;list-style:disc!important}
+    #summary-results li{line-height:1.7!important;margin:.6rem 0!important;font-size:1.05rem!important}
+
+    .llm-insights{margin:.4rem 0 1.2rem}
+    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
+    .llm-row:last-child{border-bottom:0}
+    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
+    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
+    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
+
+    /* Get Full Report Form Section */
+    .form-section{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);margin-top:3rem;width:100%}
+    .form-section h3{margin:0 0 2rem;font-size:1.8rem;font-weight:700}
+    .form-container{max-width:100%;margin:0 auto}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:0 auto 1rem}
+    .form-full{grid-column:1/-1}
+    .form-section input, .form-section textarea{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:4px;font-size:16px;font-family:inherit}
+    .form-section textarea{min-height:100px;resize:vertical}
+    .form-section input:focus, .form-section textarea:focus{outline:none;border-color:#3182CE}
+    .form-btn{margin-top:1rem;max-width:300px}
+
+    /* Consultation Section */
+    .consultation-section{text-align:center;padding:3rem 2rem;margin-top:3rem}
+    .consultation-section h3{margin:0 0 1rem;font-size:1.8rem;font-weight:700}
+    .consultation-section p{margin:0 0 2rem;color:var(--muted)}
+    .consultation-info{color:var(--muted);font-size:.95rem;margin-top:1rem}
+    .consultation-info strong{color:#000}
+
+    /* Progress overlay */
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
+    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
+    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .progress-title{font-weight:700;font-size:18px}
+    .progress-pct{color:#666;font-size:16px;font-weight:600}
+    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
+    .progress-eta{color:#666;font-size:14px;line-height:1.4}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1001}
+    .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .modal-title{font-size:20px;font-weight:700;margin:0}
+    .modal-close{background:transparent;border:0;font-size:24px;cursor:pointer;padding:4px;color:#666}
+    .modal-close:hover{color:#000}
+    .modal-content{line-height:1.6}
+    .modal-content p{margin:12px 0;color:#333}
+    .modal-content strong{color:#111}
+
+    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
+    .footer a{color:#3182CE;text-decoration:none}
   </style>
 </head>
 <body>
-  <header>
-    <div class="bar">
-      <span class="brand"><span class="dot"></span>SnipeRank</span>
-      <span id="site-url" class="url"></span>
-      <div class="actions">
-        <button class="btn" id="btn-another">Analyze another site</button>
-        <a class="btn" href="/index.html">Home</a>
-        <a class="btn primary" id="btn-full" href="#">Full report</a>
+  <h1>SnipeRank</h1>
+  <h2>AI SEO Analysis</h2>
+
+  <div class="info-row">
+    <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
+  </div>
+
+  <section class="card score-card" id="scoreCard" aria-live="polite">
+    <div class="score-top">
+      <div class="score-main">
+        <div class="score-number" id="scoreNumber">-</div>
+        <div class="score-band" id="scoreBand">Calculating...</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" id="breakdownBtn" type="button">What goes into this score?</button>
+        <button class="btn-ghost" id="copyBtn" type="button">Copy Shareable Summary</button>
       </div>
     </div>
-  </header>
+    <div class="pillars" id="pillarsGrid"></div>
+    <div class="highlights" id="highlightsBlock" hidden>
+      <h4>Highlights</h4>
+      <ul id="highlightsList"></ul>
+    </div>
+  </section>
 
-  <div class="wrap">
-    <div class="scoreCard">
-      <div class="badge" id="score-badge">—</div>
-      <div class="meta">
-        <div class="title">AI Visibility Score: <span id="score-label">—</span></div>
-        <div class="sub" id="generated-at">Waiting for analysis…</div>
+  <section id="summary-results">
+    <p style="text-align:center;color:gray;">Loading analysis...</p>
+  </section>
+
+  <!-- Get Full Report Form -->
+  <section class="form-section">
+    <h3>Get Your Full Report</h3>
+    <div class="form-container">
+      <form id="full-report-form">
+        <div class="form-grid">
+          <input type="text" id="name-input" placeholder="Your Name" required />
+          <input type="email" id="email-input" placeholder="Your Email" required />
+          <input type="tel" id="phone-input" placeholder="Your Phone (optional)" />
+          <input type="text" id="company-input" placeholder="Your Company (optional)" />
+          <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
+        </div>
+        <button type="submit" class="btn-primary form-btn">Get My Full Report</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Consultation Section -->
+  <section class="consultation-section">
+    <h3>Ready to Improve Your AI Visibility?</h3>
+    <p>After reviewing your analysis, book a free 30-minute consultation to discuss your specific opportunities and next steps.</p>
+    <a href="https://calendly.com/quontora" class="btn-primary" target="_blank" rel="noopener">Schedule Free Consultation</a>
+    <div class="consultation-info">
+      <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
+    </div>
+  </section>
+
+  <div class="footer">
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated August 2.
+  </div>
+
+  <!-- Progress Overlay -->
+  <div id="progress-overlay" class="overlay">
+    <div class="progress-panel">
+      <div class="progress-header">
+        <div class="progress-title">Analyzing your website...</div>
+        <div class="progress-pct" id="progress-pct">0%</div>
       </div>
-      <div class="progress" title="Live analysis progress">
-        <div id="progress-fill"></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-eta" id="progress-eta">
+        Performing comprehensive website analysis.<br>
+        This typically takes <strong>15-45 seconds</strong>.
       </div>
     </div>
+  </div>
 
-    <div class="grid">
-      <div class="card">
-        <h3>Superpowers (What’s working)</h3>
-        <ul id="superpowers">
-          <li class="muted">We’ll list the strengths found on your site…</li>
-        </ul>
+  <!-- Score Breakdown Modal -->
+  <div id="breakdown-modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">What goes into your SnipeRank score?</h3>
+        <button class="modal-close" id="modal-close">×</button>
       </div>
-      <div class="card">
-        <h3>Opportunities (What’s holding you back)</h3>
-        <ul id="opportunities">
-          <li class="muted">And here are targeted fixes with impact…</li>
-        </ul>
+      <div class="modal-content">
+        <p>Your SnipeRank score is calculated based on <strong>50+ SEO factors</strong> optimized for AI search engines. Our analysis evaluates how well your website performs across four critical pillars:</p>
+        
+        <p><strong>🎯 AI Access Readiness (25 points)</strong><br>
+        How easily AI systems can discover, crawl, and understand your site structure.</p>
+        
+        <p><strong>🔒 Trust & Verification Signals (25 points)</strong><br>
+        Authority indicators, security implementation, and credibility markers that AI engines prioritize.</p>
+        
+        <p><strong>📝 LLM Interpretability & Clarity (25 points)</strong><br>
+        Content organization, semantic markup, and clarity for AI language models.</p>
+        
+        <p><strong>🔍 Prompt-Pattern Alignment (25 points)</strong><br>
+        How well your content matches common search patterns and query structures.</p>
+        
+        <p style="margin-top:16px;font-style:italic;color:#666;">
+          Each factor is weighted based on its impact on AI search visibility and ranking potential.
+        </p>
       </div>
     </div>
-
-    <div class="card insights">
-      <h3>Insights</h3>
-      <ul id="insights">
-        <li class="muted">Model perspectives from multiple AI systems…</li>
-      </ul>
-      <div class="err" id="err">Failed to load report. Please try again.</div>
-    </div>
-
-    <footer>
-      Prefer help implementing fixes? <a href="mailto:hello@quontora.com?subject=SnipeRank%20Consultation">Contact us for a free consultation</a>.
-    </footer>
   </div>
 
   <script>
-    // ---------- Helpers ----------
-    const qs = new URLSearchParams(location.search);
-    const targetUrl = qs.get('url') || '';
-    const nameParam = qs.get('n') || '';
-    const emailParam = qs.get('e') || '';
-    const $ = (s) => document.querySelector(s);
-    const byId = (id) => document.getElementById(id);
+    // v3.1.3 - JavaScript with fixed progress handling
+    const LOGO_SOURCES = {
+      ChatGPT: '/img/chatgpt-logo.png',
+      Claude: '/img/claude-logo.png',
+      Gemini: '/img/gemini-logo.png',
+      Copilot: '/img/copilot-logo.png',
+      Perplexity: '/img/perplexity-logo.png',
+    };
+    
+    function logoDivFor(engine){
+      const wrap = document.createElement('div'); 
+      wrap.className = 'llm-logo';
+      const p = LOGO_SOURCES[engine];
+      if (!p) {
+        wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
+        return wrap;
+      }
+      const img = document.createElement('img'); 
+      img.alt = `${engine} logo`; 
+      img.src = p;
+      img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
+      img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
+      return wrap;
+    }
+    
+    function transformAIInsights(root){
+      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')].find(n => /ai\s*engine\s*insights?/i.test((n.textContent || '').trim()));
+      if (!title) return;
+      let ul = title.nextElementSibling;
+      while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
+      if (!ul) return;
+      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent || '').trim());
+      if (!bullets.length) return;
+      const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
+      const box = document.createElement('div'); 
+      box.className = 'llm-insights';
+      engines.forEach((e, i) => {
+        const t = bullets[i]; 
+        if (!t) return; 
+        const row = document.createElement('div'); 
+        row.className = 'llm-row'; 
+        row.appendChild(logoDivFor(e)); 
+        const p = document.createElement('p'); 
+        p.textContent = t; 
+        row.appendChild(p); 
+        box.appendChild(row);
+      });
+      ul.replaceWith(box);
+    }
+    
+    function renderScoreCard(total, pillars, highlights){
+      document.getElementById("scoreNumber").textContent = `${total}/100`;
+      document.getElementById("scoreBand").textContent =
+        total >= 70 ? "Rank: Highly Visible ★★★★☆" : 
+        total >= 55 ? "Rank: Partially Visible ★★★☆☆" : 
+        total >= 40 ? "Rank: Needs Work ★★☆☆☆" : 
+        "Rank: Low Visibility ★☆☆☆☆";
+      const grid = document.getElementById("pillarsGrid"); 
+      grid.innerHTML = "";
+      [
+        ["AI Access Readiness", pillars.access],
+        ["Trust & Verification Signals", pillars.trust],
+        ["LLM Interpretability & Clarity", pillars.clarity],
+        ["Prompt-Pattern Alignment", pillars.alignment]
+      ].forEach(([label, val]) => {
+        const d = document.createElement("div"); 
+        d.className = "pillar"; 
+        d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`; 
+        grid.appendChild(d);
+      });
+      if (highlights && highlights.length) {
+        const ul = document.getElementById("highlightsList"); 
+        ul.innerHTML = ""; 
+        highlights.forEach(h => {
+          const li = document.createElement("li"); 
+          li.textContent = h; 
+          ul.appendChild(li);
+        }); 
+        document.getElementById("highlightsBlock").hidden = false;
+      }
+    }
 
-    // ---------- UI wiring ----------
-    byId('site-url').textContent = targetUrl || '';
-    byId('btn-another').addEventListener('click', () => { window.location.href = '/index.html'; });
-    byId('btn-full').addEventListener('click', (e) => {
+    // Get URL from query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUrl = urlParams.get("url");
+    
+    // Progress simulation with time-based approach
+    function startProgress() {
+      document.getElementById('progress-overlay').style.display = 'flex';
+      const expectedDuration = 30000; // 30 seconds to reach 95%
+      const startTime = Date.now();
+      const progressFill = document.getElementById('progress-fill');
+      const progressPct = document.getElementById('progress-pct');
+      
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const ratio = Math.min(elapsed / expectedDuration, 1);
+        const progress = ratio * 95;
+        
+        progressFill.style.width = progress + '%';
+        progressPct.textContent = Math.floor(progress) + '%';
+        
+        if (progress >= 95) {
+          clearInterval(interval);
+        }
+        
+        if (progress > 30) {
+          document.getElementById('progress-eta').innerHTML = 'Processing content structure and AI optimization signals...<br>Almost done!';
+        }
+      }, 100);
+      
+      return interval;
+    }
+
+    function stopProgress() {
+      const progressFill = document.getElementById('progress-fill');
+      const progressPct = document.getElementById('progress-pct');
+      // Smoothly complete to 100%
+      progressFill.style.transition = 'width 0.5s ease';
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      // Give time to see 100% before hiding
+      setTimeout(() => {
+        document.getElementById('progress-overlay').style.display = 'none';
+      }, 800);
+    }
+
+    // Modal controls
+    document.getElementById('breakdownBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      const dest = `/full-report.html?url=${encodeURIComponent(targetUrl)}&n=${encodeURIComponent(nameParam)}&e=${encodeURIComponent(emailParam)}`;
-      window.location.href = dest;
+      document.getElementById('breakdown-modal').style.display = 'flex';
+    });
+    
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('breakdown-modal').style.display = 'none';
+    });
+    
+    document.getElementById('breakdown-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('breakdown-modal')) {
+        document.getElementById('breakdown-modal').style.display = 'none';
+      }
     });
 
-    // Progress simulation while we fetch (0 → 90%), final jump to 100% on render
-    let p = 0;
-    const fill = byId('progress-fill');
-    const tick = setInterval(() => {
-      p = Math.min(90, p + Math.random()*9 + 3);
-      fill.style.width = p.toFixed(0) + '%';
-    }, 300);
+    // Copy button
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
+      const labels = [...document.querySelectorAll('.pillar .label')].map(el => el.textContent.trim());
+      const vals = [...document.querySelectorAll('.pillar .badge')].map(el => el.textContent.trim());
+      const highlights = [...document.querySelectorAll('#highlightsList li')].map(li => li.textContent.trim());
+      const txt = [
+        `Website: ${targetUrl}`,
+        `SnipeRank Score: ${scoreText}`,
+        `Pillars:`, ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
+        ``, `Highlights/Issues:`, ...highlights.map(h => `- ${h}`)
+      ].join("\n");
+      try { 
+        await navigator.clipboard.writeText(txt);
+        const b = document.getElementById("copyBtn"); 
+        const old = b.textContent; 
+        b.textContent = "Copied!"; 
+        setTimeout(() => b.textContent = old, 1500);
+      } catch { 
+        window.prompt("Copy the summary:", txt); 
+      }
+    });
 
-    // ---------- Fetch report ----------
-    async function run() {
+    // Full report form submission
+    document.getElementById('full-report-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name-input').value.trim();
+      const email = document.getElementById('email-input').value.trim();
+      const phone = document.getElementById('phone-input').value.trim();
+      const company = document.getElementById('company-input').value.trim();
+      const context = document.getElementById('context-input').value.trim();
+      
+      if (!name || !email || !targetUrl) return;
+      
+      // Store user info
+      sessionStorage.setItem('sniperank:name', name);
+      sessionStorage.setItem('sniperank:email', email);
+      sessionStorage.setItem('sniperank:phone', phone);
+      sessionStorage.setItem('sniperank:company', company);
+      sessionStorage.setItem('sniperank:context', context);
+      sessionStorage.setItem('sniperank:url', targetUrl);
+      
+      // Navigate to full report
+      window.location.href = `full-report.html?url=${encodeURIComponent(targetUrl)}`;
+    });
+
+    // Load analysis on page load
+    document.addEventListener("DOMContentLoaded", async () => {
       if (!targetUrl) {
-        byId('err').style.display = 'block';
-        byId('err').textContent = 'Missing ?url= parameter.';
-        clearInterval(tick);
+        document.getElementById("current-url").textContent = "No URL provided";
+        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>No URL provided. Please go back to the homepage.</p>";
         return;
       }
+      
+      document.getElementById("current-url").textContent = targetUrl;
+      
+      const progressTimer = startProgress();
+
+      let apiBase = '';
       try {
-        const endpoint = `/api/friendly?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' }});
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        const data = await res.json();
+        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
+        if (!probe.ok) throw 0;
+      } catch { 
+        apiBase = 'https://sniperank-app2.onrender.com'; 
+      }
 
-        // Expected shape: { score:number (0-10), strengths:string[], opportunities:string[], insights:string[], generatedAt?: string }
-        const score = Number(data.score ?? 0);
-        const strengths = Array.isArray(data.strengths) ? data.strengths : (data.superpowers || []);
-        const opps = Array.isArray(data.opportunities) ? data.opportunities : (data.issues || []);
-        const insights = Array.isArray(data.insights) ? data.insights : [];
-
-        // Render
-        byId('score-badge').textContent = isNaN(score) ? '—' : String(score);
-        byId('score-label').textContent = isNaN(score) ? '—' : `${score} / 10`;
-        byId('generated-at').textContent = (data.generatedAt ? `Generated ${data.generatedAt}` : `Generated ${new Date().toLocaleString()}`) + ' • SnipeRank v2.0';
-
-        renderList('#superpowers', strengths);
-        renderList('#opportunities', opps);
-        renderList('#insights', insights);
-
-        clearInterval(tick);
-        requestAnimationFrame(() => { fill.style.width = '100%'; });
-
+      try {
+        const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
+        const j = await r.json();
+        renderScoreCard(j.score, j.pillars, j.highlights);
+        
+        // Store data for full report
+        sessionStorage.setItem('sniperank:url', targetUrl);
+        sessionStorage.setItem('sniperank:data', JSON.stringify(j));
       } catch (e) {
-        console.error(e);
-        byId('err').style.display = 'block';
-        clearInterval(tick);
+        console.error('Score error:', e);
       }
-    }
 
-    function renderList(sel, items){
-      const el = $(sel);
-      el.innerHTML = '';
-      if (!items || !items.length){
-        const li = document.createElement('li');
-        li.textContent = 'No data.';
-        el.appendChild(li);
-        return;
+      try {
+        const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);
+        const html = await res.text();
+        const host = document.getElementById('summary-results'); 
+        host.innerHTML = html; 
+        transformAIInsights(host);
+      } catch {
+        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading analysis report.</p>";
+      } finally {
+        clearInterval(progressTimer);
+        stopProgress();
       }
-      items.forEach(text => {
-        const li = document.createElement('li');
-        li.textContent = text;
-        el.appendChild(li);
-      });
-    }
-
-    run();
+    });
   </script>
 </body>
 </html>

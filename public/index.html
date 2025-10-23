@@ -1370,10 +1370,8 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
     </div>
 
     <!-- Scroll Up Arrow -->
-    <button id="scroll-up-arrow" class="scroll-up-arrow" title="Run Free Scan">
-        ↑
-    </button>
-
+<button id="scroll-up-arrow" class="scroll-up-arrow" title="Back to top" aria-label="Back to top">↑</button>
+    
     <!-- Footer -->
     <footer>
         <div class="footer-content">
@@ -1432,16 +1430,22 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
         }
 
         // Scroll up arrow functionality
-        const scrollUpArrow = document.getElementById('scroll-up-arrow');
-        
-        // Show/hide arrow based on scroll position
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                scrollUpArrow.classList.add('visible');
-            } else {
-                scrollUpArrow.classList.remove('visible');
-            }
-        });
+const scrollUpArrow = document.getElementById('scroll-up-arrow');
+
+// Show sooner than before (180px instead of 300px)
+window.addEventListener('scroll', () => {
+  if (window.pageYOffset > 180) {
+    scrollUpArrow.classList.add('visible');
+  } else {
+    scrollUpArrow.classList.remove('visible');
+  }
+});
+
+// Prefer sending folks back to the form; fall back to top
+scrollUpArrow.addEventListener('click', () => {
+  const target = document.getElementById('free-scan-section') || document.body;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
         
         // Handle arrow click to scroll to free scan section
         scrollUpArrow.addEventListener('click', function() {

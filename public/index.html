@@ -10,6 +10,10 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SnipeRank — Is Your Website Ready for AI Powered Search?</title>
+
+    <!-- NEW: shared overrides (keeps arrow aligned to content) -->
+    <link rel="stylesheet" href="styles/shared.css" />
+
     <style>
         :root {
             --max-width: 1200px;
@@ -53,7 +57,7 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
             overflow: hidden;
             position: relative;
             white-space: nowrap;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 12px 12px 0 0;
             margin: 2rem 0 0 0;
         }
@@ -770,7 +774,8 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
             margin: 0.15rem 0;
         }
         
-        /* Scroll Up Arrow */
+        /* ORIGINAL scroll-up arrow styles remain,
+           but final placement/visibility is controlled by shared.css + main.js */
         .scroll-up-arrow {
             position: fixed;
             bottom: 2rem;
@@ -1060,8 +1065,8 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
             <div class="quick-links">
                 <a href="#how-it-works">Detailed Overview ↓</a>
                 <a href="#pricing">Pricing ↓</a>
-                <a href="#whitepaper">Technical Whitepaper ↓</a>
-                <a href="#technology">Architecture & Stack ↓</a>
+                <a href="whitepaper.html">Technical Whitepaper →</a>
+                <a href="tech-stack.html">Architecture & Stack →</a>
             </div>
         </div>
 
@@ -1212,170 +1217,16 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
             </div>
         </section>
 
-        <!-- Whitepaper Section -->
+        <!-- Whitepaper Section (links now route to dedicated pages above) -->
         <section id="whitepaper" class="section">
             <h2>Technical Whitepaper</h2>
-            
-            <h3>Executive Summary</h3>
-            <p>
-                SnipeRank represents a paradigm shift in SEO analysis, moving from keyword centric evaluation 
-                to semantic understanding powered by state of the art natural language processing. This whitepaper 
-                outlines our technical architecture, methodologies, and the scientific principles underlying our approach.
-            </p>
-
-            <h3>The Challenge: SEO in the Age of AI</h3>
-            <p>
-                Traditional SEO tools were designed for keyword matching algorithms. Today's search engines use 
-                transformer based models (BERT, GPT, and their variants) to understand content semantically. 
-                This fundamental shift requires new analytical approaches that can model how these AI systems 
-                interpret and rank content.
-            </p>
-
-            <h3>Our Solution: Multi Modal AI Analysis</h3>
-            <p>
-                SnipeRank employs a sophisticated ensemble of AI models to analyze websites across multiple dimensions:
-            </p>
-            
-            <ul>
-                <li><strong>Semantic Embeddings:</strong> We generate high dimensional vector representations of your content 
-                using advanced embedding models, allowing us to measure semantic similarity and topical coherence.</li>
-                
-                <li><strong>Entity Recognition & Knowledge Graphs:</strong> Our NER systems identify and map relationships 
-                between entities, building a knowledge graph that represents your site's informational structure.</li>
-                
-                <li><strong>Transformer Based Scoring:</strong> Custom trained transformer models evaluate content quality, 
-                relevance, and authority using architectures similar to those employed by major search engines.</li>
-                
-                <li><strong>Behavioral Simulation:</strong> We simulate user interaction patterns to predict engagement 
-                metrics and identify UX issues that impact SEO performance.</li>
-            </ul>
-
-            <h3>Technical Architecture</h3>
-            <p>
-                Our platform is built on a microservices architecture designed for scalability and reliability:
-            </p>
-            
-            <div class="tech-grid">
-                <div class="tech-card">
-                    <h4>Distributed Crawling Layer</h4>
-                    <p>Kubernetes orchestrated crawler pods with intelligent rate limiting and retry mechanisms.</p>
-                    <div class="tech-list">Technologies: Go, Kubernetes, Redis, Kafka</div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>AI Processing Pipeline</h4>
-                    <p>GPU accelerated inference servers running optimized transformer models.</p>
-                    <div class="tech-list">Technologies: Python, PyTorch, CUDA, TensorRT</div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>Data Storage & Processing</h4>
-                    <p>Distributed data lake with real time stream processing capabilities.</p>
-                    <div class="tech-list">Technologies: Apache Spark, Cassandra, PostgreSQL, S3</div>
-                </div>
-            </div>
-
-            <h3>Scoring Methodology</h3>
-            <p>
-                Our proprietary SnipeRank Score combines multiple weighted factors:
-            </p>
-            <ul>
-                <li>Semantic Coherence Score (25%): Measures topical consistency and relevance</li>
-                <li>Technical Excellence Score (20%): Evaluates site performance and crawlability</li>
-                <li>Content Authority Score (20%): Assesses expertise and trustworthiness signals</li>
-                <li>User Experience Score (20%): Analyzes engagement potential and accessibility</li>
-                <li>AI Readability Score (15%): Determines how well AI systems can parse and understand content</li>
-            </ul>
-
-            <h3>Privacy & Security</h3>
-            <p>
-                SnipeRank adheres to strict privacy standards. We never store sensitive data, all analysis 
-                is performed in memory, and results are encrypted at rest and in transit using AES-256 encryption.
-            </p>
+            <p>Read the detailed whitepaper here: <a href="whitepaper.html">Technical Whitepaper →</a></p>
         </section>
 
         <!-- Technology Stack Section -->
         <section id="technology" class="section">
             <h2>Technology Stack & Implementation</h2>
-            
-            <p>
-                Building SnipeRank required combining cutting-edge technologies across multiple domains. 
-                Our engineering team leveraged years of experience in distributed systems, machine learning, 
-                and web technologies to create a platform that operates at scale.
-            </p>
-
-            <h3>Core Technologies</h3>
-            
-            <div class="tech-grid">
-                <div class="tech-card">
-                    <h4>Backend Infrastructure</h4>
-                    <p>High-performance, distributed backend built for reliability and scale.</p>
-                    <div class="tech-list">
-                        <strong>Languages:</strong> Go, Python, Rust<br>
-                        <strong>Frameworks:</strong> FastAPI, Gin, Actix<br>
-                        <strong>Infrastructure:</strong> Docker, Kubernetes, Terraform
-                    </div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>Machine Learning Stack</h4>
-                    <p>State-of-the-art ML pipeline for real-time inference and training.</p>
-                    <div class="tech-list">
-                        <strong>Frameworks:</strong> PyTorch, Transformers, spaCy<br>
-                        <strong>Models:</strong> BERT, RoBERTa, Custom CNNs<br>
-                        <strong>Optimization:</strong> ONNX, TensorRT, Quantization
-                    </div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>Data Processing</h4>
-                    <p>Distributed data processing for handling millions of pages.</p>
-                    <div class="tech-list">
-                        <strong>Streaming:</strong> Apache Kafka, Redis Streams<br>
-                        <strong>Batch:</strong> Apache Spark, Dask<br>
-                        <strong>Storage:</strong> PostgreSQL, Cassandra, S3
-                    </div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>Frontend & Visualization</h4>
-                    <p>Interactive, responsive interfaces for data visualization.</p>
-                    <div class="tech-list">
-                        <strong>Framework:</strong> React, Next.js<br>
-                        <strong>Visualization:</strong> D3.js, Chart.js<br>
-                        <strong>Styling:</strong> Tailwind CSS, Framer Motion
-                    </div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>Security & Monitoring</h4>
-                    <p>Enterprise-grade security and observability.</p>
-                    <div class="tech-list">
-                        <strong>Security:</strong> OAuth 2.0, JWT, Vault<br>
-                        <strong>Monitoring:</strong> Prometheus, Grafana<br>
-                        <strong>Logging:</strong> ELK Stack, Jaeger
-                    </div>
-                </div>
-                
-                <div class="tech-card">
-                    <h4>Cloud & DevOps</h4>
-                    <p>Multi-cloud deployment with automated CI/CD.</p>
-                    <div class="tech-list">
-                        <strong>Providers:</strong> AWS, GCP, Cloudflare<br>
-                        <strong>CI/CD:</strong> GitHub Actions, ArgoCD<br>
-                        <strong>IaC:</strong> Terraform, Helm Charts
-                    </div>
-                </div>
-            </div>
-
-            <h3>Engineering Achievements</h3>
-            <ul>
-                <li><strong>Sub second Inference:</strong> Optimized ML models deliver results in under 500ms</li>
-                <li><strong>Horizontal Scalability:</strong> Auto scaling infrastructure handles 10,000+ concurrent analyses</li>
-                <li><strong>99.9% Uptime:</strong> Redundant systems and automatic failover ensure reliability</li>
-                <li><strong>Real time Processing:</strong> Stream processing architecture enables live analysis</li>
-                <li><strong>Global CDN:</strong> Edge computing reduces latency for worldwide users</li>
-            </ul>
+            <p>See the architecture & stack details here: <a href="tech-stack.html">Architecture & Stack →</a></p>
         </section>
 
         <!-- Final CTA Section -->
@@ -1387,7 +1238,7 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
     </div>
 
     <!-- Scroll Up Arrow -->
-    <button id="scroll-up-arrow" class="scroll-up-arrow" title="Run Free Scan">
+    <button id="scroll-up-arrow" class="scroll-up-arrow" title="Run Free Scan" aria-label="Run Free Scan">
         ↑
     </button>
 
@@ -1442,48 +1293,12 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
             event.preventDefault();
             const form = event.target;
             const email = form.querySelector('input[type="email"]').value;
-            
-            // Here you would normally send to your backend
             alert('Thanks for joining our early-bird list! We\'ll notify you when paid plans launch.');
             form.reset();
         }
-
-        // Scroll up arrow functionality
-        const scrollUpArrow = document.getElementById('scroll-up-arrow');
-        
-        // Show/hide arrow based on scroll position
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                scrollUpArrow.classList.add('visible');
-            } else {
-                scrollUpArrow.classList.remove('visible');
-            }
-        });
-        
-        // Handle arrow click to scroll to free scan section
-        scrollUpArrow.addEventListener('click', function() {
-            const freeScanSection = document.getElementById('free-scan-section');
-            if (freeScanSection) {
-                freeScanSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
     </script>
+
+    <!-- NEW: arrow behavior & placement logic -->
+    <script src="scripts/main.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnipeRank — Technical Whitepaper</title>
+  <style>
+    :root{--content-width:760px;--pad-h:2rem;--primary:#3182CE;--primary-dark:#2563EB;--border:#e2e8f0;--muted:#4a5568;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Helvetica,Arial,sans-serif;color:#000;background:#fff;line-height:1.7}
+    header,footer,main{max-width:var(--content-width);margin:0 auto;padding:1.5rem var(--pad-h)}
+    .logo{font-size:3rem;font-weight:700;letter-spacing:-1px;margin:.25rem 0;
+      background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .powered{color:#666;font-size:.9rem;margin:.25rem 0 1rem}
+    .powered a{color:var(--primary);text-decoration:none}
+    nav{display:flex;gap:.75rem;flex-wrap:wrap;margin:1rem 0 1.25rem}
+    .btn{display:inline-block;padding:.6rem 1rem;border-radius:8px;font-weight:700;text-decoration:none;border:1px solid #111;color:#111}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .hero{background:#f7fafc;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+    h1{font-size:1.9rem;margin-bottom:.25rem}
+    h2{font-size:1.4rem;margin:1.75rem 0 .75rem}
+    h3{font-size:1.15rem;margin:1.25rem 0 .5rem}
+    p{margin:.75rem 0;color:#111}
+    ul{margin:.75rem 0 .75rem 1.25rem}
+    li{margin:.45rem 0;color:#111}
+    .card{border:1px solid var(--border);border-radius:12px;padding:1rem;margin:1rem 0;background:#fff}
+    footer{border-top:1px solid var(--border);color:#697285;text-align:center;font-size:.85rem}
+    footer a{color:var(--primary);text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">SnipeRank</div>
+    <div class="powered">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    <nav>
+      <a class="btn" href="index.html">← Back to Homepage</a>
+      <a class="btn" href="tech-stack.html">Architecture & Stack →</a>
+      <a class="btn primary" href="#exec">Jump to Executive Summary</a>
+    </nav>
+    <div class="hero">
+      <h1>Technical Whitepaper</h1>
+      <p id="exec">This document explains SnipeRank’s technical approach to AI-era SEO: how we crawl, interpret, score, and report using semantic and AI-aware methods.</p>
+    </div>
+  </header>
+
+  <main>
+    <h2>Executive Summary</h2>
+    <p>
+      SnipeRank represents a shift from keyword-centric SEO to semantic understanding powered by modern NLP.
+      We model how AI systems (ChatGPT, Gemini, etc.) interpret your site, then produce an AI Visibility score and step-by-step fixes.
+    </p>
+
+    <h2>The Challenge: SEO in the Age of AI</h2>
+    <p>
+      Search engines and AI assistants now use transformer models (BERT, GPT variants) to parse meaning, entities, and intent.
+      Traditional tools miss this layer; SnipeRank measures how well content is understood by AI systems—not just crawlers.
+    </p>
+
+    <h2>Our Solution: Multi-Modal AI Analysis</h2>
+    <div class="card">
+      <h3>Semantic Embeddings</h3>
+      <p>We compute embeddings to measure topical coherence and coverage within a content cluster.</p>
+      <h3>Entity Recognition & Knowledge Graphs</h3>
+      <p>Named entities and relationships are detected and mapped to reveal gaps and disambiguation issues.</p>
+      <h3>Transformer-Based Scoring</h3>
+      <p>Lightweight transformer evaluators approximate how AI models rate clarity, authority, and structure.</p>
+      <h3>Behavioral Simulation</h3>
+      <p>We simulate user flows to flag UX pitfalls that degrade AI-assisted discovery and engagement.</p>
+    </div>
+
+    <h2>Scoring Methodology</h2>
+    <p>Our SnipeRank Score blends weighted factors optimized for AI visibility:</p>
+    <ul>
+      <li><strong>Semantic Coherence (25%)</strong> — topical consistency & relevance</li>
+      <li><strong>Technical Excellence (20%)</strong> — performance & crawlability</li>
+      <li><strong>Content Authority (20%)</strong> — expertise & trust signals</li>
+      <li><strong>User Experience (20%)</strong> — accessibility & engagement potential</li>
+      <li><strong>AI Readability (15%)</strong> — schema, structure, and clarity for LLMs</li>
+    </ul>
+
+    <h2>Privacy & Security</h2>
+    <p>
+      We avoid storing sensitive data, encrypt results in transit and at rest, and respect robots.txt and rate limits.
+      Enterprise options support dedicated infrastructure and stricter controls.
+    </p>
+
+    <h2>What’s Next</h2>
+    <ul>
+      <li>Deeper SGE/AI-answer readiness scoring</li>
+      <li>Duplicate AI-generated content detection</li>
+      <li>Intent clustering for smarter internal linking</li>
+    </ul>
+  </main>
+
+  <footer>
+    © 2025 SnipeRank. <a href="index.html">Homepage</a> · <a href="tech-stack.html">Architecture & Stack</a>
+  </footer>
+</body>
+</html>

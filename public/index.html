@@ -770,64 +770,47 @@ Changes: Fixed pricing alignment with reduced font sizes, added scroll-up arrow,
             margin: 0.15rem 0;
         }
         
-        /* Scroll Up Arrow */
-        .scroll-up-arrow {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: bold;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
-        }
-        
-        .scroll-up-arrow.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .scroll-up-arrow:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.4);
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 900px) {
-            .tech-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .pricing-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .pricing-card {
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-            
-            .pricing-card:last-child {
-                border-bottom: none;
-            }
-            
-            .comparison-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .comparison-side:first-child {
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
+     /* Scroll Up Arrow – v2 */
+.scroll-up-arrow{
+  position: fixed;
+  bottom: 1.25rem;   /* tighter than 2rem */
+  right: 1.25rem;
+  width: 60px;       /* up from 50px */
+  height: 60px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.4rem; /* slightly larger caret */
+  font-weight: 700;
+  opacity: 0;
+  visibility: hidden;
+  transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+  z-index: 1000;
+  box-shadow: 0 10px 24px rgba(49,130,206,.35); /* stronger */
+}
+
+.scroll-up-arrow.visible{
+  opacity: 1;
+  visibility: visible;
+  animation: sr-pulse 2.4s ease-in-out infinite; /* gentle pulse */
+}
+
+.scroll-up-arrow:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(49,130,206,.45);
+}
+
+@keyframes sr-pulse{
+  0%,100% { box-shadow: 0 10px 24px rgba(49,130,206,.35); }
+  50%     { box-shadow: 0 14px 30px rgba(49,130,206,.50); }
+}
+
+/* (optional) compact on very small screens */
+@media (max-width:480px){
+  .scroll-up-arrow { width: 54px; height: 54px; font-size: 1.25rem; }
+}
         }
         
         @media (max-width: 768px) {

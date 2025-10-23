@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnipeRank — Architecture & Technology Stack</title>
+  <style>
+    :root{--content-width:760px;--pad-h:2rem;--primary:#3182CE;--primary-dark:#2563EB;--border:#e2e8f0;--muted:#4a5568;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Helvetica,Arial,sans-serif;color:#000;background:#fff;line-height:1.7}
+    header,footer,main{max-width:var(--content-width);margin:0 auto;padding:1.5rem var(--pad-h)}
+    .logo{font-size:3rem;font-weight:700;letter-spacing:-1px;margin:.25rem 0;
+      background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .powered{color:#666;font-size:.9rem;margin:.25rem 0 1rem}
+    .powered a{color:var(--primary);text-decoration:none}
+    nav{display:flex;gap:.75rem;flex-wrap:wrap;margin:1rem 0 1.25rem}
+    .btn{display:inline-block;padding:.6rem 1rem;border-radius:8px;font-weight:700;text-decoration:none;border:1px solid #111;color:#111}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .hero{background:#f7fafc;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+    h1{font-size:1.9rem;margin-bottom:.25rem}
+    h2{font-size:1.4rem;margin:1.75rem 0 .75rem}
+    h3{font-size:1.15rem;margin:1.25rem 0 .5rem}
+    p{margin:.75rem 0;color:#111}
+    .grid{display:grid;grid-template-columns:1fr;gap:1rem}
+    .card{border:1px solid var(--border);border-radius:12px;padding:1rem;background:#fff}
+    .meta{color:#697285;font-size:.95rem}
+    ul{margin:.75rem 0 .75rem 1.25rem}
+    li{margin:.45rem 0}
+    footer{border-top:1px solid var(--border);color:#697285;text-align:center;font-size:.85rem}
+    footer a{color:var(--primary);text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">SnipeRank</div>
+    <div class="powered">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    <nav>
+      <a class="btn" href="index.html">← Back to Homepage</a>
+      <a class="btn" href="whitepaper.html">Technical Whitepaper →</a>
+      <a class="btn primary" href="#stack">Jump to Stack</a>
+    </nav>
+    <div class="hero">
+      <h1>Architecture & Technology Stack</h1>
+      <p class="meta">High-level overview of SnipeRank’s components and technologies.</p>
+    </div>
+  </header>
+
+  <main id="stack">
+    <div class="grid">
+      <section class="card">
+        <h2>Backend Infrastructure</h2>
+        <p>High-performance, distributed backend built for reliability and scale.</p>
+        <ul>
+          <li><strong>Languages:</strong> Go, Python, Rust</li>
+          <li><strong>Frameworks:</strong> FastAPI, Gin, Actix</li>
+          <li><strong>Infrastructure:</strong> Docker, Kubernetes, Terraform</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Machine Learning Stack</h2>
+        <p>Real-time inference + offline evaluation pipelines.</p>
+        <ul>
+          <li><strong>Frameworks:</strong> PyTorch, Transformers, spaCy</li>
+          <li><strong>Models:</strong> BERT, RoBERTa, custom light transformers</li>
+          <li><strong>Optimization:</strong> ONNX, TensorRT, quantization</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Data Processing</h2>
+        <p>Distributed data processing for large crawls.</p>
+        <ul>
+          <li><strong>Streaming:</strong> Apache Kafka, Redis Streams</li>
+          <li><strong>Batch:</strong> Apache Spark, Dask</li>
+          <li><strong>Storage:</strong> PostgreSQL, Cassandra, S3</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Frontend & Visualization</h2>
+        <p>Clean, responsive interfaces for analysis and reporting.</p>
+        <ul>
+          <li><strong>Framework:</strong> React, Next.js</li>
+          <li><strong>Visualization:</strong> D3.js, Chart.js</li>
+          <li><strong>Styling:</strong> Tailwind CSS, Framer Motion</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Security & Monitoring</h2>
+        <p>Enterprise-grade security and observability.</p>
+        <ul>
+          <li><strong>Security:</strong> OAuth 2.0, JWT, Vault</li>
+          <li><strong>Monitoring:</strong> Prometheus, Grafana</li>
+          <li><strong>Logging:</strong> ELK Stack, Jaeger</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Cloud & DevOps</h2>
+        <p>Multi-cloud deployment with automated CI/CD.</p>
+        <ul>
+          <li><strong>Providers:</strong> AWS, GCP, Cloudflare</li>
+          <li><strong>CI/CD:</strong> GitHub Actions, ArgoCD</li>
+          <li><strong>IaC:</strong> Terraform, Helm Charts</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Engineering Achievements</h2>
+        <ul>
+          <li><strong>Sub-second inference:</strong> optimized models</li>
+          <li><strong>Horizontal scalability:</strong> 10k+ concurrent analyses</li>
+          <li><strong>99.9% uptime:</strong> redundancy & automatic failover</li>
+          <li><strong>Global CDN:</strong> edge-accelerated delivery</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 SnipeRank. <a href="index.html">Homepage</a> · <a href="whitepaper.html">Technical Whitepaper</a>
+  </footer>
+</body>
+</html>

@@ -1,23 +1,32 @@
-/*
-  server.js — v3.0.0 (one-file backend)
-  Purpose: Guarantees /api/full exists and returns valid JSON (or safe fallback).
-  - GET /                : Health check
-  - GET /api/friendly    : Lightweight analyzer (score 0–10 -> 0–100 mapped in frontend)
-  - GET /api/full        : Comprehensive AI analysis (OpenAI) with robust fallback
-  - HEAD /api/full       : 200 if handler available (used by frontend probe)
-  - GET /api/full/status : { ok, openai } service status
-  - GET /report.html     : Simple HTML report for analyze page
-  - POST /api/send-link  : Accepts form posts (no-op OK response)
+/**
+ * SnipeRank Backend — server.js v3.1.0 (CommonJS)
+ * One-file backend that GUARANTEES /api/full exists.
+ * 
+ * Routes:
+ *  - GET  /                   health
+ *  - GET  /api/friendly       lightweight analyzer
+ *  - GET  /api/full           comprehensive analysis (OpenAI) with safe fallback
+ *  - HEAD /api/full           probe (200 if server is up)
+ *  - GET  /api/full/status    { ok, openai }
+ *  - GET  /report.html        HTML snippet used by analyze.html
+ *  - POST /api/send-link      accepts form posts (returns ok:true)
+ * 
+ * Env:
+ *  - OPENAI_API_KEY (optional; if missing, /api/full returns a rich fallback)
+ */
 
-  Requires (for full analysis):
-    - OPENAI_API_KEY  (optional; if missing, fallback JSON is returned)
-*/
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+const cheerio = require("cheerio");
 
-import express from "express";
-import cors from "cors";
-import axios from "axios";
-import * as cheerio from "cheerio";
-import OpenAI from "openai";
+// OpenAI is optional. If the lib isn't installed or key missing, we still serve fallback.
+let OpenAI = null;
+try {
+  OpenAI = require("openai");
+} catch (_) {
+  // Library not installed; we'll run in fallback mode.
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +34,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// ---------- Utilities ----------
+// ---------- Helpers ----------
 function extractDomain(u) {
   try {
     const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
@@ -56,23 +65,24 @@ function fallbackPayload(url, reason = "fallback", snippet = "") {
       "[PRIORITY: Medium] Image Alt Text Coverage: Low coverage limits AI understanding of visuals. Solution: Add descriptive alt attributes to key images. Impact: Better context for multimodal AI."
     ],
     engineInsights: [
-      "ChatGPT: Benefits from explicit FAQs and task-oriented sections; add Q/A blocks for core intents.",
-      "Claude: Prefers clear structure and citations; ensure headings reflect user tasks and include authoritative links.",
-      "Gemini: Leans on entities; add schema and unambiguous entity mentions for brands, services, and locations.",
-      "Perplexity: Surfaces sources; add referenceable pages (guides, docs) with clear titles and summaries.",
-      "Copilot: Values concise, skimmable answers; add checklists and short how-to steps."
+      "ChatGPT: Add explicit FAQs and task-oriented sections for core intents.",
+      "Claude: Use clear headings and cite authoritative sources.",
+      "Gemini: Strengthen entity signals (schema, unambiguous brand/service/location mentions).",
+      "Perplexity: Publish referenceable guides with clear titles and summaries.",
+      "Copilot: Provide concise checklists and short how-to steps."
     ],
     meta: { url, mode: "lite-fallback", reason, snippet }
   };
 }
 
-// ---------- Basic analyzer for /api/friendly ----------
+// ---------- Simple analyzer for /api/friendly ----------
 async function analyzeWebsite(url) {
   try {
     const response = await axios.get(url, {
       timeout: 10000,
       headers: { "User-Agent": "SnipeRank SEO Analyzer Bot" }
     });
+
     const $ = cheerio.load(response.data);
     const analysis = { working: [], needsAttention: [], insights: [] };
 
@@ -192,7 +202,7 @@ async function analyzeWebsite(url) {
       });
     }
 
-    // Fill up to target counts
+    // Fill up to counts
     const genericWorking = [
       {
         title: "Mobile-Responsive Design",
@@ -278,26 +288,14 @@ async function analyzeWebsite(url) {
   } catch (error) {
     return {
       working: [
-        {
-          title: "Basic Web Presence",
-          description: "Your website is accessible and loads properly."
-        }
+        { title: "Basic Web Presence", description: "Your website is accessible and loads properly." }
       ],
       needsAttention: [
-        {
-          title: "Analysis Connection Issue",
-          description: "Technical limitations prevented complete analysis."
-        },
-        {
-          title: "Schema Markup Missing",
-          description: "Your site likely lacks structured data for AI engines."
-        }
+        { title: "Analysis Connection Issue", description: "Technical limitations prevented complete analysis." },
+        { title: "Schema Markup Missing", description: "Your site likely lacks structured data for AI engines." }
       ],
       insights: [
-        {
-          description:
-            "Complete AI analysis requires deeper technical access for accurate insights."
-        }
+        { description: "Complete AI analysis requires deeper technical access for accurate insights." }
       ]
     };
   }
@@ -313,7 +311,10 @@ app.get("/api/friendly", async (req, res) => {
   try { new URL(targetUrl); } catch { return res.status(400).json({ error: "Invalid URL format" }); }
 
   const analysis = await analyzeWebsite(targetUrl);
-  const score10 = Math.max(0, Math.min(10, Math.round(5 + analysis.working.length * 0.5 - analysis.needsAttention.length * 0.3)));
+  const score10 = Math.max(
+    0,
+    Math.min(10, Math.round(5 + analysis.working.length * 0.5 - analysis.needsAttention.length * 0.3))
+  );
   res.json({
     score: score10,
     powers: analysis.working.map(i => `${i.title}: ${i.description}`),
@@ -323,23 +324,24 @@ app.get("/api/friendly", async (req, res) => {
   });
 });
 
-// Comprehensive AI analysis (OpenAI) — ALWAYS RETURNS JSON
+// --- Comprehensive analysis (OpenAI optional) ---
 app.get("/api/full", async (req, res) => {
   const url = req.query.url;
   if (!url) return res.status(400).json({ error: "Missing URL parameter" });
   try { new URL(url); } catch { return res.status(400).json({ error: "Invalid URL format" }); }
 
-  // If no key, return fallback immediately
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(200).json(fallbackPayload(url, "no_api_key"));
+  // If OpenAI library missing OR no key -> fallback JSON (still valid)
+  if (!OpenAI || !process.env.OPENAI_API_KEY) {
+    return res.status(200).json(fallbackPayload(url, !OpenAI ? "no_openai_lib" : "no_api_key"));
   }
 
   try {
-    // Fetch page content
+    // Fetch page
     const resp = await axios.get(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; SnipeRankBot/1.0)" },
       timeout: 15000
     });
+
     const $ = cheerio.load(resp.data);
     const text = $("body").text().replace(/\s+/g, " ").trim();
     const title = $("title").text().trim();
@@ -349,15 +351,12 @@ app.get("/api/full", async (req, res) => {
     const content = `URL: ${url}\nTitle: ${title}\nDescription: ${desc}\nHeadings: ${heads}\nBody: ${text.slice(0, 12000)}`;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
     const prompt = `
 You are an expert AI SEO specialist focused on AI engines (ChatGPT, Claude, Gemini, Perplexity, Copilot).
-
 Analyze:
 """
 ${content}
 """
-
 Return ONLY JSON with keys:
 - "whatsWorking": 10 items (2–4 sentences each, site-specific)
 - "needsAttention": 25 items, each like "[PRIORITY: High|Medium|Low] Title: Problem for AI engines. Solution: 2–3 steps. Impact: ..."
@@ -407,13 +406,13 @@ No prose outside JSON. No code fences.
   }
 });
 
-// Probes for frontend
+// Probes
 app.head("/api/full", (_req, res) => res.status(200).end());
 app.get("/api/full/status", (_req, res) =>
-  res.json({ ok: true, openai: !!process.env.OPENAI_API_KEY })
+  res.json({ ok: true, openai: !!(OpenAI && process.env.OPENAI_API_KEY) })
 );
 
-// HTML report used by analyze.html
+// HTML snippet for analyze page
 app.get("/report.html", async (req, res) => {
   const targetUrl = req.query.url;
   if (!targetUrl) return res.status(400).send("<p style='color:red'>Missing URL parameter.</p>");
@@ -436,14 +435,11 @@ app.get("/report.html", async (req, res) => {
   res.send(html);
 });
 
-// Accepts contact form (no-op success)
+// Accepts contact form (no-op)
 app.post("/api/send-link", (_req, res) => res.json({ ok: true }));
 
 // ---------- Start ----------
 app.listen(PORT, () => {
-  console.log("=".repeat(50));
-  console.log(`🚀 SnipeRank Server v3.0.0 STARTED on ${PORT}`);
-  console.log(`🔧 OpenAI Integration: ${process.env.OPENAI_API_KEY ? "Configured ✓" : "Missing ✗ (fallback mode)"}`);
-  console.log("Routes: GET /  |  GET /api/friendly  |  GET /api/full  |  HEAD /api/full  |  GET /api/full/status  |  GET /report.html  |  POST /api/send-link");
-  console.log("=".repeat(50));
+  console.log(`Server running on port ${PORT}`);
+  console.log(`API endpoint available at: http://localhost:${PORT}/api/friendly`);
 });

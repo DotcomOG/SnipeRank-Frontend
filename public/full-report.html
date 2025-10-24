@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- full-report.html - v2.4.1 - October 24, 2025
-       Fixes:
-       - Probes same-origin /api/full then falls back to Render base (SnipeRank-V2-dev)
-       - Better error surfacing in UI
+  <!-- full-report.html - v2.4.2 Hotfix
+       - Auto-fallback to /api/friendly if /api/full fails
+       - Works on Vercel (same-origin) and Render (SnipeRank-V2-dev)
+       - Clear UI banner when showing fallback (“Lite analysis mode”)
+       Last updated: Oct 24, 2025
   -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -16,6 +17,8 @@
       --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
       --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
       --btn-red:#dc3545; --btn-red-hover:#c82333;
+      --warn:#b45309; --warn-bg:#fff7ed; --warn-bd:#fcd34d;
+      --err:#b91c1c;
     }
     *{box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
@@ -60,11 +63,8 @@
     .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
     .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
 
-    .consultation-section{text-align:center;padding:3rem 2rem;margin-top:3rem}
-    .consultation-section h3{margin:0 0 1rem;font-size:1.8rem;font-weight:700}
-    .consultation-section p{margin:0 0 2rem;color:var(--muted)}
-    .consultation-info{color:var(--muted);font-size:.95rem;margin-top:1rem}
-    .consultation-info strong{color:#000}
+    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
+    .footer a{color:#3182CE;text-decoration:none}
 
     .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
     .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
@@ -75,8 +75,8 @@
     .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
     .progress-eta{color:#666;font-size:14px;line-height:1.4}
 
-    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
-    .footer a{color:#3182CE;text-decoration:none}
+    .banner{width:100%;margin:0 0 1rem;padding:.9rem 1rem;border:1px solid var(--warn-bd);background:var(--warn-bg);border-radius:10px;color:var(--warn);display:none}
+    .error-msg{color:var(--err);text-align:center;margin:1rem 0}
   </style>
 </head>
 <body>
@@ -87,6 +87,8 @@
     <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
     <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
   </div>
+
+  <div id="mode-banner" class="banner"></div>
 
   <section class="card score-card" id="scoreCard" aria-live="polite">
     <div class="score-top">
@@ -108,6 +110,8 @@
   <section id="summary-results">
     <p style="text-align:center;color:gray;">Generating detailed AI visibility analysis...</p>
   </section>
+
+  <div id="global-error" class="error-msg" style="display:none;">Error loading comprehensive analysis. Please try again.</div>
 
   <section class="consultation-section">
     <h3>Ready to Implement These Optimizations?</h3>
@@ -139,7 +143,7 @@
   </div>
 
   <script>
-    // ---- helpers (logos + transform) identical to analyze.html ----
+    // ---- helpers (logos + transform + score card) ----
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
       Claude: '/img/claude-logo.png', 
@@ -244,23 +248,56 @@
 
       const progressTimer = startProgress();
 
-      // PROBE: same-origin first, then fallback to Render (SnipeRank-V2-dev)
-      let apiBase = '';
-      try {
-        const probe = await fetch('/api/full?url=' + encodeURIComponent('https://example.com'), { method: 'HEAD' });
-        if (!probe.ok) throw 0;
-      } catch {
-        apiBase = 'https://sniperank-v2-dev.onrender.com';
+      // Try same-origin first, then Render (SnipeRank-V2-dev)
+      const bases = ['', 'https://sniperank-v2-dev.onrender.com'];
+
+      let data = null;
+      let usedBase = '';
+      let mode = 'full'; // 'full' | 'lite'
+
+      // 1) Try FULL report
+      for (const base of bases){
+        try{
+          const r = await fetch(`${base}/api/full?url=${encodeURIComponent(targetUrl)}`);
+          const j = await r.json();
+          if (j && !j.error && (j.whatsWorking || j.needsAttention || j.engineInsights)) {
+            data = j; usedBase = base || 'same-origin'; mode='full'; break;
+          }
+        }catch(e){ /* continue */ }
+      }
+
+      // 2) Fallback to FRIENDLY (lite)
+      if (!data){
+        for (const base of bases){
+          try{
+            const r = await fetch(`${base}/api/friendly?url=${encodeURIComponent(targetUrl)}`);
+            const j = await r.json();
+            if (j && !j.error && (j.powers || j.opportunities)) {
+              // Map friendly -> full format
+              data = {
+                score: Math.min(100, Math.max(0, Math.round((j.score ?? 5) * 10))), // 0–10 -> 0–100
+                whatsWorking: (j.powers || []).slice(0, 10),
+                needsAttention: (j.opportunities || []).slice(0, 25),
+                engineInsights: (j.insights || []).slice(0, 5),
+                meta: j.meta || {}
+              };
+              usedBase = base || 'same-origin'; mode='lite'; break;
+            }
+          }catch(e){ /* continue */ }
+        }
       }
 
       try {
-        const res = await fetch(`${apiBase}/api/full?url=${encodeURIComponent(targetUrl)}`);
-        const data = await res.json();
-
-        if (data.error) {
-          document.getElementById('summary-results').innerHTML =
-            `<p style='text-align:center;color:red'>Analysis failed: ${data.error}${data.details ? ' — ' + data.details : ''}</p>`;
+        if (!data){
+          document.getElementById('global-error').style.display = 'block';
           return;
+        }
+
+        if (mode === 'lite'){
+          const banner = document.getElementById('mode-banner');
+          banner.innerHTML = `⚠️ Showing <strong>Lite analysis</strong> (temporary). The comprehensive AI report service was unavailable.<br>
+          We still listed top strengths, priority opportunities, and AI engine insights.`;
+          banner.style.display = 'block';
         }
 
         const score = data.score || 65;
@@ -288,9 +325,7 @@
         host.innerHTML = html; 
         transformAIInsights(host);
 
-      } catch (error) {
-        console.error('Full report load error:', error);
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading comprehensive analysis. Please try again.</p>";
+        console.log(`SnipeRank full-report loaded via ${mode.toUpperCase()} from: ${usedBase || 'same-origin'}`);
       } finally {
         clearInterval(progressTimer);
         stopProgress();

@@ -1,4 +1,4 @@
-<!-- full-report.html — Last updated: Aug 1, 2025 - deployment test -->
+<!-- full-report.html — Updated to read from sessionStorage -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +19,7 @@
     <div id="fullScore" class="text-center text-2xl font-bold my-4"></div>
 
     <section>
-      <h2 class="text-xl font-bold mt-8 mb-2">What’s Working</h2>
+      <h2 class="text-xl font-bold mt-8 mb-2">What's Working</h2>
       <ul id="fullStrengths" class="list-disc list-inside space-y-3"></ul>
     </section>
 
@@ -48,14 +48,43 @@
 
   <script>
     async function runFullReport() {
+      // Try URL parameters first (for direct links)
       const params = new URLSearchParams(window.location.search);
-      const url = params.get("url");
-      const name = params.get("name") || "";
-      const email = params.get("email") || "";
+      let url = params.get("url");
+      let name = params.get("name") || "";
+      let email = params.get("email") || "";
 
+      // If not in URL, try sessionStorage (from analyze.html form)
+      if (!url) {
+        url = sessionStorage.getItem('sniperank:url');
+      }
+      if (!name) {
+        name = sessionStorage.getItem('sniperank:name') || "";
+      }
+      if (!email) {
+        email = sessionStorage.getItem('sniperank:email') || "";
+      }
+
+      // Validate we have required data
+      if (!url) {
+        document.body.innerHTML = '<div class="text-center mt-8"><p class="text-red-500">No URL provided for analysis.</p><a href="/analyze.html" class="text-blue-500 underline">Return to Analysis</a></div>';
+        return;
+      }
+
+      // Populate form fields
       document.getElementById("name").value = decodeURIComponent(name);
       document.getElementById("email").value = decodeURIComponent(email);
       document.getElementById("fullResultUrl").textContent = decodeURIComponent(url);
+
+      // Also populate phone and company if available from sessionStorage
+      const phone = sessionStorage.getItem('sniperank:phone');
+      const company = sessionStorage.getItem('sniperank:company');
+      if (phone) {
+        document.querySelector('input[name="phone"]').value = phone;
+      }
+      if (company) {
+        document.querySelector('input[name="company"]').value = company;
+      }
 
       try {
         const res = await fetch(`/api/full?url=${encodeURIComponent(url)}`);
@@ -68,19 +97,24 @@
 
         document.getElementById("fullScore").textContent = `Score: ${data.score}`;
 
-        (data.ai_strengths || []).forEach(item => {
+        // Handle different possible response formats
+        const strengths = data.ai_strengths || data.whatsWorking || [];
+        const opportunities = data.ai_opportunities || data.needsAttention || [];
+        const insights = data.engine_insights || data.engineInsights || [];
+
+        strengths.forEach(item => {
           const li = document.createElement("li");
           li.textContent = item;
           document.getElementById("fullStrengths").appendChild(li);
         });
 
-        (data.ai_opportunities || []).forEach(item => {
+        opportunities.forEach(item => {
           const li = document.createElement("li");
           li.textContent = item;
           document.getElementById("fullOpportunities").appendChild(li);
         });
 
-        (data.engine_insights || []).forEach(item => {
+        insights.forEach(item => {
           const li = document.createElement("li");
           li.textContent = item;
           document.getElementById("fullEngineInsights").appendChild(li);

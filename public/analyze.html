@@ -1,9 +1,9 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.1.4 - Production fix for full-report redirect -->
+  <!-- analyze.html - v3.1.6 - Root full-report redirect (no API), passes url+domain -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields -->
-  <!-- Backend compatibility: server.js v2.6.0+ (/api/score and /report.html?report=analyze endpoints) -->
+  <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
   <!-- Last updated: October 24, 2025 -->
 
   <meta charset="UTF-8" />
@@ -97,6 +97,7 @@
 
     .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
     .footer a{color:#3182CE;text-decoration:none}
+    .error-note{color:#c00;text-align:center;margin-top:.5rem;font-size:.95rem}
   </style>
 </head>
 <body>
@@ -134,7 +135,7 @@
   <section class="form-section">
     <h3>Get Your Full Report</h3>
     <div class="form-container">
-      <form id="full-report-form">
+      <form id="full-report-form" novalidate>
         <div class="form-grid">
           <input type="text" id="name-input" placeholder="Your Name" required />
           <input type="email" id="email-input" placeholder="Your Email" required />
@@ -142,7 +143,8 @@
           <input type="text" id="company-input" placeholder="Your Company (optional)" />
           <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
         </div>
-        <button type="submit" class="btn-primary form-btn">Get My Full Report</button>
+        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report</button>
+        <div id="form-error" class="error-note" style="display:none;"></div>
       </form>
     </div>
   </section>
@@ -208,7 +210,7 @@
   </div>
 
   <script>
-    // v3.1.4 JS — keeps your features, fixes full-report redirect to root
+    // v3.1.6 JS — no API submit for full-report; root redirect + domain param
 
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
@@ -291,14 +293,27 @@
       }
     }
 
-    // Query param URL
+    // Extract target URL from query params
     const urlParams = new URLSearchParams(window.location.search);
     const targetUrl = urlParams.get("url");
+
+    // Robust domain extractor
+    function extractDomain(u){
+      if (!u) return '';
+      try {
+        const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+        const { hostname } = new URL(withProto);
+        return hostname.replace(/^www\./i,'');
+      } catch {
+        const m = String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i);
+        return (m ? m[1] : '').replace(/^www\./i,'');
+      }
+    }
 
     // Progress simulation
     function startProgress() {
       document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 30000; // to ~95%
+      const expectedDuration = 30000; // ~95%
       const startTime = Date.now();
       const progressFill = document.getElementById('progress-fill');
       const progressPct = document.getElementById('progress-pct');
@@ -367,7 +382,7 @@
       }
     });
 
-    // Full report form submission (FIX: root-relative redirect)
+    // Full report form — SAVE to sessionStorage and REDIRECT to ROOT full-report.html
     document.getElementById('full-report-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const name = document.getElementById('name-input').value.trim();
@@ -375,19 +390,39 @@
       const phone = document.getElementById('phone-input').value.trim();
       const company = document.getElementById('company-input').value.trim();
       const context = document.getElementById('context-input').value.trim();
-      
-      if (!name || !email || !targetUrl) return;
-      
-      // Persist for full-report page usage
+      const errorEl = document.getElementById('form-error');
+      const btn = document.getElementById('full-report-btn');
+
+      errorEl.style.display = 'none';
+      if (!name || !email || !targetUrl) {
+        errorEl.textContent = 'Please provide your name and email.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const domain = extractDomain(targetUrl);
+
+      // Persist user inputs for full-report.html to read
       sessionStorage.setItem('sniperank:name', name);
       sessionStorage.setItem('sniperank:email', email);
       sessionStorage.setItem('sniperank:phone', phone);
       sessionStorage.setItem('sniperank:company', company);
       sessionStorage.setItem('sniperank:context', context);
       sessionStorage.setItem('sniperank:url', targetUrl);
+      sessionStorage.setItem('sniperank:domain', domain);
 
-      // IMPORTANT: Use root-relative path so it resolves from / (not /public/)
-      window.location.href = `/full-report.html?url=${encodeURIComponent(targetUrl)}`;
+      // Prevent double-clicks
+      btn.disabled = true; 
+      btn.textContent = 'Preparing Full Report...';
+
+      // IMPORTANT: Root-relative redirect; no API call here
+      const q = new URLSearchParams({
+        url: targetUrl,
+        domain,
+        source: 'analyze'
+      }).toString();
+
+      window.location.href = `/full-report.html?${q}`;
     });
 
     // Load analysis on page load
@@ -415,9 +450,6 @@
         const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
         const j = await r.json();
         renderScoreCard(j.score, j.pillars, j.highlights);
-        
-        // Store data for full report
-        sessionStorage.setItem('sniperank:url', targetUrl);
         sessionStorage.setItem('sniperank:data', JSON.stringify(j));
       } catch (e) {
         console.error('Score error:', e);

@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.1.3 - Production version with fixed progress bar -->
+  <!-- analyze.html - v3.1.4 - Production fix for full-report redirect -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields -->
-  <!-- Compatible with: server.js v2.6.0+ (/api/score and /report.html?report=analyze endpoints) -->
-  <!-- Last updated: August 2, 2025 -->
-  
+  <!-- Backend compatibility: server.js v2.6.0+ (/api/score and /report.html?report=analyze endpoints) -->
+  <!-- Last updated: October 24, 2025 -->
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SnipeRank - AI SEO Analysis</title>
@@ -61,7 +60,6 @@
     .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
     .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
 
-    /* Get Full Report Form Section */
     .form-section{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);margin-top:3rem;width:100%}
     .form-section h3{margin:0 0 2rem;font-size:1.8rem;font-weight:700}
     .form-container{max-width:100%;margin:0 auto}
@@ -72,14 +70,12 @@
     .form-section input:focus, .form-section textarea:focus{outline:none;border-color:#3182CE}
     .form-btn{margin-top:1rem;max-width:300px}
 
-    /* Consultation Section */
     .consultation-section{text-align:center;padding:3rem 2rem;margin-top:3rem}
     .consultation-section h3{margin:0 0 1rem;font-size:1.8rem;font-weight:700}
     .consultation-section p{margin:0 0 2rem;color:var(--muted)}
     .consultation-info{color:var(--muted);font-size:.95rem;margin-top:1rem}
     .consultation-info strong{color:#000}
 
-    /* Progress overlay */
     .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
     .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
     .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -89,7 +85,6 @@
     .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
     .progress-eta{color:#666;font-size:14px;line-height:1.4}
 
-    /* Modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1001}
     .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
     .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
@@ -163,7 +158,7 @@
   </section>
 
   <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated August 2.
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 24.
   </div>
 
   <!-- Progress Overlay -->
@@ -213,7 +208,8 @@
   </div>
 
   <script>
-    // v3.1.3 - JavaScript with fixed progress handling
+    // v3.1.4 JS — keeps your features, fixes full-report redirect to root
+
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
       Claude: '/img/claude-logo.png',
@@ -221,7 +217,7 @@
       Copilot: '/img/copilot-logo.png',
       Perplexity: '/img/perplexity-logo.png',
     };
-    
+
     function logoDivFor(engine){
       const wrap = document.createElement('div'); 
       wrap.className = 'llm-logo';
@@ -295,14 +291,14 @@
       }
     }
 
-    // Get URL from query params
+    // Query param URL
     const urlParams = new URLSearchParams(window.location.search);
     const targetUrl = urlParams.get("url");
-    
-    // Progress simulation with time-based approach
+
+    // Progress simulation
     function startProgress() {
       document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 30000; // 30 seconds to reach 95%
+      const expectedDuration = 30000; // to ~95%
       const startTime = Date.now();
       const progressFill = document.getElementById('progress-fill');
       const progressPct = document.getElementById('progress-pct');
@@ -315,26 +311,20 @@
         progressFill.style.width = progress + '%';
         progressPct.textContent = Math.floor(progress) + '%';
         
-        if (progress >= 95) {
-          clearInterval(interval);
-        }
-        
+        if (progress >= 95) clearInterval(interval);
         if (progress > 30) {
           document.getElementById('progress-eta').innerHTML = 'Processing content structure and AI optimization signals...<br>Almost done!';
         }
       }, 100);
-      
       return interval;
     }
 
     function stopProgress() {
       const progressFill = document.getElementById('progress-fill');
       const progressPct = document.getElementById('progress-pct');
-      // Smoothly complete to 100%
       progressFill.style.transition = 'width 0.5s ease';
       progressFill.style.width = '100%';
       progressPct.textContent = '100%';
-      // Give time to see 100% before hiding
       setTimeout(() => {
         document.getElementById('progress-overlay').style.display = 'none';
       }, 800);
@@ -345,11 +335,9 @@
       e.preventDefault();
       document.getElementById('breakdown-modal').style.display = 'flex';
     });
-    
     document.getElementById('modal-close').addEventListener('click', () => {
       document.getElementById('breakdown-modal').style.display = 'none';
     });
-    
     document.getElementById('breakdown-modal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('breakdown-modal')) {
         document.getElementById('breakdown-modal').style.display = 'none';
@@ -379,7 +367,7 @@
       }
     });
 
-    // Full report form submission
+    // Full report form submission (FIX: root-relative redirect)
     document.getElementById('full-report-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const name = document.getElementById('name-input').value.trim();
@@ -390,16 +378,16 @@
       
       if (!name || !email || !targetUrl) return;
       
-      // Store user info
+      // Persist for full-report page usage
       sessionStorage.setItem('sniperank:name', name);
       sessionStorage.setItem('sniperank:email', email);
       sessionStorage.setItem('sniperank:phone', phone);
       sessionStorage.setItem('sniperank:company', company);
       sessionStorage.setItem('sniperank:context', context);
       sessionStorage.setItem('sniperank:url', targetUrl);
-      
-      // Navigate to full report
-      window.location.href = `full-report.html?url=${encodeURIComponent(targetUrl)}`;
+
+      // IMPORTANT: Use root-relative path so it resolves from / (not /public/)
+      window.location.href = `/full-report.html?url=${encodeURIComponent(targetUrl)}`;
     });
 
     // Load analysis on page load
@@ -414,6 +402,7 @@
       
       const progressTimer = startProgress();
 
+      // Probe for local /api/score; fallback to Render base if needed
       let apiBase = '';
       try {
         const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});

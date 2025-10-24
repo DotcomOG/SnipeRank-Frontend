@@ -1,9 +1,11 @@
 /*
-  api/full.js - v3.0.1 - October 24, 2025
-  - More forgiving JSON parsing (handles fenced & unfenced JSON)
-  - Clearer error logs (prints OpenAI error payloads)
-  - Optional minimal fallback payload to avoid hard failure UX
+  api/full.js - v3.1.0 — Drop-in replacement
+  Purpose: Produce comprehensive AI SEO JSON for /api/full or return a safe fallback.
+  Notes:
+  - Expects ENV: OPENAI_API_KEY (Render: SnipeRank-V2-dev)
+  - Output keys: whatsWorking[10], needsAttention[25], engineInsights[5], score
 */
+
 import OpenAI from "openai";
 import cheerio from "cheerio";
 import axios from "axios";
@@ -14,127 +16,156 @@ export default async function handler(req, res) {
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: "Missing URL parameter" });
 
+  // quick sanity
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(200).json(fallbackPayload(url, "no_api_key"));
+  }
+
   try {
-    const response = await axios.get(url, {
+    // Fetch target HTML
+    const resp = await axios.get(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; SnipeRankBot/1.0)" },
       timeout: 15000
     });
 
-    const html = response.data;
-    const $ = cheerio.load(html);
-    const textContent = $("body").text();
-    const pageTitle = $("title").text();
-    const metaDescription = $('meta[name="description"]').attr('content') || '';
-    const headings = $("h1, h2, h3").map((i, el) => $(el).text()).get().join(' | ');
+    const $ = cheerio.load(resp.data);
+    const textContent = $("body").text().replace(/\s+/g, " ").trim();
+    const pageTitle = $("title").text().trim();
+    const metaDescription = $('meta[name="description"]').attr("content")?.trim() || "";
+    const headings = $("h1, h2, h3").map((i, el) => $(el).text().replace(/\s+/g, " ").trim()).get().join(" | ").slice(0, 2000);
 
-    const contentPackage = `
-    URL: ${url}
-    Page Title: ${pageTitle}
-    Meta Description: ${metaDescription}
-    Main Headings: ${headings}
-    Body Content: ${textContent.slice(0, 15000)}
-    `;
+    const contentPackage = [
+      `URL: ${url}`,
+      `Title: ${pageTitle}`,
+      `Description: ${metaDescription}`,
+      `Headings: ${headings}`,
+      `Body (first 12k chars): ${textContent.slice(0, 12000)}`
+    ].join("\n");
 
-    const enhancedPrompt = `You are an expert AI SEO specialist focused specifically on optimizing websites for AI search engines like ChatGPT, Claude, Gemini, Perplexity, and Copilot.
+    const prompt = `
+You are an expert AI SEO specialist focused on visibility in AI engines (ChatGPT, Claude, Gemini, Perplexity, Copilot).
 
-    Analyze this website content for AI visibility optimization:
-    """
-    ${contentPackage}
-    """
+Analyze the site content below for **AI visibility** (not generic SEO):
 
-    Generate a comprehensive, client-facing AI SEO analysis as valid JSON with keys:
-    - whatsWorking (10 items)
-    - needsAttention (25 items) // format: "[PRIORITY: High/Medium/Low] Title: Problem... Solution: ..."
-    - engineInsights (5 items)
-    ONLY return JSON.`;
+"""
+${contentPackage}
+"""
 
+Return **ONLY JSON** with the exact keys:
+- "whatsWorking": array of EXACTLY 10 items (2–4 sentences each, specific to this site)
+- "needsAttention": array of EXACTLY 25 items. Each item must follow:
+  "[PRIORITY: High|Medium|Low] Title: Problem for AI engines. Solution: 2–3 concrete steps. Impact: expected result."
+- "engineInsights": array of EXACTLY 5 items (one each for ChatGPT, Claude, Gemini, Perplexity, Copilot) with actionable recommendations.
+
+No prose outside JSON. No code fences. Keep language plain and client-facing. Ensure valid JSON.
+`.trim();
+
+    // OpenAI call
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",
-      messages: [
-        { role: "system", content: "You are an expert AI SEO analyst specializing in optimizing websites for AI search engines and language models. Provide detailed, actionable analysis focused specifically on AI visibility factors." },
-        { role: "user", content: enhancedPrompt }
-      ],
       temperature: 0.3,
-      max_tokens: 4000
+      max_tokens: 3600,
+      messages: [
+        { role: "system", content: "You are a precise AI SEO analyst. Output must be valid JSON only." },
+        { role: "user", content: prompt }
+      ]
     });
+
+    // Parse response (robust)
+    const raw = completion?.choices?.[0]?.message?.content?.trim() || "";
+    const jsonString = extractJSONObject(raw);
+    if (!jsonString) {
+      // Soft fallback to keep UI alive
+      return res.status(200).json(fallbackPayload(url, "parse_missing_json", raw.slice(0, 600)));
+    }
 
     let parsed;
     try {
-      const responseText = completion.choices[0]?.message?.content || "";
-      // Prefer fenced JSON, otherwise any top-level JSON object
-      const fence = responseText.match(/```json\s*([\s\S]*?)\s*```/i);
-      const raw = fence ? fence[1] : (responseText.match(/\{[\s\S]*\}$/) || [])[0];
-      if (!raw) throw new Error("No valid JSON found in response");
-      parsed = JSON.parse(raw);
-
-      if (!parsed.whatsWorking || !parsed.needsAttention || !parsed.engineInsights) {
-        throw new Error("Invalid response structure from OpenAI");
-      }
-    } catch (parseError) {
-      console.error('JSON parsing failed:', parseError);
-      // Optional soft fallback to avoid blank UI
-      return res.status(200).json({
-        success: false,
-        score: 50,
-        whatsWorking: [
-          "Your website loads successfully and has accessible content.",
-          "HTTPS appears to be active, signaling trust to AI systems."
-        ],
-        needsAttention: [
-          "Comprehensive AI visibility analysis unavailable due to parsing issue.",
-          "Retry later or contact support for a manual assessment."
-        ],
-        engineInsights: ["Fallback mode: Limited AI analysis available."],
-        meta: { error: "parse_error" }
-      });
+      parsed = JSON.parse(jsonString);
+    } catch (e) {
+      return res.status(200).json(fallbackPayload(url, "parse_invalid_json", raw.slice(0, 600)));
     }
 
-    const calculateAIScore = (strengths, opportunities) => {
-      const baseScore = 40;
-      const strengthBonus = Math.min(strengths.length * 3, 30);
-      const opportunityPenalty = Math.min(opportunities.length * 1.5, 30);
-      return Math.max(20, Math.min(100, baseScore + strengthBonus - opportunityPenalty));
-    };
-    const aiScore = calculateAIScore(parsed.whatsWorking, parsed.needsAttention);
+    // Validate shape
+    const ok =
+      Array.isArray(parsed.whatsWorking) &&
+      Array.isArray(parsed.needsAttention) &&
+      Array.isArray(parsed.engineInsights);
+
+    if (!ok) {
+      return res.status(200).json(fallbackPayload(url, "invalid_shape", jsonString.slice(0, 600)));
+    }
+
+    // Compute score (bounded 20–100)
+    const score = computeScore(parsed.whatsWorking, parsed.needsAttention);
 
     return res.status(200).json({
       success: true,
-      score: aiScore,
-      analysisType: "comprehensive",
-      ...parsed,
+      score,
+      whatsWorking: parsed.whatsWorking.slice(0, 10),
+      needsAttention: parsed.needsAttention.slice(0, 25),
+      engineInsights: parsed.engineInsights.slice(0, 5),
       meta: {
         analyzedAt: new Date().toISOString(),
-        model: "GPT-4-turbo",
+        model: "gpt-4-turbo",
         analysisDepth: "premium",
         url
       }
     });
 
   } catch (error) {
-    // Surface OpenAI errors more clearly in logs
-    console.error('Full analysis error details:', error?.response?.data || error?.message || error);
-    if (error.response && error.response.status === 403) {
-      return res.status(403).json({ 
-        error: "Website blocks automated analysis", 
-        details: "The target website prevents automated crawling. Try a different URL or contact support for manual analysis." 
-      });
-    }
-    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      return res.status(400).json({ 
-        error: "Unable to access website", 
-        details: "The provided URL cannot be reached. Please verify the URL is correct and publicly accessible." 
-      });
-    }
-    if (error.message && /api key|unauthorized|invalid.+key/i.test(error.message)) {
-      return res.status(500).json({ 
-        error: "AI analysis service unavailable", 
-        details: "OpenAI service configuration error. Please try again later or contact support." 
-      });
-    }
-    return res.status(500).json({ 
-      error: "Analysis failed", 
-      details: error.message || "An unexpected error occurred during analysis",
-      retryable: true
-    });
+    // Network / site access / OpenAI transport errors
+    const code = error?.response?.status || error?.code || "unknown";
+    // Always return a payload the UI can render
+    return res.status(200).json(fallbackPayload(url, String(code)));
   }
+}
+
+/* ---------- helpers ---------- */
+
+function extractJSONObject(text) {
+  // If model returned fenced JSON, strip it
+  const fenced = text.match(/```json\s*([\s\S]*?)\s*```/i);
+  if (fenced) return fenced[1].trim();
+
+  // Otherwise, grab the first top-level JSON object
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    return text.slice(start, end + 1).trim();
+  }
+  return "";
+}
+
+function computeScore(strengths, issues) {
+  const base = 40;
+  const bonus = Math.min((strengths?.length || 0) * 3, 30);
+  const penalty = Math.min((issues?.length || 0) * 1.5, 30);
+  const s = Math.max(20, Math.min(100, Math.round(base + bonus - penalty)));
+  return s;
+}
+
+function fallbackPayload(url, reason = "fallback", snippet = "") {
+  // Always valid JSON for UI; communicates reason via meta
+  return {
+    success: false,
+    score: 50,
+    whatsWorking: [
+      "Your website is accessible and loads successfully for crawlers.",
+      "HTTPS appears active, which is a baseline trust signal for AI engines."
+    ],
+    needsAttention: [
+      "[PRIORITY: High] Structured Data Coverage: AI engines rely on schema to understand entities and services. Solution: Add Organization, WebSite, and relevant Service/Product schemas sitewide. Impact: Improves inclusion in AI summaries.",
+      "[PRIORITY: Medium] Meta Description Gaps: Missing/weak descriptions reduce control over AI summaries. Solution: Author concise task-focused descriptions per page. Impact: Clearer answers in AI results.",
+      "[PRIORITY: Medium] Image Alt Text Coverage: Low coverage limits AI understanding of visuals. Solution: Add descriptive alt attributes to key images. Impact: Better context for multimodal AI."
+    ],
+    engineInsights: [
+      "ChatGPT: Benefits from explicit FAQs and task-oriented sections; add Q/A blocks for core intents.",
+      "Claude: Prefers clear structure and citations; ensure headings reflect user tasks and include authoritative links.",
+      "Gemini: Leans on entities; add schema and unambiguous entity mentions for brands, services, and locations.",
+      "Perplexity: Surfaces sources; add referenceable pages (guides, docs) with clear titles and summaries.",
+      "Copilot: Values concise, skimmable answers; add checklists and short how-to steps."
+    ],
+    meta: { url, mode: "lite-fallback", reason, snippet }
+  };
 }

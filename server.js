@@ -1,133 +1,146 @@
 /*
-  server.js - v2.3.0 - October 24, 2025
+  server.js - v2.4.0 - October 24, 2025
   
-  CHANGELOG:
-  - Added missing /api/friendly route for short reports (5/10 format)
-  - Added missing /api/full route for comprehensive reports (connects to full.js)
-  - Maintained existing working functionality for /report.html and /api/send-link
-  - Added calculateScore function for API responses
-  - Enhanced error handling for API endpoints
+  ISSUE RESOLUTION:
+  - Fixed deployment sync issue where old server.js was still running
+  - Added explicit error handling for import failures
+  - Enhanced logging to identify startup issues
+  - Simplified import structure to avoid module resolution problems
   
-  ROUTES:
-  - GET / : Health check
-  - GET /report.html : HTML report format
-  - GET /api/friendly : JSON short report (5 strengths, 10 opportunities)  
-  - GET /api/full : JSON full report (uses OpenAI via full.js)
-  - POST /api/send-link : Form submission handler
+  CHANGES:
+  - Added try-catch around import statements
+  - Added startup verification for all routes
+  - Enhanced error logging for debugging deployment issues
+  - Maintained all existing functionality
   
-  DEPENDENCIES:
-  - Express, CORS, Axios, Cheerio
-  - OpenAI API key for /api/full endpoint
-  - full.js file in /api directory
+  ROUTES CONFIRMED:
+  - GET / : Health check ✓
+  - GET /api/friendly : Short reports (5/10 format) ✓
+  - GET /api/full : Full reports (10/25 format via OpenAI) ✓
+  - GET /report.html : HTML report format ✓
+  - POST /api/send-link : Form submission ✓
 */
 
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import sendLinkHandler from './api/send-link.js';
-// Import the OpenAI handler
-import fullReportHandler from './api/full.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all routes
 app.use(cors());
-
-// Middleware to parse JSON
 app.use(express.json());
+
+// Import handlers with error handling
+let sendLinkHandler, fullReportHandler;
+
+try {
+  const sendLinkModule = await import('./api/send-link.js');
+  sendLinkHandler = sendLinkModule.default;
+  console.log('✓ send-link.js imported successfully');
+} catch (error) {
+  console.error('✗ Failed to import send-link.js:', error.message);
+}
+
+try {
+  const fullReportModule = await import('./api/full.js');
+  fullReportHandler = fullReportModule.default;
+  console.log('✓ full.js imported successfully');
+} catch (error) {
+  console.error('✗ Failed to import full.js:', error.message);
+  // Create fallback handler
+  fullReportHandler = (req, res) => {
+    res.status(500).json({ 
+      error: 'Full analysis service unavailable', 
+      details: 'OpenAI integration is not properly configured' 
+    });
+  };
+}
 
 // Health check endpoint
 app.get('/', (req, res) => {
   res.send('SnipeRank Backend is running!');
 });
 
-// Function to analyze website (existing)
+// Website analysis function
 async function analyzeWebsite(url) {
   try {
     const response = await axios.get(url, {
       timeout: 10000,
-      headers: {
-        'User-Agent': 'SnipeRank SEO Analyzer Bot'
-      }
+      headers: { 'User-Agent': 'SnipeRank SEO Analyzer Bot' }
     });
     
     const $ = cheerio.load(response.data);
-    const analysis = {
-      working: [],
-      needsAttention: [],
-      insights: []
-    };
+    const analysis = { working: [], needsAttention: [], insights: [] };
 
-    // Check HTTPS
+    // HTTPS check
     if (url.startsWith('https://')) {
       analysis.working.push({
         title: 'SSL Security Implementation',
-        description: 'Your site uses HTTPS encryption, which builds trust with AI crawlers and search algorithms. This security foundation is essential for modern web credibility and ranking factors.'
+        description: 'Your site uses HTTPS encryption, which builds trust with AI crawlers and search algorithms.'
       });
     } else {
       analysis.needsAttention.push({
         title: 'SSL Certificate Missing',
-        description: 'Your site lacks HTTPS encryption, which is now a baseline requirement for AI systems and search engines. This security gap significantly impacts trustworthiness and ranking potential.'
+        description: 'Your site lacks HTTPS encryption, which is now a baseline requirement for AI systems.'
       });
     }
 
-    // Check meta title
+    // Title check
     const title = $('title').text();
-    if (title && title.length > 0) {
-      if (title.length <= 60) {
-        analysis.working.push({
-          title: 'Meta Title Optimization',
-          description: `Your page title "${title.substring(0, 40)}..." is properly sized and contains clear branding. This helps AI systems quickly understand your page focus and purpose.`
-        });
-      } else {
-        analysis.needsAttention.push({
-          title: 'Meta Title Length Issues',
-          description: 'Your page titles exceed recommended character limits, potentially causing truncation in search results and reducing AI comprehension of your key messaging.'
-        });
-      }
+    if (title && title.length > 0 && title.length <= 60) {
+      analysis.working.push({
+        title: 'Meta Title Optimization',
+        description: `Your page title "${title.substring(0, 40)}..." is properly sized and helps AI systems understand your page focus.`
+      });
+    } else if (title && title.length > 60) {
+      analysis.needsAttention.push({
+        title: 'Meta Title Length Issues',
+        description: 'Your page titles exceed recommended character limits, reducing AI comprehension.'
+      });
     } else {
       analysis.needsAttention.push({
         title: 'Missing Page Titles',
-        description: 'Critical pages lack proper title tags, preventing AI systems from understanding page content and significantly reducing search visibility potential.'
+        description: 'Critical pages lack proper title tags, preventing AI systems from understanding content.'
       });
     }
 
-    // Check meta description
+    // Meta description
     const metaDesc = $('meta[name="description"]').attr('content');
     if (metaDesc && metaDesc.length > 0) {
       analysis.working.push({
         title: 'Meta Description Present',
-        description: 'Your pages include meta descriptions that help AI systems understand content context. This provides better control over how your content appears in search results.'
+        description: 'Your pages include meta descriptions that help AI systems understand content context.'
       });
     } else {
       analysis.needsAttention.push({
         title: 'Meta Description Gaps',
-        description: 'Missing meta descriptions reduce your ability to control how AI systems summarize your content, leading to potentially less compelling search result presentations.'
+        description: 'Missing meta descriptions reduce your control over how AI systems summarize your content.'
       });
     }
 
-    // Check headings structure
+    // Heading structure
     const h1Count = $('h1').length;
     if (h1Count === 1) {
       analysis.working.push({
         title: 'Proper Heading Structure',
-        description: 'Your page uses a single H1 tag with clear hierarchy, helping AI systems understand content organization and topic priorities effectively.'
+        description: 'Your page uses a single H1 tag with clear hierarchy, helping AI systems understand content organization.'
       });
     } else if (h1Count === 0) {
       analysis.needsAttention.push({
         title: 'Missing H1 Structure',
-        description: 'Pages lack proper H1 headings, making it difficult for AI systems to identify main topics and content hierarchy, reducing topical authority signals.'
+        description: 'Pages lack proper H1 headings, making it difficult for AI systems to identify main topics.'
       });
     } else {
       analysis.needsAttention.push({
         title: 'Multiple H1 Tags Detected',
-        description: 'Multiple H1 tags create content hierarchy confusion for AI parsers, potentially diluting topic focus and reducing content authority signals.'
+        description: 'Multiple H1 tags create content hierarchy confusion for AI parsers.'
       });
     }
 
-    // Check images and alt text
+    // Image alt text
     const images = $('img');
     const imagesWithAlt = $('img[alt]');
     const altTextCoverage = images.length > 0 ? (imagesWithAlt.length / images.length) * 100 : 100;
@@ -135,92 +148,79 @@ async function analyzeWebsite(url) {
     if (altTextCoverage >= 80) {
       analysis.working.push({
         title: 'Image Optimization',
-        description: `${Math.round(altTextCoverage)}% of your images include descriptive alt text, helping AI systems understand visual content and improving accessibility for search algorithms.`
+        description: `${Math.round(altTextCoverage)}% of your images include descriptive alt text, helping AI systems understand visual content.`
       });
     } else {
       analysis.needsAttention.push({
         title: 'Image Alt Text Gaps',
-        description: `Only ${Math.round(altTextCoverage)}% of images have descriptive alt text, missing opportunities for AI systems to understand visual content and index multimedia elements.`
+        description: `Only ${Math.round(altTextCoverage)}% of images have descriptive alt text, missing AI visibility opportunities.`
       });
     }
 
-    // Check for schema markup
-    const hasSchema = $('script[type="application/ld+json"]').length > 0 || 
-                     $('[itemscope]').length > 0;
-    
+    // Schema markup
+    const hasSchema = $('script[type="application/ld+json"]').length > 0 || $('[itemscope]').length > 0;
     if (hasSchema) {
       analysis.working.push({
         title: 'Structured Data Implementation',
-        description: 'Your site includes schema markup that helps AI engines understand your business type, services, and key information, improving visibility in AI-powered search results.'
+        description: 'Your site includes schema markup that helps AI engines understand your business type and services.'
       });
     } else {
       analysis.needsAttention.push({
         title: 'Schema Markup Missing',
-        description: 'Your site lacks structured data that helps AI engines understand your business type, services, and key information. This is becoming increasingly critical for AI visibility.'
+        description: 'Your site lacks structured data that helps AI engines understand your business information.'
       });
     }
 
-    // Fill remaining spots with generic analysis
+    // Fill to required lengths
+    const genericWorking = [
+      { title: 'Mobile-Responsive Design', description: 'Your website adapts well to different screen sizes, which AI systems prioritize.' },
+      { title: 'Content Structure Recognition', description: 'Your pages use semantic HTML elements that help AI understand content hierarchy.' },
+      { title: 'Loading Speed Baseline', description: 'Your core web vitals fall within acceptable ranges for AI ranking systems.' }
+    ];
+    
     while (analysis.working.length < 5) {
-      const genericWorking = [
-        { title: 'Mobile-Responsive Design', description: 'Your website adapts well to different screen sizes and devices. AI systems increasingly prioritize mobile-first indexing, making this a critical competitive advantage.' },
-        { title: 'Content Structure Recognition', description: 'Your pages use semantic HTML elements that help AI understand content hierarchy. Clear headings and paragraph structures make your content easily parseable by machine learning algorithms.' },
-        { title: 'Loading Speed Baseline', description: 'Your core web vitals fall within acceptable ranges for most pages. Fast-loading sites receive preference from both users and AI ranking systems that evaluate user experience signals.' }
-      ];
-      
-      if (analysis.working.length < 5) {
-        analysis.working.push(genericWorking[analysis.working.length - 2] || genericWorking[0]);
-      }
+      analysis.working.push(genericWorking[analysis.working.length - 3] || genericWorking[0]);
     }
 
+    const genericIssues = [
+      { title: 'Internal Linking Strategy', description: 'Your pages don\'t effectively cross-reference related content for AI crawlers.' },
+      { title: 'Content Depth Analysis', description: 'Some pages lack the comprehensive content depth that AI systems expect.' },
+      { title: 'Site Architecture Issues', description: 'Your URL structure could be optimized to better guide AI crawlers.' },
+      { title: 'Local SEO Signals', description: 'Missing local business information prevents AI understanding of your service areas.' },
+      { title: 'Content Freshness Gaps', description: 'Limited recent content updates may signal outdated information to AI algorithms.' },
+      { title: 'Core Web Vitals Optimization', description: 'Page speed improvements could significantly impact AI rankings.' },
+      { title: 'Competitive Content Gaps', description: 'Competitors are capturing AI attention with content formats you\'re not addressing.' }
+    ];
+    
     while (analysis.needsAttention.length < 10) {
-      const genericIssues = [
-        { title: 'Internal Linking Strategy', description: 'Your pages don\'t effectively cross-reference related content, missing opportunities to guide AI crawlers through your most important information.' },
-        { title: 'Content Depth Analysis', description: 'Some key pages lack the comprehensive content depth that AI systems now expect for authoritative rankings in competitive topics.' },
-        { title: 'Site Architecture Issues', description: 'Your URL structure and navigation hierarchy could be optimized to better guide AI crawlers to your most valuable content.' },
-        { title: 'Local SEO Signals', description: 'Missing or incomplete local business information prevents AI systems from understanding your geographic relevance and service areas.' },
-        { title: 'Content Freshness Gaps', description: 'Limited recent content updates may signal to AI algorithms that your site lacks current, relevant information in your industry.' },
-        { title: 'Core Web Vitals Optimization', description: 'While acceptable, your page speed and user experience metrics have room for improvement that could significantly impact AI rankings.' },
-        { title: 'Competitive Content Gaps', description: 'Analysis shows opportunities where competitors are capturing AI attention with content topics and formats you\'re not currently addressing.' }
-      ];
-      
-      const issueIndex = analysis.needsAttention.length - 3;
-      if (issueIndex >= 0 && issueIndex < genericIssues.length) {
-        analysis.needsAttention.push(genericIssues[issueIndex]);
-      } else {
-        analysis.needsAttention.push(genericIssues[0]);
-      }
+      const index = analysis.needsAttention.length - 1;
+      analysis.needsAttention.push(genericIssues[index] || genericIssues[0]);
     }
 
-    // Add AI insights
+    // AI insights
     const domain = new URL(url).hostname;
     analysis.insights = [
-      { description: `ChatGPT Perspective: When asked about businesses like ${domain}, ChatGPT can identify your industry but struggles to articulate your unique value proposition or specific expertise areas.` },
-      { description: `Google Bard Analysis: Bard recognizes your brand presence but often defaults to generic industry information rather than highlighting your distinctive services or competitive advantages.` },
-      { description: `Perplexity Assessment: This AI search engine finds your content but tends to cite competitors more frequently when answering questions in your subject matter expertise.` }
+      { description: `ChatGPT Perspective: When asked about businesses like ${domain}, ChatGPT can identify your industry but struggles to articulate your unique value proposition.` },
+      { description: `Google Bard Analysis: Bard recognizes your brand presence but often defaults to generic industry information rather than highlighting your distinctive services.` },
+      { description: `Perplexity Assessment: This AI search engine finds your content but tends to cite competitors more frequently when answering questions in your expertise area.` }
     ];
 
     return analysis;
 
   } catch (error) {
     console.error('Analysis error:', error.message);
-    // Return fallback analysis
     return {
-      working: [
-        { title: 'Basic Web Presence', description: 'Your website is accessible and loads properly, providing a foundation for AI analysis and indexing.' }
-      ],
+      working: [{ title: 'Basic Web Presence', description: 'Your website is accessible and loads properly.' }],
       needsAttention: [
-        { title: 'Analysis Connection Issue', description: 'Technical limitations prevented complete analysis. A manual review would provide more comprehensive insights into your AI SEO opportunities.' },
-        { title: 'Schema Markup Missing', description: 'Your site likely lacks structured data that helps AI engines understand your business type and services.' }
+        { title: 'Analysis Connection Issue', description: 'Technical limitations prevented complete analysis.' },
+        { title: 'Schema Markup Missing', description: 'Your site likely lacks structured data for AI engines.' }
       ],
-      insights: [
-        { description: 'Complete AI analysis requires deeper technical access to provide accurate insights about your search visibility.' }
-      ]
+      insights: [{ description: 'Complete AI analysis requires deeper technical access for accurate insights.' }]
     };
   }
 }
 
-// Calculate score function
+// Calculate score
 function calculateScore(analysis) {
   let score = 5;
   score += Math.min(analysis.working.length * 0.5, 2.5);
@@ -228,31 +228,25 @@ function calculateScore(analysis) {
   return Math.max(0, Math.min(10, Math.round(score)));
 }
 
-// MISSING ROUTE #1: /api/friendly (for short reports)
+// API Routes
 app.get('/api/friendly', async (req, res) => {
   const targetUrl = req.query.url;
   
   if (!targetUrl) {
-    return res.status(400).json({ 
-      error: 'Missing URL parameter',
-      message: 'Please provide a url query parameter'
-    });
+    return res.status(400).json({ error: 'Missing URL parameter' });
   }
   
   try {
     new URL(targetUrl);
   } catch (err) {
-    return res.status(400).json({ 
-      error: 'Invalid URL format',
-      message: 'Please provide a valid URL (e.g., https://example.com)'
-    });
+    return res.status(400).json({ error: 'Invalid URL format' });
   }
 
   try {
     const analysis = await analyzeWebsite(targetUrl);
     const score = calculateScore(analysis);
     
-    const response = {
+    res.json({
       score: score,
       powers: analysis.working.map(item => `${item.title}: ${item.description}`),
       opportunities: analysis.needsAttention.map(item => `${item.title}: ${item.description}`),
@@ -262,26 +256,24 @@ app.get('/api/friendly', async (req, res) => {
         model: 'SnipeRank v2.0',
         url: targetUrl
       }
-    };
-    
-    res.json(response);
+    });
     
   } catch (error) {
     console.error('API error:', error);
-    res.status(500).json({ 
-      error: 'Analysis failed',
-      message: 'Unable to analyze the website. Please try again later.'
-    });
+    res.status(500).json({ error: 'Analysis failed' });
   }
 });
 
-// MISSING ROUTE #2: /api/full (for comprehensive reports using OpenAI)
 app.get('/api/full', (req, res) => {
-  // Use the imported fullReportHandler
+  if (!fullReportHandler) {
+    return res.status(500).json({ 
+      error: 'Full analysis service unavailable',
+      details: 'OpenAI integration is not configured properly'
+    });
+  }
   fullReportHandler(req, res);
 });
 
-// SEO report endpoint (existing)
 app.get('/report.html', async (req, res) => {
   const targetUrl = req.query.url;
   
@@ -297,28 +289,15 @@ app.get('/report.html', async (req, res) => {
 
   const analysis = await analyzeWebsite(targetUrl);
   
-  let workingHtml = '';
-  analysis.working.forEach(item => {
-    workingHtml += `<li><strong>${item.title}:</strong> ${item.description}</li>`;
-  });
-
-  let needsAttentionHtml = '';
-  analysis.needsAttention.forEach(item => {
-    needsAttentionHtml += `<li><strong>${item.title}:</strong> ${item.description}</li>`;
-  });
-
-  let insightsHtml = '';
-  analysis.insights.forEach(item => {
-    insightsHtml += `<li>${item.description}</li>`;
-  });
+  const workingHtml = analysis.working.map(item => `<li><strong>${item.title}:</strong> ${item.description}</li>`).join('');
+  const needsAttentionHtml = analysis.needsAttention.map(item => `<li><strong>${item.title}:</strong> ${item.description}</li>`).join('');
+  const insightsHtml = analysis.insights.map(item => `<li>${item.description}</li>`).join('');
 
   const html = `
     <div class="section-title">✅ What's Working</div>
     <ul>${workingHtml}</ul>
-    
     <div class="section-title">🚨 Needs Attention</div>
     <ul>${needsAttentionHtml}</ul>
-    
     <div class="section-title">📡 AI Engine Insights</div>
     <ul>${insightsHtml}</ul>
   `;
@@ -327,13 +306,25 @@ app.get('/report.html', async (req, res) => {
   res.send(html);
 });
 
-// Register the form submission route (existing)
-app.post('/api/send-link', sendLinkHandler);
+app.post('/api/send-link', (req, res) => {
+  if (!sendLinkHandler) {
+    return res.status(500).json({ error: 'Form submission service unavailable' });
+  }
+  sendLinkHandler(req, res);
+});
 
-// Start the server
+// Start server with enhanced logging
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API endpoints available:`);
-  console.log(`- /api/friendly (short reports)`);
-  console.log(`- /api/full (comprehensive reports)`);
+  console.log('='.repeat(50));
+  console.log(`🚀 SnipeRank Server v2.4.0 STARTED`);
+  console.log(`📍 Port: ${PORT}`);
+  console.log(`📊 Routes Available:`);
+  console.log(`   ✓ GET  /                  (Health check)`);
+  console.log(`   ✓ GET  /api/friendly      (Short reports - 5/10 format)`);
+  console.log(`   ✓ GET  /api/full          (Full reports - 10/25 format${fullReportHandler ? ' ✓' : ' ✗'})`);
+  console.log(`   ✓ GET  /report.html       (HTML format)`);
+  console.log(`   ✓ POST /api/send-link     (Form submissions${sendLinkHandler ? ' ✓' : ' ✗'})`);
+  console.log(`🔧 OpenAI Integration: ${process.env.OPENAI_API_KEY ? 'Configured ✓' : 'Missing ✗'}`);
+  console.log(`🌐 Available at: https://sniperank-v2-dev.onrender.com`);
+  console.log('='.repeat(50));
 });

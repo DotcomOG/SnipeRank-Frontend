@@ -1,4 +1,43 @@
-<!-- full-report.html — With loading lightbox (up to 5 mins) -->
+<!--
+  full-report.html - v2.2.0 - October 24, 2025
+  
+  CHANGELOG:
+  - Added loading lightbox overlay copied from analyze.html
+  - Modified progress timing from 30 seconds to 2+ minutes for comprehensive analysis
+  - Updated progress messages for full report context ("deep AI analysis", "comprehensive insights")
+  - Fixed API response field mapping to handle both old and new server.js formats
+  - Added support for multiple response field names (whatsWorking/ai_strengths, needsAttention/ai_opportunities, etc.)
+  - Enhanced error handling with specific error messages
+  - Added fallback message when no data is returned
+  - Integrated progress overlay with API call lifecycle (start on load, stop on completion)
+  
+  DEPENDENCIES:
+  - TailwindCSS (CDN)
+  - /api/full endpoint (expects url parameter)
+  - Formspree form handler (https://formspree.io/f/mayzkzed)
+  
+  FEATURES:
+  - Loading overlay with percentage progress bar (0-95% over ~2 minutes)
+  - URL parameter reading (url, name, email)
+  - API response compatibility with multiple field formats
+  - Form pre-population with user data
+  - Error handling and user feedback
+  
+  BUG FIXES:
+  - Fixed "Error loading report" issue by handling multiple API response formats
+  - Added null checks for URL parameter
+  - Improved error messaging for different failure scenarios
+  
+  INTEGRATION:
+  - Called from analyze.html form submission
+  - Expects URL parameters: ?url=...&name=...&email=...
+  - Server.js must have /api/full endpoint that returns JSON with whatsWorking, needsAttention, engineInsights fields
+  
+  PERFORMANCE:
+  - Progress simulation caps at 95% until API completes
+  - Smooth transitions and responsive design
+  - Optimized for 2-5 minute loading experience
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>

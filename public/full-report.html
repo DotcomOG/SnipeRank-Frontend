@@ -1,32 +1,11 @@
-<!--
-  full-report.html - v2.4.0 - October 24, 2025
-  
-  CHANGELOG:
-  - Updated layout to match analyze.html template structure
-  - Added score card with pillars breakdown
-  - Added highlights section for key opportunities
-  - Integrated AI Engine insights with logo support
-  - Added progress overlay with 2-5 minute timing
-  - Maintained form submission and consultation sections
-  - Adapted data mapping for OpenAI API response format
-  
-  LAYOUT STRUCTURE (matches analyze.html):
-  - Header with SnipeRank branding
-  - Score card with pillars breakdown
-  - Highlights section
-  - Detailed analysis sections
-  - AI Engine insights with logos
-  - Form submission
-  - Progress overlay
-  
-  API INTEGRATION:
-  - Calls /api/full endpoint
-  - Expects: whatsWorking, needsAttention, engineInsights fields
-  - Displays enhanced content with solutions and priorities
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- full-report.html - v2.4.1 - October 24, 2025
+       Fixes:
+       - Probes same-origin /api/full then falls back to Render base (SnipeRank-V2-dev)
+       - Better error surfacing in UI
+  -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SnipeRank - AI SEO Analysis</title>
@@ -130,7 +109,6 @@
     <p style="text-align:center;color:gray;">Generating detailed AI visibility analysis...</p>
   </section>
 
-  <!-- Consultation Section -->
   <section class="consultation-section">
     <h3>Ready to Implement These Optimizations?</h3>
     <p>Your comprehensive analysis is complete. Schedule a free consultation to discuss implementation strategy and prioritization.</p>
@@ -144,7 +122,6 @@
     © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 24.
   </div>
 
-  <!-- Progress Overlay -->
   <div id="progress-overlay" class="overlay">
     <div class="progress-panel">
       <div class="progress-header">
@@ -156,13 +133,13 @@
       </div>
       <div class="progress-eta" id="progress-eta">
         Performing deep AI analysis across multiple engines.<br>
-        This typically takes <strong>2-5 minutes</strong> for comprehensive insights.
+        This typically takes <strong>2-5 minutes</strong>.
       </div>
     </div>
   </div>
 
   <script>
-    // Logo sources (same as analyze.html)
+    // ---- helpers (logos + transform) identical to analyze.html ----
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
       Claude: '/img/claude-logo.png', 
@@ -170,48 +147,31 @@
       Copilot: '/img/copilot-logo.png',
       Perplexity: '/img/perplexity-logo.png',
     };
-
     function logoDivFor(engine){
       const wrap = document.createElement('div'); 
       wrap.className = 'llm-logo';
       const p = LOGO_SOURCES[engine];
-      if (!p) {
-        wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
-        return wrap;
-      }
-      const img = document.createElement('img'); 
-      img.alt = `${engine} logo`; 
-      img.src = p;
+      if (!p) { wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`; return wrap; }
+      const img = document.createElement('img'); img.alt = `${engine} logo`; img.src = p;
       img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
       img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
       return wrap;
     }
-    
     function transformAIInsights(root){
-      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')].find(n => /ai\s*engine\s*insights?/i.test((n.textContent || '').trim()));
+      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')].find(n => /ai\s*engine\s*insights?/i.test((n.textContent||'').trim()));
       if (!title) return;
-      let ul = title.nextElementSibling;
-      while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
+      let ul = title.nextElementSibling; while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
       if (!ul) return;
-      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent || '').trim());
+      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent||'').trim());
       if (!bullets.length) return;
       const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
-      const box = document.createElement('div'); 
-      box.className = 'llm-insights';
-      engines.forEach((e, i) => {
-        const t = bullets[i]; 
-        if (!t) return; 
-        const row = document.createElement('div'); 
-        row.className = 'llm-row'; 
-        row.appendChild(logoDivFor(e)); 
-        const p = document.createElement('p'); 
-        p.textContent = t; 
-        row.appendChild(p); 
-        box.appendChild(row);
+      const box = document.createElement('div'); box.className = 'llm-insights';
+      engines.forEach((e,i) => { const t = bullets[i]; if (!t) return;
+        const row = document.createElement('div'); row.className = 'llm-row';
+        row.appendChild(logoDivFor(e)); const p = document.createElement('p'); p.textContent = t; row.appendChild(p); box.appendChild(row);
       });
       ul.replaceWith(box);
     }
-    
     function renderScoreCard(score, highlights){
       document.getElementById("scoreNumber").textContent = `${score}/100`;
       document.getElementById("scoreBand").textContent =
@@ -219,73 +179,38 @@
         score >= 55 ? "Rank: Partially Visible ★★★☆☆" : 
         score >= 40 ? "Rank: Needs Work ★★☆☆☆" : 
         "Rank: Low Visibility ★☆☆☆☆";
-      
-      // Create pillars based on comprehensive analysis
-      const grid = document.getElementById("pillarsGrid"); 
-      grid.innerHTML = "";
-      [
-        ["Content Clarity & Structure", Math.floor(score/4)],
-        ["AI Engine Optimization", Math.floor(score/4)],
-        ["Technical Implementation", Math.floor(score/4)],
-        ["Competitive Positioning", Math.floor(score/4)]
-      ].forEach(([label, val]) => {
-        const d = document.createElement("div"); 
-        d.className = "pillar"; 
-        d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`; 
-        grid.appendChild(d);
-      });
-      
-      if (highlights && highlights.length) {
-        const ul = document.getElementById("highlightsList"); 
-        ul.innerHTML = ""; 
-        highlights.slice(0, 5).forEach(h => {
-          const li = document.createElement("li"); 
-          li.textContent = h; 
-          ul.appendChild(li);
-        }); 
+      const grid = document.getElementById("pillarsGrid"); grid.innerHTML = "";
+      [["Content Clarity & Structure", Math.floor(score/4)],
+       ["AI Engine Optimization", Math.floor(score/4)],
+       ["Technical Implementation", Math.floor(score/4)],
+       ["Competitive Positioning", Math.floor(score/4)]]
+       .forEach(([label,val])=>{
+         const d = document.createElement("div"); d.className="pillar";
+         d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`;
+         grid.appendChild(d);
+       });
+      if (highlights && highlights.length){
+        const ul = document.getElementById("highlightsList"); ul.innerHTML = "";
+        highlights.slice(0,5).forEach(h=>{ const li=document.createElement("li"); li.textContent=h; ul.appendChild(li); });
         document.getElementById("highlightsBlock").hidden = false;
       }
     }
-
-    // Progress functions (same as analyze.html, adapted for 2-5 min timing)
-    function startProgress() {
-      document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 120000; // 2 minutes to reach ~95%
-      const startTime = Date.now();
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-      
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const ratio = Math.min(elapsed / expectedDuration, 1);
-        const progress = ratio * 95;
-        
-        progressFill.style.width = progress + '%';
-        progressPct.textContent = Math.floor(progress) + '%';
-        
-        if (progress >= 95) clearInterval(interval);
-        if (progress > 30) {
-          document.getElementById('progress-eta').innerHTML = 'Analyzing content depth and AI optimization signals...<br>Generating detailed recommendations...';
-        }
-        if (progress > 70) {
-          document.getElementById('progress-eta').innerHTML = 'Finalizing comprehensive insights and implementation guidance...<br>Almost complete!';
-        }
-      }, 100);
-      return interval;
+    function startProgress(){
+      document.getElementById('progress-overlay').style.display='flex';
+      const expectedDuration = 120000; const start = Date.now();
+      const fill = document.getElementById('progress-fill'); const pct = document.getElementById('progress-pct');
+      const id = setInterval(()=>{ const r = Math.min((Date.now()-start)/expectedDuration,1); const p = r*95;
+        fill.style.width = p+'%'; pct.textContent = Math.floor(p)+'%';
+        if (p>=95) clearInterval(id);
+        if (p>30) document.getElementById('progress-eta').innerHTML = 'Analyzing content depth and AI signals...<br>Generating detailed recommendations...';
+        if (p>70) document.getElementById('progress-eta').innerHTML = 'Finalizing comprehensive insights and implementation guidance...<br>Almost complete!';
+      },100);
+      return id;
     }
-
-    function stopProgress() {
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-      progressFill.style.transition = 'width 0.5s ease';
-      progressFill.style.width = '100%';
-      progressPct.textContent = '100%';
-      setTimeout(() => {
-        document.getElementById('progress-overlay').style.display = 'none';
-      }, 800);
+    function stopProgress(){ const fill=document.getElementById('progress-fill'); const pct=document.getElementById('progress-pct');
+      fill.style.transition='width .5s ease'; fill.style.width='100%'; pct.textContent='100%';
+      setTimeout(()=>{ document.getElementById('progress-overlay').style.display='none'; },800);
     }
-
-    // Copy button functionality
     document.getElementById("copyBtn").addEventListener("click", async () => {
       const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
       const url = document.getElementById("current-url").textContent || "";
@@ -298,76 +223,64 @@
         `Priority Opportunities:`,
         ...highlights.map(h => `- ${h}`),
         ``,
-        `Full analysis available at: ${window.location.href}`
+        `Full analysis: ${window.location.href}`
       ].join("\n");
-      try { 
-        await navigator.clipboard.writeText(txt);
-        const b = document.getElementById("copyBtn"); 
-        const old = b.textContent; 
-        b.textContent = "Copied!"; 
-        setTimeout(() => b.textContent = old, 1500);
-      } catch { 
-        window.prompt("Copy the comprehensive summary:", txt); 
-      }
+      try { await navigator.clipboard.writeText(txt);
+        const b=document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
+      } catch { window.prompt("Copy the comprehensive summary:", txt); }
     });
 
-    // Extract target URL from query params
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get("url");
+    // ---- main load ----
+    const params = new URLSearchParams(window.location.search);
+    const targetUrl = params.get("url");
 
-    // Load analysis on page load
     document.addEventListener("DOMContentLoaded", async () => {
-      if (!targetUrl) {
+      if (!targetUrl){
         document.getElementById("current-url").textContent = "No URL provided";
         document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>No URL provided. Please return to the analysis form.</p>";
         return;
       }
-      
       document.getElementById("current-url").textContent = targetUrl;
-      
+
       const progressTimer = startProgress();
 
+      // PROBE: same-origin first, then fallback to Render (SnipeRank-V2-dev)
+      let apiBase = '';
       try {
-        const res = await fetch(`/api/full?url=${encodeURIComponent(targetUrl)}`);
+        const probe = await fetch('/api/full?url=' + encodeURIComponent('https://example.com'), { method: 'HEAD' });
+        if (!probe.ok) throw 0;
+      } catch {
+        apiBase = 'https://sniperank-v2-dev.onrender.com';
+      }
+
+      try {
+        const res = await fetch(`${apiBase}/api/full?url=${encodeURIComponent(targetUrl)}`);
         const data = await res.json();
-        
+
         if (data.error) {
-          document.getElementById('summary-results').innerHTML = `<p style='text-align:center;color:red'>Analysis failed: ${data.error}</p>`;
+          document.getElementById('summary-results').innerHTML =
+            `<p style='text-align:center;color:red'>Analysis failed: ${data.error}${data.details ? ' — ' + data.details : ''}</p>`;
           return;
         }
 
-        // Render score card
         const score = data.score || 65;
-        const highlights = data.needsAttention ? data.needsAttention.slice(0, 5).map(item => 
-          item.includes(':') ? item.split(':')[1].trim() : item
-        ) : [];
-        
+        const highlights = (data.needsAttention || []).slice(0,5).map(item => item.includes(':') ? item.split(':').slice(1).join(':').trim() : item);
         renderScoreCard(score, highlights);
 
-        // Build comprehensive analysis HTML
         let html = '';
-        
-        if (data.whatsWorking && data.whatsWorking.length) {
+        if (data.whatsWorking?.length){
           html += `<div class="section-title">✅ What's Working</div><ul>`;
-          data.whatsWorking.forEach(item => {
-            html += `<li>${item}</li>`;
-          });
+          data.whatsWorking.forEach(item => { html += `<li>${item}</li>`; });
           html += `</ul>`;
         }
-        
-        if (data.needsAttention && data.needsAttention.length) {
+        if (data.needsAttention?.length){
           html += `<div class="section-title">🚨 Comprehensive Opportunities</div><ul>`;
-          data.needsAttention.forEach(item => {
-            html += `<li>${item}</li>`;
-          });
+          data.needsAttention.forEach(item => { html += `<li>${item}</li>`; });
           html += `</ul>`;
         }
-        
-        if (data.engineInsights && data.engineInsights.length) {
+        if (data.engineInsights?.length){
           html += `<div class="section-title">🤖 AI Engine Insights</div><ul>`;
-          data.engineInsights.forEach(item => {
-            html += `<li>${item}</li>`;
-          });
+          data.engineInsights.forEach(item => { html += `<li>${item}</li>`; });
           html += `</ul>`;
         }
 
@@ -376,7 +289,7 @@
         transformAIInsights(host);
 
       } catch (error) {
-        console.error('Analysis error:', error);
+        console.error('Full report load error:', error);
         document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading comprehensive analysis. Please try again.</p>";
       } finally {
         clearInterval(progressTimer);

@@ -1,4 +1,4 @@
-<!-- full-report.html — Updated to read from sessionStorage -->
+<!-- full-report.html — With loading lightbox (up to 5 mins) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Full AI SEO Report – SnipeRank</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Progress Overlay Styles (copied from analyze.html) */
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
+    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
+    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .progress-title{font-weight:700;font-size:18px}
+    .progress-pct{color:#666;font-size:16px;font-weight:600}
+    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
+    .progress-eta{color:#666;font-size:14px;line-height:1.4}
+  </style>
 </head>
 <body class="bg-white text-black font-sans">
 
@@ -46,61 +57,101 @@
     </section>
   </main>
 
+  <!-- Progress Overlay (copied from analyze.html, modified for 5 min timing) -->
+  <div id="progress-overlay" class="overlay">
+    <div class="progress-panel">
+      <div class="progress-header">
+        <div class="progress-title">Generating your comprehensive report...</div>
+        <div class="progress-pct" id="progress-pct">0%</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-eta" id="progress-eta">
+        Performing deep AI analysis across multiple engines.<br>
+        This typically takes <strong>2-5 minutes</strong> for comprehensive insights.
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Progress functions (copied from analyze.html, modified for longer duration)
+    function startProgress() {
+      document.getElementById('progress-overlay').style.display = 'flex';
+      const expectedDuration = 120000; // 2 minutes to reach ~95%
+      const startTime = Date.now();
+      const progressFill = document.getElementById('progress-fill');
+      const progressPct = document.getElementById('progress-pct');
+      
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const ratio = Math.min(elapsed / expectedDuration, 1);
+        const progress = ratio * 95; // Cap at 95% until done
+        
+        progressFill.style.width = progress + '%';
+        progressPct.textContent = Math.floor(progress) + '%';
+        
+        if (progress >= 95) clearInterval(interval);
+        if (progress > 30) {
+          document.getElementById('progress-eta').innerHTML = 'Analyzing content depth and AI optimization signals...<br>Generating detailed recommendations...';
+        }
+        if (progress > 70) {
+          document.getElementById('progress-eta').innerHTML = 'Finalizing AI engine insights and recommendations...<br>Almost complete!';
+        }
+      }, 100);
+      return interval;
+    }
+
+    function stopProgress() {
+      const progressFill = document.getElementById('progress-fill');
+      const progressPct = document.getElementById('progress-pct');
+      progressFill.style.transition = 'width 0.5s ease';
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      setTimeout(() => {
+        document.getElementById('progress-overlay').style.display = 'none';
+      }, 800);
+    }
+
     async function runFullReport() {
-      // Try URL parameters first (for direct links)
       const params = new URLSearchParams(window.location.search);
-      let url = params.get("url");
-      let name = params.get("name") || "";
-      let email = params.get("email") || "";
+      const url = params.get("url");
+      const name = params.get("name") || "";
+      const email = params.get("email") || "";
 
-      // If not in URL, try sessionStorage (from analyze.html form)
       if (!url) {
-        url = sessionStorage.getItem('sniperank:url');
-      }
-      if (!name) {
-        name = sessionStorage.getItem('sniperank:name') || "";
-      }
-      if (!email) {
-        email = sessionStorage.getItem('sniperank:email') || "";
-      }
-
-      // Validate we have required data
-      if (!url) {
-        document.body.innerHTML = '<div class="text-center mt-8"><p class="text-red-500">No URL provided for analysis.</p><a href="/analyze.html" class="text-blue-500 underline">Return to Analysis</a></div>';
+        document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>No URL provided.</p>";
         return;
       }
 
-      // Populate form fields
       document.getElementById("name").value = decodeURIComponent(name);
       document.getElementById("email").value = decodeURIComponent(email);
       document.getElementById("fullResultUrl").textContent = decodeURIComponent(url);
 
-      // Also populate phone and company if available from sessionStorage
-      const phone = sessionStorage.getItem('sniperank:phone');
-      const company = sessionStorage.getItem('sniperank:company');
-      if (phone) {
-        document.querySelector('input[name="phone"]').value = phone;
-      }
-      if (company) {
-        document.querySelector('input[name="company"]').value = company;
-      }
+      // Start the progress overlay
+      const progressTimer = startProgress();
 
       try {
         const res = await fetch(`/api/full?url=${encodeURIComponent(url)}`);
         const data = await res.json();
 
-        if (!data.success) {
-          document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>Analysis failed. Try again.</p>";
+        // Handle different response formats
+        if (data.error) {
+          clearInterval(progressTimer);
+          stopProgress();
+          document.body.innerHTML += `<p class='text-red-500 text-center mt-8'>Analysis failed: ${data.error}</p>`;
           return;
         }
 
-        document.getElementById("fullScore").textContent = `Score: ${data.score}`;
+        // Display score if available
+        if (data.score) {
+          document.getElementById("fullScore").textContent = `Score: ${data.score}`;
+        }
 
-        // Handle different possible response formats
-        const strengths = data.ai_strengths || data.whatsWorking || [];
-        const opportunities = data.ai_opportunities || data.needsAttention || [];
-        const insights = data.engine_insights || data.engineInsights || [];
+        // Handle multiple possible field names for backward compatibility
+        const strengths = data.whatsWorking || data.ai_strengths || [];
+        const opportunities = data.needsAttention || data.ai_opportunities || [];
+        const insights = data.engineInsights || data.engine_insights || [];
 
         strengths.forEach(item => {
           const li = document.createElement("li");
@@ -119,13 +170,23 @@
           li.textContent = item;
           document.getElementById("fullEngineInsights").appendChild(li);
         });
+
+        // If no data loaded, show message
+        if (strengths.length === 0 && opportunities.length === 0 && insights.length === 0) {
+          document.body.innerHTML += "<p class='text-yellow-600 text-center mt-8'>Analysis completed but no detailed results available.</p>";
+        }
+
       } catch (err) {
         console.error(err);
-        document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>Error loading report.</p>";
+        document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>Error loading report. Please try again.</p>";
+      } finally {
+        clearInterval(progressTimer);
+        stopProgress();
       }
     }
 
-    runFullReport();
+    // Auto-run when page loads
+    document.addEventListener("DOMContentLoaded", runFullReport);
   </script>
 </body>
 </html>

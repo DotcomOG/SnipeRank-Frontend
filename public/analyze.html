@@ -382,49 +382,53 @@
       }
     });
 
-    // Full report form — SAVE to sessionStorage and REDIRECT to ROOT full-report.html
-    document.getElementById('full-report-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name-input').value.trim();
-      const email = document.getElementById('email-input').value.trim();
-      const phone = document.getElementById('phone-input').value.trim();
-      const company = document.getElementById('company-input').value.trim();
-      const context = document.getElementById('context-input').value.trim();
-      const errorEl = document.getElementById('form-error');
-      const btn = document.getElementById('full-report-btn');
+// CORRECTED form submission handler for analyze.html
+// Replace the existing form handler with this code
 
-      errorEl.style.display = 'none';
-      if (!name || !email || !targetUrl) {
-        errorEl.textContent = 'Please provide your name and email.';
-        errorEl.style.display = 'block';
-        return;
-      }
+document.getElementById('full-report-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('name-input').value.trim();
+  const email = document.getElementById('email-input').value.trim();
+  const phone = document.getElementById('phone-input').value.trim();
+  const company = document.getElementById('company-input').value.trim();
+  const context = document.getElementById('context-input').value.trim();
+  const errorEl = document.getElementById('form-error');
+  const btn = document.getElementById('full-report-btn');
 
-      const domain = extractDomain(targetUrl);
+  errorEl.style.display = 'none';
+  if (!name || !email || !targetUrl) {
+    errorEl.textContent = 'Please provide your name and email.';
+    errorEl.style.display = 'block';
+    return;
+  }
 
-      // Persist user inputs for full-report.html to read
-      sessionStorage.setItem('sniperank:name', name);
-      sessionStorage.setItem('sniperank:email', email);
-      sessionStorage.setItem('sniperank:phone', phone);
-      sessionStorage.setItem('sniperank:company', company);
-      sessionStorage.setItem('sniperank:context', context);
-      sessionStorage.setItem('sniperank:url', targetUrl);
-      sessionStorage.setItem('sniperank:domain', domain);
+  const domain = extractDomain(targetUrl);
 
-      // Prevent double-clicks
-      btn.disabled = true; 
-      btn.textContent = 'Preparing Full Report...';
+  // Keep sessionStorage for backup/additional data
+  sessionStorage.setItem('sniperank:name', name);
+  sessionStorage.setItem('sniperank:email', email);
+  sessionStorage.setItem('sniperank:phone', phone);
+  sessionStorage.setItem('sniperank:company', company);
+  sessionStorage.setItem('sniperank:context', context);
+  sessionStorage.setItem('sniperank:url', targetUrl);
+  sessionStorage.setItem('sniperank:domain', domain);
 
-      // IMPORTANT: Root-relative redirect; no API call here
-      const q = new URLSearchParams({
-        url: targetUrl,
-        domain,
-        source: 'analyze'
-      }).toString();
+  // Prevent double-clicks
+  btn.disabled = true; 
+  btn.textContent = 'Preparing Full Report...';
 
-      window.location.href = `/full-report.html?${q}`;
-    });
+  // IMPORTANT: Pass name and email as URL parameters to match full-report.html expectations
+  const q = new URLSearchParams({
+    url: targetUrl,
+    name: encodeURIComponent(name),
+    email: encodeURIComponent(email),
+    domain,
+    source: 'analyze'
+  }).toString();
 
+  console.log('Redirecting to full report with params:', q);
+  window.location.href = `/full-report.html?${q}`;
+});
     // Load analysis on page load
     document.addEventListener("DOMContentLoaded", async () => {
       if (!targetUrl) {

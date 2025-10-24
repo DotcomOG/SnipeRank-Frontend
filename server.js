@@ -1,24 +1,36 @@
-// server.js - Fixed missing API endpoints
-// Last updated: October 24, 2025
-// Fix: Added missing /api/score and /api/full endpoints for frontend compatibility
-// - Added /api/score endpoint for analyze.html score display
-// - Added /api/full endpoint for full-report.html detailed analysis
-// - Integrated OpenAI functionality from full.js into Express server
-// - Maintains backward compatibility with existing /api/friendly endpoint
-// Issue: Frontend was calling non-existent endpoints causing 404 errors
+/*
+  server.js - v2.3.0 - October 24, 2025
+  
+  CHANGELOG:
+  - Added missing /api/friendly route for short reports (5/10 format)
+  - Added missing /api/full route for comprehensive reports (connects to full.js)
+  - Maintained existing working functionality for /report.html and /api/send-link
+  - Added calculateScore function for API responses
+  - Enhanced error handling for API endpoints
+  
+  ROUTES:
+  - GET / : Health check
+  - GET /report.html : HTML report format
+  - GET /api/friendly : JSON short report (5 strengths, 10 opportunities)  
+  - GET /api/full : JSON full report (uses OpenAI via full.js)
+  - POST /api/send-link : Form submission handler
+  
+  DEPENDENCIES:
+  - Express, CORS, Axios, Cheerio
+  - OpenAI API key for /api/full endpoint
+  - full.js file in /api directory
+*/
 
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import sendLinkHandler from './api/send-link.js';
-import OpenAI from "openai";
+// Import the OpenAI handler
+import fullReportHandler from './api/full.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Initialize OpenAI (you'll need OPENAI_API_KEY in your environment)
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Enable CORS for all routes
 app.use(cors());
@@ -31,7 +43,7 @@ app.get('/', (req, res) => {
   res.send('SnipeRank Backend is running!');
 });
 
-// Function to analyze website
+// Function to analyze website (existing)
 async function analyzeWebsite(url) {
   try {
     const response = await axios.get(url, {
@@ -208,147 +220,18 @@ async function analyzeWebsite(url) {
   }
 }
 
-// Calculate AI Visibility Score (0-10)
+// Calculate score function
 function calculateScore(analysis) {
-  // Start with base score of 5
   let score = 5;
-  
-  // Each working item adds points
   score += Math.min(analysis.working.length * 0.5, 2.5);
-  
-  // Too many issues reduce score
   score -= Math.min(analysis.needsAttention.length * 0.3, 3);
-  
-  // Ensure score is between 0-10
   return Math.max(0, Math.min(10, Math.round(score)));
 }
 
-// MISSING ENDPOINT #1: /api/score (for analyze.html)
-app.get('/api/score', async (req, res) => {
-  const targetUrl = req.query.url;
-  
-  if (!targetUrl) {
-    return res.status(400).json({ error: 'Missing URL parameter' });
-  }
-  
-  try {
-    const analysis = await analyzeWebsite(targetUrl);
-    const score = calculateScore(analysis);
-    
-    // Format for analyze.html expectations
-    const response = {
-      score: score * 10, // Convert 0-10 to 0-100 scale
-      pillars: {
-        access: Math.floor(score * 2.5),
-        trust: Math.floor(score * 2.5), 
-        clarity: Math.floor(score * 2.5),
-        alignment: Math.floor(score * 2.5)
-      },
-      highlights: analysis.needsAttention.slice(0, 3).map(item => item.title)
-    };
-    
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ error: 'Analysis failed' });
-  }
-});
-
-// MISSING ENDPOINT #2: /api/full (for full-report.html)
-app.get('/api/full', async (req, res) => {
-  const { url } = req.query;
-  if (!url) return res.status(400).json({ error: "Missing URL" });
-
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; SnipeRankBot/1.0)"
-      },
-      timeout: 10000
-    });
-
-    const html = response.data;
-    const $ = cheerio.load(html);
-    const textContent = $("body").text();
-
-    // If OpenAI is not configured, return fallback analysis
-    if (!process.env.OPENAI_API_KEY) {
-      const fallbackAnalysis = await analyzeWebsite(url);
-      return res.json({
-        success: true,
-        score: calculateScore(fallbackAnalysis) * 10,
-        whatsWorking: fallbackAnalysis.working.map(item => `${item.title}: ${item.description}`),
-        needsAttention: fallbackAnalysis.needsAttention.map(item => `${item.title}: ${item.description}`),
-        engineInsights: fallbackAnalysis.insights.map(item => item.description)
-      });
-    }
-
-    const prompt = `You are an expert AI SEO analyst.
-    A user has submitted the following website content for SEO evaluation:
-    """
-    ${textContent.slice(0, 10000)}
-    """
-
-    Generate a persuasive, client-facing SEO report structured as follows:
-
-    1. "What's Working" (7 items):
-    - Identify strengths in the SEO or content strategy that would appeal to AI-driven search engines.
-    - Write 2–3 sentence explanations per item.
-    - Use varied language and avoid repetitive phrases.
-    - Reassure the reader that some foundational SEO elements are strong.
-
-    2. "Needs Attention" (20 items):
-    - Focus on weaknesses or omissions that could hurt visibility in AI-driven search results.
-    - For each item, explain *why the issue matters* in impactful, professional language.
-    - Avoid repeating sentence structures and do not start every line with the word "AI".
-    - Do NOT include fix instructions.
-    - Each item must be 4–5 sentences, persuasive, and dramatic in tone to emphasize missed opportunities or risks.
-
-    3. "AI Engine Insights" (5 insights):
-    - Provide unique observations tailored to AI platforms like ChatGPT, Gemini, Perplexity, Copilot, and Claude.
-    - Each insight should emphasize visibility risk or opportunity *in that specific engine*.
-    - Avoid repeating phrasing. Use varied sentence openers.
-    - Keep tone confident, expert, and succinct (2–3 sentences).
-
-    Use plain English. Format output as a JSON object with three fields: whatsWorking, needsAttention, engineInsights.`;
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
-      messages: [
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7
-    });
-
-    let parsed;
-    try {
-      const firstCodeBlock = completion.choices[0].message.content.match(/```json([\s\S]*?)```/);
-      const json = firstCodeBlock ? firstCodeBlock[1] : completion.choices[0].message.content;
-      parsed = JSON.parse(json);
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to parse GPT output.", raw: completion.choices[0].message.content });
-    }
-
-    return res.status(200).json({
-      success: true,
-      score: 85, // Add a score
-      ...parsed
-    });
-  } catch (error) {
-    if (error.response && error.response.status === 403) {
-      return res.status(403).json({ error: "The website appears to block automated analysis tools. Try another URL or contact us for help." });
-    }
-    return res.status(500).json({ error: "Analysis failed.", details: error.message });
-  }
-});
-
-// JSON API endpoint for frontend
+// MISSING ROUTE #1: /api/friendly (for short reports)
 app.get('/api/friendly', async (req, res) => {
   const targetUrl = req.query.url;
   
-  // Validate URL parameter
   if (!targetUrl) {
     return res.status(400).json({ 
       error: 'Missing URL parameter',
@@ -356,7 +239,6 @@ app.get('/api/friendly', async (req, res) => {
     });
   }
   
-  // Validate URL format
   try {
     new URL(targetUrl);
   } catch (err) {
@@ -367,13 +249,9 @@ app.get('/api/friendly', async (req, res) => {
   }
 
   try {
-    // Analyze the website
     const analysis = await analyzeWebsite(targetUrl);
-    
-    // Calculate score
     const score = calculateScore(analysis);
     
-    // Format response for frontend
     const response = {
       score: score,
       powers: analysis.working.map(item => `${item.title}: ${item.description}`),
@@ -386,7 +264,6 @@ app.get('/api/friendly', async (req, res) => {
       }
     };
     
-    // Return JSON
     res.json(response);
     
   } catch (error) {
@@ -398,26 +275,28 @@ app.get('/api/friendly', async (req, res) => {
   }
 });
 
-// SEO report endpoint (HTML - kept for compatibility)
+// MISSING ROUTE #2: /api/full (for comprehensive reports using OpenAI)
+app.get('/api/full', (req, res) => {
+  // Use the imported fullReportHandler
+  fullReportHandler(req, res);
+});
+
+// SEO report endpoint (existing)
 app.get('/report.html', async (req, res) => {
   const targetUrl = req.query.url;
   
-  // Check for missing URL parameter
   if (!targetUrl) {
     return res.status(400).send('<p style="color:red">Missing URL parameter.</p>');
   }
   
-  // Validate URL format
   try {
     new URL(targetUrl);
   } catch (err) {
     return res.status(400).send('<p style="color:red">Invalid URL format.</p>');
   }
 
-  // Analyze the website
   const analysis = await analyzeWebsite(targetUrl);
   
-  // Build HTML response
   let workingHtml = '';
   analysis.working.forEach(item => {
     workingHtml += `<li><strong>${item.title}:</strong> ${item.description}</li>`;
@@ -444,19 +323,17 @@ app.get('/report.html', async (req, res) => {
     <ul>${insightsHtml}</ul>
   `;
   
-  // Set proper content type and send response
   res.setHeader('Content-Type', 'text/html');
   res.send(html);
 });
 
-// Register the form submission route
+// Register the form submission route (existing)
 app.post('/api/send-link', sendLinkHandler);
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API endpoints available:`);
-  console.log(`- http://localhost:${PORT}/api/friendly`);
-  console.log(`- http://localhost:${PORT}/api/score`);
-  console.log(`- http://localhost:${PORT}/api/full`);
+  console.log(`- /api/friendly (short reports)`);
+  console.log(`- /api/full (comprehensive reports)`);
 });

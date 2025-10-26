@@ -1,336 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- full-report.html - v2.4.2 Hotfix
-       - Auto-fallback to /api/friendly if /api/full fails
-       - Works on Vercel (same-origin) and Render (SnipeRank-V2-dev)
-       - Clear UI banner when showing fallback (“Lite analysis mode”)
-       Last updated: Oct 24, 2025
-  -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SnipeRank - AI SEO Analysis</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SnipeRank — Full AI SEO Analysis Report</title>
   <style>
     :root{
-      --max-width:760px; --pad-v:3vh; --pad-h:2rem;
-      --muted:#666; --border:#e5e5e5;
-      --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
-      --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
-      --btn-red:#dc3545; --btn-red-hover:#c82333;
-      --warn:#b45309; --warn-bg:#fff7ed; --warn-bd:#fcd34d;
-      --err:#b91c1c;
+      --max: 780px; --muted:#6b7280; --border:#e5e7eb; --black:#0f172a;
+      --accent:#dc3545; --accent-dark:#b02a37; --bg:#ffffff;
     }
     *{box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
-    h1{font-size:4rem;font-weight:700;margin:0 0 .25em;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    h2{font-size:1.6rem;font-weight:700;margin:0 0 1rem}
-    p{font-size:1.075rem;line-height:1.65;margin:0 0 1rem}
-
-    .info-row{width:100%;display:flex;gap:1rem;align-items:center;justify-content:space-between;margin:.25rem 0 1rem}
-    .powered-by,.for-url{color:var(--muted);font-size:.95rem}
-    .powered-by a{color:#3182CE;text-decoration:none;font-weight:600}
-    .for-url strong{color:#000}
-
-    .card{width:100%;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff}
-    .score-card{padding:1rem;margin-bottom:2.25rem}
-    .score-top{display:flex;align-items:center;gap:.75rem;justify-content:space-between;flex-wrap:wrap}
-    .score-main{display:flex;align-items:baseline;gap:.5rem}
-    .score-number{font-size:2.25rem;font-weight:800}
-    .score-band{color:var(--muted);font-size:.95rem}
-    .btn-row{display:flex;gap:.5rem;align-items:center}
-    .btn-ghost{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem;transition:.2s}
-    .btn-ghost:hover{background:#f2f2f2}
-    .btn-primary{background:var(--btn-red);color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;display:inline-block;text-decoration:none;text-align:center}
-    .btn-primary:hover{background:var(--btn-red-hover)}
-    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
-    .pillar{border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;font-size:.98rem;background:#fff}
-    .pillar .label{font-weight:600}
-    .badge{font-weight:700;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:.85rem;background:#fafafa}
-    .highlights{margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--border)}
-    .highlights h4{margin:0 0 .55rem;font-size:1.2rem;font-weight:800}
-    .highlights ul{margin:0;padding-left:1rem}
-    .highlights li{margin:.45rem 0;line-height:1.5}
-
-    #summary-results .section-title{font-size:1.25rem!important;font-weight:700!important;margin:2rem 0 .6rem!important}
-    #summary-results p{line-height:1.68!important;margin:0 0 .9rem!important;font-size:1.05rem!important;white-space:pre-line}
-    #summary-results ul{margin:0 0 1.1rem 1.1rem!important;padding-left:.2rem!important;list-style:disc!important}
-    #summary-results li{line-height:1.7!important;margin:.6rem 0!important;font-size:1.05rem!important}
-
-    .llm-insights{margin:.4rem 0 1.2rem}
-    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
-    .llm-row:last-child{border-bottom:0}
-    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
-    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
-    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
-
-    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
-    .footer a{color:#3182CE;text-decoration:none}
-
-    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
-    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
-    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .progress-title{font-weight:700;font-size:18px}
-    .progress-pct{color:#666;font-size:16px;font-weight:600}
-    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
-    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
-    .progress-eta{color:#666;font-size:14px;line-height:1.4}
-
-    .banner{width:100%;margin:0 0 1rem;padding:.9rem 1rem;border:1px solid var(--warn-bd);background:var(--warn-bg);border-radius:10px;color:var(--warn);display:none}
-    .error-msg{color:var(--err);text-align:center;margin:1rem 0}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--black);background:var(--bg);}
+    .wrap{max-width:var(--max);margin:40px auto;padding:0 20px}
+    h1{font-size:40px;line-height:1.1;margin:0 0 6px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sub{color:var(--muted);margin:2px 0 20px}
+    .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px}
+    .score{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .score-num{font-size:28px;font-weight:800}
+    .pillars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+    .pill{border:1px solid var(--border);border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between}
+    .badge{font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fafafa}
+    .section{margin-top:22px}
+    .section h3{margin:0 0 8px}
+    ul{margin:8px 0 0 18px}
+    li{margin:6px 0;line-height:1.6}
+    .muted{color:var(--muted)}
+    .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:default}
+    .note{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;padding:10px;border-radius:8px;margin:14px 0}
+    .err{color:#b91c1c}
+    .footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:13px}
+    .spinner{width:16px;height:16px;border:2px solid #ddd;border-top-color:#666;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
-  <h1>SnipeRank</h1>
-  <h2>Full AI SEO Analysis Report</h2>
+  <div class="wrap">
+    <h1>SnipeRank</h1>
+    <div class="sub">Full AI SEO Analysis Report • Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
 
-  <div class="info-row">
-    <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
-    <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
-  </div>
+    <div id="notice" class="note" style="display:none"></div>
 
-  <div id="mode-banner" class="banner"></div>
-
-  <section class="card score-card" id="scoreCard" aria-live="polite">
-    <div class="score-top">
-      <div class="score-main">
-        <div class="score-number" id="scoreNumber">-</div>
-        <div class="score-band" id="scoreBand">Generating comprehensive report...</div>
+    <div class="card">
+      <div class="score">
+        <div>
+          <div class="muted">Analysis for</div>
+          <div id="target-url" style="font-weight:700">—</div>
+        </div>
+        <div class="score-num" id="score">Generating…</div>
+        <button id="copyBtn" class="btn" type="button">Copy Comprehensive Summary</button>
       </div>
-      <div class="btn-row">
-        <button class="btn-ghost" id="copyBtn" type="button">Copy Comprehensive Summary</button>
-      </div>
+      <div class="pillars" id="pillars"></div>
     </div>
-    <div class="pillars" id="pillarsGrid"></div>
-    <div class="highlights" id="highlightsBlock" hidden>
-      <h4>Priority Opportunities</h4>
-      <ul id="highlightsList"></ul>
+
+    <div id="report-content" class="section">
+      <p class="muted"><span class="spinner"></span> Generating comprehensive report…</p>
     </div>
-  </section>
 
-  <section id="summary-results">
-    <p style="text-align:center;color:gray;">Generating detailed AI visibility analysis...</p>
-  </section>
-
-  <div id="global-error" class="error-msg" style="display:none;">Error loading comprehensive analysis. Please try again.</div>
-
-  <section class="consultation-section">
-    <h3>Ready to Implement These Optimizations?</h3>
-    <p>Your comprehensive analysis is complete. Schedule a free consultation to discuss implementation strategy and prioritization.</p>
-    <a href="https://calendly.com/quontora" class="btn-primary" target="_blank" rel="noopener">Schedule Strategy Session</a>
-    <div class="consultation-info">
-      <strong>What we'll cover:</strong> Implementation roadmap, priority sequencing, technical requirements, and measurement strategy for your AI visibility improvements.
+    <div class="section">
+      <a class="btn" href="https://calendly.com/quontora" target="_blank" rel="noopener">Schedule Strategy Session</a>
     </div>
-  </section>
 
-  <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 24.
-  </div>
-
-  <div id="progress-overlay" class="overlay">
-    <div class="progress-panel">
-      <div class="progress-header">
-        <div class="progress-title">Generating your comprehensive report...</div>
-        <div class="progress-pct" id="progress-pct">0%</div>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="progress-eta" id="progress-eta">
-        Performing deep AI analysis across multiple engines.<br>
-        This typically takes <strong>2-5 minutes</strong>.
-      </div>
-    </div>
+    <div class="footer">© 2025 SnipeRank by quontora.com</div>
   </div>
 
   <script>
-    // ---- helpers (logos + transform + score card) ----
-    const LOGO_SOURCES = {
-      ChatGPT: '/img/chatgpt-logo.png',
-      Claude: '/img/claude-logo.png', 
-      Gemini: '/img/gemini-logo.png',
-      Copilot: '/img/copilot-logo.png',
-      Perplexity: '/img/perplexity-logo.png',
-    };
-    function logoDivFor(engine){
-      const wrap = document.createElement('div'); 
-      wrap.className = 'llm-logo';
-      const p = LOGO_SOURCES[engine];
-      if (!p) { wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`; return wrap; }
-      const img = document.createElement('img'); img.alt = `${engine} logo`; img.src = p;
-      img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
-      img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
-      return wrap;
-    }
-    function transformAIInsights(root){
-      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')].find(n => /ai\s*engine\s*insights?/i.test((n.textContent||'').trim()));
-      if (!title) return;
-      let ul = title.nextElementSibling; while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
-      if (!ul) return;
-      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent||'').trim());
-      if (!bullets.length) return;
-      const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
-      const box = document.createElement('div'); box.className = 'llm-insights';
-      engines.forEach((e,i) => { const t = bullets[i]; if (!t) return;
-        const row = document.createElement('div'); row.className = 'llm-row';
-        row.appendChild(logoDivFor(e)); const p = document.createElement('p'); p.textContent = t; row.appendChild(p); box.appendChild(row);
-      });
-      ul.replaceWith(box);
-    }
-    function renderScoreCard(score, highlights){
-      document.getElementById("scoreNumber").textContent = `${score}/100`;
-      document.getElementById("scoreBand").textContent =
-        score >= 70 ? "Rank: Highly Visible ★★★★☆" : 
-        score >= 55 ? "Rank: Partially Visible ★★★☆☆" : 
-        score >= 40 ? "Rank: Needs Work ★★☆☆☆" : 
-        "Rank: Low Visibility ★☆☆☆☆";
-      const grid = document.getElementById("pillarsGrid"); grid.innerHTML = "";
-      [["Content Clarity & Structure", Math.floor(score/4)],
-       ["AI Engine Optimization", Math.floor(score/4)],
-       ["Technical Implementation", Math.floor(score/4)],
-       ["Competitive Positioning", Math.floor(score/4)]]
-       .forEach(([label,val])=>{
-         const d = document.createElement("div"); d.className="pillar";
-         d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`;
-         grid.appendChild(d);
-       });
-      if (highlights && highlights.length){
-        const ul = document.getElementById("highlightsList"); ul.innerHTML = "";
-        highlights.slice(0,5).forEach(h=>{ const li=document.createElement("li"); li.textContent=h; ul.appendChild(li); });
-        document.getElementById("highlightsBlock").hidden = false;
+    // === CONFIG: point frontend to the Render backend (working) ===
+    const API_BASE = "https://sniperank-v2-dev.onrender.com";
+
+    const qs = new URLSearchParams(location.search);
+    const targetUrl = qs.get("url") || "";
+    document.getElementById("target-url").textContent = targetUrl || "—";
+
+    const noticeEl = document.getElementById("notice");
+    const pillarsEl = document.getElementById("pillars");
+    const reportEl  = document.getElementById("report-content");
+
+    function setNotice(msg){ noticeEl.textContent = msg; noticeEl.style.display = "block"; }
+
+    function renderScore(score){
+      document.getElementById("score").textContent = `${score}/100`;
+      // derive simple 4 pillars from score (visual only)
+      const q = Math.max(0, Math.min(25, Math.round(score/4)));
+      const data = [
+        ["Content Clarity & Structure", q],
+        ["AI Engine Optimization", q],
+        ["Technical Implementation", q],
+        ["Competitive Positioning", q]
+      ];
+      pillarsEl.innerHTML = "";
+      for (const [label,val] of data){
+        const d = document.createElement("div");
+        d.className = "pill";
+        d.innerHTML = `<span>${label}</span><span class="badge">${val}/25</span>`;
+        pillarsEl.appendChild(d);
       }
     }
-    function startProgress(){
-      document.getElementById('progress-overlay').style.display='flex';
-      const expectedDuration = 120000; const start = Date.now();
-      const fill = document.getElementById('progress-fill'); const pct = document.getElementById('progress-pct');
-      const id = setInterval(()=>{ const r = Math.min((Date.now()-start)/expectedDuration,1); const p = r*95;
-        fill.style.width = p+'%'; pct.textContent = Math.floor(p)+'%';
-        if (p>=95) clearInterval(id);
-        if (p>30) document.getElementById('progress-eta').innerHTML = 'Analyzing content depth and AI signals...<br>Generating detailed recommendations...';
-        if (p>70) document.getElementById('progress-eta').innerHTML = 'Finalizing comprehensive insights and implementation guidance...<br>Almost complete!';
-      },100);
-      return id;
-    }
-    function stopProgress(){ const fill=document.getElementById('progress-fill'); const pct=document.getElementById('progress-pct');
-      fill.style.transition='width .5s ease'; fill.style.width='100%'; pct.textContent='100%';
-      setTimeout(()=>{ document.getElementById('progress-overlay').style.display='none'; },800);
-    }
-    document.getElementById("copyBtn").addEventListener("click", async () => {
-      const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
-      const url = document.getElementById("current-url").textContent || "";
-      const highlights = [...document.querySelectorAll('#highlightsList li')].map(li => li.textContent.trim());
-      const txt = [
-        `Comprehensive AI SEO Analysis`,
-        `Website: ${url}`,
-        `Overall Score: ${scoreText}`,
-        ``,
-        `Priority Opportunities:`,
-        ...highlights.map(h => `- ${h}`),
-        ``,
-        `Full analysis: ${window.location.href}`
-      ].join("\n");
-      try { await navigator.clipboard.writeText(txt);
-        const b=document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
-      } catch { window.prompt("Copy the comprehensive summary:", txt); }
-    });
 
-    // ---- main load ----
-    const params = new URLSearchParams(window.location.search);
-    const targetUrl = params.get("url");
+    function renderLists(data){
+      const working = (data.whatsWorking || []).map(x => `<li>${x}</li>`).join("");
+      const needs   = (data.needsAttention || []).map(x => `<li>${x}</li>`).join("");
+      const engines = (data.engineInsights || []).map(x => `<li>${x}</li>`).join("");
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      if (!targetUrl){
-        document.getElementById("current-url").textContent = "No URL provided";
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>No URL provided. Please return to the analysis form.</p>";
+      reportEl.innerHTML = `
+        <div class="section">
+          <h3>Priority Opportunities</h3>
+          <ul>${needs}</ul>
+        </div>
+        <div class="section">
+          <h3>✅ What’s Working</h3>
+          <ul>${working}</ul>
+        </div>
+        <div class="section">
+          <h3>🤖 AI Engine Insights</h3>
+          <ul>${engines}</ul>
+        </div>
+      `;
+    }
+
+    async function loadFullReport(){
+      if(!targetUrl){
+        reportEl.innerHTML = `<p class="err">No URL provided.</p>`;
         return;
       }
-      document.getElementById("current-url").textContent = targetUrl;
+      try{
+        const res = await fetch(`${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`);
+        const data = await res.json();
 
-      const progressTimer = startProgress();
-
-      // Try same-origin first, then Render (SnipeRank-V2-dev)
-      const bases = ['', 'https://sniperank-v2-dev.onrender.com'];
-
-      let data = null;
-      let usedBase = '';
-      let mode = 'full'; // 'full' | 'lite'
-
-      // 1) Try FULL report
-      for (const base of bases){
-        try{
-          const r = await fetch(`${base}/api/full?url=${encodeURIComponent(targetUrl)}`);
-          const j = await r.json();
-          if (j && !j.error && (j.whatsWorking || j.needsAttention || j.engineInsights)) {
-            data = j; usedBase = base || 'same-origin'; mode='full'; break;
-          }
-        }catch(e){ /* continue */ }
-      }
-
-      // 2) Fallback to FRIENDLY (lite)
-      if (!data){
-        for (const base of bases){
-          try{
-            const r = await fetch(`${base}/api/friendly?url=${encodeURIComponent(targetUrl)}`);
-            const j = await r.json();
-            if (j && !j.error && (j.powers || j.opportunities)) {
-              // Map friendly -> full format
-              data = {
-                score: Math.min(100, Math.max(0, Math.round((j.score ?? 5) * 10))), // 0–10 -> 0–100
-                whatsWorking: (j.powers || []).slice(0, 10),
-                needsAttention: (j.opportunities || []).slice(0, 25),
-                engineInsights: (j.insights || []).slice(0, 5),
-                meta: j.meta || {}
-              };
-              usedBase = base || 'same-origin'; mode='lite'; break;
-            }
-          }catch(e){ /* continue */ }
-        }
-      }
-
-      try {
-        if (!data){
-          document.getElementById('global-error').style.display = 'block';
+        if (!data || data.error){
+          reportEl.innerHTML = `<p class="err">Error loading comprehensive analysis. Please try again.</p>`;
           return;
         }
 
-        if (mode === 'lite'){
-          const banner = document.getElementById('mode-banner');
-          banner.innerHTML = `⚠️ Showing <strong>Lite analysis</strong> (temporary). The comprehensive AI report service was unavailable.<br>
-          We still listed top strengths, priority opportunities, and AI engine insights.`;
-          banner.style.display = 'block';
+        if (data.success !== true){
+          setNotice('⚠️ Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.');
         }
 
-        const score = data.score || 65;
-        const highlights = (data.needsAttention || []).slice(0,5).map(item => item.includes(':') ? item.split(':').slice(1).join(':').trim() : item);
-        renderScoreCard(score, highlights);
+        renderScore(data.score || 50);
+        renderLists(data);
 
-        let html = '';
-        if (data.whatsWorking?.length){
-          html += `<div class="section-title">✅ What's Working</div><ul>`;
-          data.whatsWorking.forEach(item => { html += `<li>${item}</li>`; });
-          html += `</ul>`;
-        }
-        if (data.needsAttention?.length){
-          html += `<div class="section-title">🚨 Comprehensive Opportunities</div><ul>`;
-          data.needsAttention.forEach(item => { html += `<li>${item}</li>`; });
-          html += `</ul>`;
-        }
-        if (data.engineInsights?.length){
-          html += `<div class="section-title">🤖 AI Engine Insights</div><ul>`;
-          data.engineInsights.forEach(item => { html += `<li>${item}</li>`; });
-          html += `</ul>`;
-        }
+        // copy summary button
+        document.getElementById("copyBtn").onclick = async () => {
+          const lines = [
+            `Comprehensive AI SEO Analysis`,
+            `Website: ${targetUrl}`,
+            `Overall Score: ${document.getElementById("score").textContent}`,
+            ``,
+            `Top Opportunities:`,
+            ...(data.needsAttention || []).slice(0,8).map(x => `- ${x}`),
+            ``,
+            `AI Engine Insights:`,
+            ...(data.engineInsights || []).map(x => `- ${x}`),
+            ``,
+            `Generated by SnipeRank`
+          ].join("\n");
+          try{ await navigator.clipboard.writeText(lines); 
+               const b = document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
+          }catch{ window.prompt("Copy the summary:", lines); }
+        };
 
-        const host = document.getElementById('summary-results'); 
-        host.innerHTML = html; 
-        transformAIInsights(host);
-
-        console.log(`SnipeRank full-report loaded via ${mode.toUpperCase()} from: ${usedBase || 'same-origin'}`);
-      } finally {
-        clearInterval(progressTimer);
-        stopProgress();
+      }catch(err){
+        console.error(err);
+        reportEl.innerHTML = `<p class="err">Error loading comprehensive analysis. Please try again.</p>`;
       }
-    });
+    }
+
+    loadFullReport();
   </script>
 </body>
 </html>

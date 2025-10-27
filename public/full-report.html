@@ -1,38 +1,59 @@
 <!DOCTYPE html>
+<!--
+  full-report.html — v4.0.0 (Oct 27, 2025)
+  - Matches analyze.html visual style
+  - Uses Render backend /api/full
+  - Renders detailed bullets with PROBLEM / WHY / SOLUTION / PRIORITY when present
+  - Falls back gracefully to lite data
+  - Shows AI engine logos (ChatGPT, Claude, Gemini, Perplexity, Copilot)
+-->
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>SnipeRank — Full AI SEO Analysis Report</title>
   <style>
     :root{
-      --max: 780px; --muted:#6b7280; --border:#e5e7eb; --black:#0f172a;
-      --accent:#dc3545; --accent-dark:#b02a37; --bg:#ffffff;
+      --max: 860px; --muted:#6b7280; --border:#e5e7eb; --ink:#0f172a;
+      --brand:#1f2937; --chip:#f3f4f6; --accent:#dc2626; --ok:#16a34a;
+      --badge:#fafafa; --shadow:0 10px 30px rgba(0,0,0,.08);
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--black);background:var(--bg);}
+    body{margin:0;background:#fff;color:var(--ink);
+      font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Helvetica,Arial,sans-serif;}
     .wrap{max-width:var(--max);margin:40px auto;padding:0 20px}
-    h1{font-size:40px;line-height:1.1;margin:0 0 6px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);
+    h1{font-size:40px;line-height:1.1;margin:0 0 6px;
+      background:linear-gradient(135deg,#000 0%,#3182CE 100%);
       -webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .sub{color:var(--muted);margin:2px 0 20px}
-    .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px}
-    .score{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .score-num{font-size:28px;font-weight:800}
-    .pillars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
-    .pill{border:1px solid var(--border);border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between}
-    .badge{font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fafafa}
-    .section{margin-top:22px}
+    .card{border:1px solid var(--border);border-radius:14px;background:#fff;
+      box-shadow:var(--shadow);padding:16px}
+    .row{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .score{font-weight:800;font-size:28px}
+    .pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+    .pill{border:1px solid var(--border);border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;background:var(--badge)}
+    .badge{font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fff}
+    .section{margin-top:26px}
     .section h3{margin:0 0 8px}
-    ul{margin:8px 0 0 18px}
-    li{margin:6px 0;line-height:1.6}
-    .muted{color:var(--muted)}
-    .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:default}
-    .note{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;padding:10px;border-radius:8px;margin:14px 0}
+    .kicker{font-size:13px;color:var(--muted);margin-bottom:4px}
+    .note{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;padding:10px;border-radius:10px;margin:14px 0}
     .err{color:#b91c1c}
+    ul{margin:10px 0 0 18px}
+    li{margin:10px 0;line-height:1.6}
+    .chip{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--border);background:var(--chip);
+      border-radius:999px;padding:6px 10px;font-weight:600}
+    .engines{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{background:#dc3545;color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:default}
     .footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:13px}
     .spinner{width:16px;height:16px;border:2px solid #ddd;border-top-color:#666;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:middle}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .grid2{display:grid;grid-template-columns:1fr;gap:14px}
+    @media (min-width: 860px){ .grid2{grid-template-columns:1fr 1fr;} }
+    .issueTitle{font-weight:700}
+    .issueMeta{font-size:12px;color:var(--muted)}
+    .ok{color:var(--ok);font-weight:700}
+    .logo{width:18px;height:18px;object-fit:contain;vertical-align:-3px}
   </style>
 </head>
 <body>
@@ -43,19 +64,31 @@
     <div id="notice" class="note" style="display:none"></div>
 
     <div class="card">
-      <div class="score">
+      <div class="row">
         <div>
-          <div class="muted">Analysis for</div>
-          <div id="target-url" style="font-weight:700">—</div>
+          <div class="kicker">Analysis for</div>
+          <div id="target-url" style="font-weight:800">—</div>
         </div>
-        <div class="score-num" id="score">Generating…</div>
+        <div class="score" id="score">Generating…</div>
         <button id="copyBtn" class="btn" type="button">Copy Comprehensive Summary</button>
       </div>
+
       <div class="pillars" id="pillars"></div>
+
+      <div class="section">
+        <div class="kicker">AI Engines Covered</div>
+        <div class="engines">
+          <span class="chip"><img class="logo" src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/brand-openai.svg" alt="ChatGPT"/> ChatGPT</span>
+          <span class="chip"><img class="logo" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/anthropic.svg" alt="Claude"/> Claude</span>
+          <span class="chip"><img class="logo" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googlegemini.svg" alt="Gemini"/> Gemini</span>
+          <span class="chip"><img class="logo" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/perplexity.svg" alt="Perplexity"/> Perplexity</span>
+          <span class="chip"><img class="logo" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/microsoft.svg" alt="Copilot"/> Copilot</span>
+        </div>
+      </div>
     </div>
 
-    <div id="report-content" class="section">
-      <p class="muted"><span class="spinner"></span> Generating comprehensive report…</p>
+    <div id="content" class="section">
+      <p class="kicker"><span class="spinner"></span> Generating comprehensive report…</p>
     </div>
 
     <div class="section">
@@ -66,107 +99,145 @@
   </div>
 
   <script>
-    // === CONFIG: point frontend to the Render backend (working) ===
-    const API_BASE = "https://sniperank-v2-dev.onrender.com";
+    // ===== CONFIG =====
+    const API_BASE = "https://sniperank-v2-dev.onrender.com"; // Render backend
+    // ==================
 
     const qs = new URLSearchParams(location.search);
     const targetUrl = qs.get("url") || "";
-    document.getElementById("target-url").textContent = targetUrl || "—";
+    const name = qs.get("name") || "";
+    const email = qs.get("email") || "";
+    const domain = qs.get("domain") || "";
+    const source = qs.get("source") || "full-report";
 
     const noticeEl = document.getElementById("notice");
     const pillarsEl = document.getElementById("pillars");
-    const reportEl  = document.getElementById("report-content");
+    const contentEl = document.getElementById("content");
+    const scoreEl = document.getElementById("score");
+    const urlEl = document.getElementById("target-url");
+    urlEl.textContent = targetUrl || "—";
 
-    function setNotice(msg){ noticeEl.textContent = msg; noticeEl.style.display = "block"; }
+    function showNotice(msg){ noticeEl.textContent = msg; noticeEl.style.display='block'; }
 
     function renderScore(score){
-      document.getElementById("score").textContent = `${score}/100`;
-      // derive simple 4 pillars from score (visual only)
-      const q = Math.max(0, Math.min(25, Math.round(score/4)));
+      const s = Math.max(0, Math.min(100, Number(score)||0));
+      scoreEl.textContent = `${s}/100`;
+      const q1=Math.round(s*0.30/1), q2=Math.round(s*0.25/1), q3=Math.round(s*0.25/1), q4=Math.round(s*0.20/1);
+      const caps= v => Math.max(0, Math.min(25, v));
       const data = [
-        ["Content Clarity & Structure", q],
-        ["AI Engine Optimization", q],
-        ["Technical Implementation", q],
-        ["Competitive Positioning", q]
+        ["Content Clarity & Structure", caps(q1)],
+        ["AI Engine Optimization",     caps(q2)],
+        ["Technical Implementation",   caps(q3)],
+        ["Competitive Positioning",    caps(q4)]
       ];
-      pillarsEl.innerHTML = "";
-      for (const [label,val] of data){
-        const d = document.createElement("div");
-        d.className = "pill";
-        d.innerHTML = `<span>${label}</span><span class="badge">${val}/25</span>`;
-        pillarsEl.appendChild(d);
-      }
+      pillarsEl.innerHTML = data.map(([label,val]) => (
+        `<div class="pill"><span>${label}</span><span class="badge">${val}/25</span></div>`
+      )).join("");
+    }
+
+    function splitIssue(text){
+      // Expected format: "[PRIORITY: High] Title: Problem. Solution: Steps. Impact: X / Difficulty: Y"
+      const mPriority = text.match(/\[PRIORITY:\s*(High|Medium|Low)\]/i);
+      const priority = mPriority ? mPriority[1] : "—";
+      const titleMatch = text.replace(/\[PRIORITY:[^\]]+\]\s*/i,'').split(':')[0];
+      const title = titleMatch ? titleMatch.trim() : "Issue";
+      const sol = /Solution:\s*([^]+)$/i.exec(text);
+      const solution = sol ? sol[1].trim() : "";
+      const why = /Problem\s*([^]+?)Solution:/i.exec(text) || /:([^]+?)Solution:/i.exec(text);
+      const whyText = why ? why[1].trim() : "";
+      const meta = [];
+      const diff = /difficulty[:\s]*([A-Za-z]+)/i.exec(text); if(diff) meta.push(`Difficulty: ${diff[1]}`);
+      const impact = /impact[:\s]*([A-Za-z]+)/i.exec(text);   if(impact) meta.push(`Impact: ${impact[1]}`);
+      return {priority, title, whyText, solution, meta: meta.join(" • ")};
     }
 
     function renderLists(data){
-      const working = (data.whatsWorking || []).map(x => `<li>${x}</li>`).join("");
-      const needs   = (data.needsAttention || []).map(x => `<li>${x}</li>`).join("");
-      const engines = (data.engineInsights || []).map(x => `<li>${x}</li>`).join("");
+      const ww = (data.whatsWorking||[]).map(x=>`<li>${x}</li>`).join("");
+      const engines = (data.engineInsights||[]).map(x=>`<li>${x}</li>`).join("");
 
-      reportEl.innerHTML = `
-        <div class="section">
-          <h3>Priority Opportunities</h3>
-          <ul>${needs}</ul>
-        </div>
-        <div class="section">
-          <h3>✅ What’s Working</h3>
-          <ul>${working}</ul>
-        </div>
-        <div class="section">
-          <h3>🤖 AI Engine Insights</h3>
-          <ul>${engines}</ul>
+      // Detailed issues if present, else plain list
+      let needsHTML = "";
+      if (Array.isArray(data.needsAttention) && data.needsAttention.length){
+        const rich = data.needsAttention.map(item=>{
+          const i = typeof item === 'string' ? splitIssue(item) : item;
+          return `
+            <li>
+              <div class="issueTitle">[${i.priority}] ${i.title}</div>
+              ${i.whyText ? `<div>${i.whyText}</div>`:''}
+              ${i.solution ? `<div><span class="ok">Solution:</span> ${i.solution}</div>`:''}
+              ${i.meta ? `<div class="issueMeta">${i.meta}</div>`:''}
+            </li>`;
+        }).join("");
+        needsHTML = rich;
+      }
+
+      contentEl.innerHTML = `
+        <div class="grid2">
+          <div>
+            <h3>Priority Opportunities</h3>
+            <ul>${needsHTML}</ul>
+          </div>
+          <div>
+            <h3>✅ What’s Working</h3>
+            <ul>${ww}</ul>
+            <div class="section">
+              <h3>🤖 AI Engine Insights</h3>
+              <ul>${engines}</ul>
+            </div>
+          </div>
         </div>
       `;
     }
 
-    async function loadFullReport(){
+    async function loadReport(){
       if(!targetUrl){
-        reportEl.innerHTML = `<p class="err">No URL provided.</p>`;
+        contentEl.innerHTML = `<p class="err">No URL provided.</p>`;
         return;
       }
       try{
-        const res = await fetch(`${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`);
+        const params = new URLSearchParams({ url: targetUrl, name, email, domain, source });
+        const res = await fetch(`${API_BASE}/api/full?${params.toString()}`);
         const data = await res.json();
 
-        if (!data || data.error){
-          reportEl.innerHTML = `<p class="err">Error loading comprehensive analysis. Please try again.</p>`;
+        if (data.error){
+          contentEl.innerHTML = `<p class="err">Error loading comprehensive analysis: ${data.error}</p>`;
           return;
         }
 
         if (data.success !== true){
-          setNotice('⚠️ Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.');
+          showNotice('⚠️ Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.');
         }
 
         renderScore(data.score || 50);
         renderLists(data);
 
-        // copy summary button
         document.getElementById("copyBtn").onclick = async () => {
           const lines = [
             `Comprehensive AI SEO Analysis`,
             `Website: ${targetUrl}`,
-            `Overall Score: ${document.getElementById("score").textContent}`,
+            `Overall Score: ${scoreEl.textContent}`,
             ``,
             `Top Opportunities:`,
-            ...(data.needsAttention || []).slice(0,8).map(x => `- ${x}`),
+            ...(data.needsAttention || []).slice(0,10).map(x => `- ${typeof x==='string'?x:(x.title||JSON.stringify(x))}`),
             ``,
             `AI Engine Insights:`,
             ...(data.engineInsights || []).map(x => `- ${x}`),
             ``,
             `Generated by SnipeRank`
           ].join("\n");
-          try{ await navigator.clipboard.writeText(lines); 
-               const b = document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
+          try{
+            await navigator.clipboard.writeText(lines);
+            const b = document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
           }catch{ window.prompt("Copy the summary:", lines); }
         };
 
       }catch(err){
         console.error(err);
-        reportEl.innerHTML = `<p class="err">Error loading comprehensive analysis. Please try again.</p>`;
+        contentEl.innerHTML = `<p class="err">Error loading comprehensive analysis. Please try again.</p>`;
       }
     }
 
-    loadFullReport();
+    loadReport();
   </script>
 </body>
 </html>

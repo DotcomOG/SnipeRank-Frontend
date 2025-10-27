@@ -60,6 +60,7 @@
       try {
         const res = await fetch(`/api/full?url=${encodeURIComponent(url)}`);
         const data = await res.json();
+        console.log("Full report data:", data);
 
         if (!data.success) {
           document.body.innerHTML += "<p class='text-red-500 text-center mt-8'>Analysis failed. Try again.</p>";

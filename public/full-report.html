@@ -1,412 +1,326 @@
 <!DOCTYPE html>
 <!--
-  full-report.html — v4.2.0 (Oct 27, 2025)
-  - Mirrors analyze.html layout:
-    • Score card, pillars, highlights
-    • Full-screen progress overlay with % bar
-  - Uses /img logos in AI Engine Insights (row-per-engine with logo)
-  - Renders rich items: title + why + solution + priority (falls back to strings)
-  - Backend: https://sniperank-v2-dev.onrender.com (/api/full?url=...)
+SnipeRank — Full AI SEO Analysis (v3.7.0)
+Last updated: 2025-10-27
+Notes:
+- Matches analyze.html look/feel (score card, pills, spacing, typography)
+- Uses LLM logos from /public/img (claude.jpeg, gemini.jpeg, copilot.jpeg, gpt.jpeg*)
+- Pulls comprehensive data from Render backend: https://sniperank-v2-dev.onrender.com/api/full?url=...
+- Shows full-screen loading overlay with progress
+- For each issue, renders “How to fix” guidance bullets
+- Safe fallback to Lite mode if backend returns success:false
+* If you don’t have gpt.jpeg, duplicate any logo for now and name it gpt.jpeg
 -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SnipeRank — Full AI SEO Analysis</title>
   <style>
     :root{
-      --max-width:760px; --pad-v:3vh; --pad-h:2rem;
-      --muted:#666; --border:#e5e5e5;
-      --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
-      --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
-      --btn-red:#dc3545; --btn-red-hover:#c82333;
+      --wrap: 960px;
+      --pad: 22px;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --ink:#0f172a;
+      --brand:#0a66c2;
+      --card:#ffffff;
+      --accent:#e11d48;
+      --accent-ink:#ffffff;
+      --pill:#f8fafc;
+      --ok:#16a34a;
+      --warn:#ca8a04;
+      --bad:#dc2626;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 14px;
     }
     *{box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
-    h1{font-size:4rem;font-weight:700;margin:0 0 .25em;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    h2{font-size:1.6rem;font-weight:700;margin:0 0 1rem}
-    p{font-size:1.075rem;line-height:1.65;margin:0 0 1rem}
-
-    .info-row{width:100%;display:flex;gap:1rem;align-items:center;justify-content:space-between;margin:.25rem 0 1rem}
-    .powered-by,.for-url{color:var(--muted);font-size:.95rem}
-    .powered-by a{color:#3182CE;text-decoration:none;font-weight:600}
-    .for-url strong{color:#000}
-
-    .card{width:100%;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff}
-    .score-card{padding:1rem;margin-bottom:2.25rem}
-    .score-top{display:flex;align-items:center;gap:.75rem;justify-content:space-between;flex-wrap:wrap}
-    .score-main{display:flex;align-items:baseline;gap:.5rem}
-    .score-number{font-size:2.25rem;font-weight:800}
-    .score-band{color:var(--muted);font-size:.95rem}
-    .btn-row{display:flex;gap:.5rem;align-items:center}
-    .btn-ghost{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem;transition:.2s}
-    .btn-ghost:hover{background:#f2f2f2}
-    .btn-primary{background:var(--btn-red);color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;display:inline-block;text-decoration:none;text-align:center}
-    .btn-primary:hover{background:var(--btn-red-hover)}
-    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
-    .pillar{border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;font-size:.98rem;background:#fff}
-    .pillar .label{font-weight:600}
-    .badge{font-weight:700;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:.85rem;background:#fafafa}
-
-    /* Insights list styling */
-    #summary-results .section-title{font-size:1.25rem!important;font-weight:700!important;margin:2rem 0 .6rem!important}
-    #summary-results p{line-height:1.68!important;margin:0 0 .9rem!important;font-size:1.05rem!important;white-space:pre-line}
-    #summary-results ul{margin:0 0 1.1rem 1.1rem!important;padding-left:.2rem!important;list-style:disc!important}
-    #summary-results li{line-height:1.7!important;margin:.6rem 0!important;font-size:1.05rem!important}
-    .fix-why{color:#111;display:block;margin:.25rem 0 0}
-    .fix-sol{color:#0a7a48;display:block;margin:.15rem 0 0}
-
-    /* AI Engine Insights with logos */
-    .llm-insights{margin:.4rem 0 1.2rem}
-    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
-    .llm-row:last-child{border-bottom:0}
-    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
-    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px;border-radius:4px;border:1px solid var(--border)}
-    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
-
-    .notice{margin:.5rem 0 1rem;color:#7a5b00;background:#fff8e1;border:1px solid #ffe08a;padding:.6rem .75rem;border-radius:8px}
-
-    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
-    .footer a{color:#3182CE;text-decoration:none}
-
-    /* Progress overlay (full-screen) */
-    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
-    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(520px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
-    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .progress-title{font-weight:700;font-size:18px}
-    .progress-pct{color:#666;font-size:16px;font-weight:600}
-    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
-    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
-    .progress-eta{color:#666;font-size:14px;line-height:1.4}
+    html,body{margin:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fff}
+    a{color:var(--brand);text-decoration:none}
+    .wrap{max-width:var(--wrap);margin:40px auto;padding:0 20px}
+    header h1{
+      margin:0 0 8px;
+      font-size:44px; line-height:1.05;
+      background:linear-gradient(135deg,#000 0%,#3182CE 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      letter-spacing:.3px;
+    }
+    header .sub{color:var(--muted);font-size:14px}
+    /* Score Card */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--pad)}
+    .score-row{display:flex;gap:18px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    .score-num{font-size:34px;font-weight:800}
+    .score-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--pill);font-weight:600}
+    .score-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+    .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 16px;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:default}
+    /* Sections */
+    .section{margin-top:26px}
+    .section h3{margin:0 0 10px;font-size:18px}
+    .bullets{margin:0;padding-left:20px}
+    .bullets li{margin:8px 0;line-height:1.6}
+    .two-col{display:grid;grid-template-columns:1fr;gap:16px}
+    @media (min-width:900px){ .two-col{grid-template-columns:1fr 1fr} }
+    .fix{border-left:4px solid var(--brand);background:#f8fbff;padding:10px 12px;border-radius:8px}
+    .note{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;padding:10px;border-radius:8px;margin:14px 0}
+    .muted{color:var(--muted)}
+    .footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:13px}
+    /* Engine chips */
+    .engines{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 10px;font-weight:700}
+    .chip img{width:18px;height:18px;border-radius:4px;object-fit:cover}
+    /* Loading overlay */
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.92);display:none;align-items:center;justify-content:center;z-index:9999}
+    .box{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:22px;min-width:320px;text-align:center}
+    .prog{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:10px}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#22c55e);transition:width .35s ease}
+    .spinner{width:16px;height:16px;border:2px solid #ddd;border-top-color:#666;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
-  <h1>SnipeRank</h1>
-  <h2>Full AI SEO Analysis</h2>
+  <div class="wrap">
+    <header>
+      <h1>SnipeRank</h1>
+      <div class="sub">Full AI SEO Analysis • Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    </header>
 
-  <div class="info-row">
-    <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
-    <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
+    <div id="notice" class="note" style="display:none"></div>
+
+    <section class="card" aria-label="Score">
+      <div class="score-row">
+        <div>
+          <div class="muted">Analysis for</div>
+          <div id="target-url" style="font-weight:800">—</div>
+          <div class="engines" style="margin-top:8px">
+            <span class="chip"><img src="/img/claude.jpeg" alt="">Claude</span>
+            <span class="chip"><img src="/img/gemini.jpeg" alt="">Gemini</span>
+            <span class="chip"><img src="/img/copilot.jpeg" alt="">Copilot</span>
+            <span class="chip"><img src="/img/gpt.jpeg" alt="">ChatGPT</span>
+          </div>
+        </div>
+        <div class="score-num" id="score">Generating…</div>
+        <button id="copyBtn" class="btn" type="button">Copy Comprehensive Summary</button>
+      </div>
+
+      <div class="score-grid" style="margin-top:14px">
+        <div class="score-pill"><span>Content Clarity & Structure</span><span id="p1">—/25</span></div>
+        <div class="score-pill"><span>AI Engine Optimization</span><span id="p2">—/25</span></div>
+        <div class="score-pill"><span>Technical Implementation</span><span id="p3">—/25</span></div>
+        <div class="score-pill"><span>Competitive Positioning</span><span id="p4">—/25</span></div>
+      </div>
+    </section>
+
+    <section id="priorities" class="section">
+      <h3>🚨 Comprehensive Opportunities</h3>
+      <ul id="needsList" class="bullets"></ul>
+    </section>
+
+    <section class="two-col section">
+      <div>
+        <h3>✅ What’s Working</h3>
+        <ul id="workingList" class="bullets"></ul>
+      </div>
+      <div>
+        <h3>🤖 AI Engine Insights</h3>
+        <div id="engineCards"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <a class="btn" href="https://calendly.com/quontora" target="_blank" rel="noopener">Schedule Strategy Session</a>
+    </section>
+
+    <div class="footer">© 2025 SnipeRank by quontora.com</div>
   </div>
 
-  <section class="card score-card" id="scoreCard" aria-live="polite">
-    <div class="score-top">
-      <div class="score-main">
-        <div class="score-number" id="scoreNumber">-</div>
-        <div class="score-band" id="scoreBand">Generating comprehensive report...</div>
-      </div>
-      <div class="btn-row">
-        <button class="btn-ghost" id="copyBtn" type="button">Copy Comprehensive Summary</button>
-      </div>
-    </div>
-    <div class="pillars" id="pillarsGrid"></div>
-  </section>
-
-  <div id="notice" class="notice" style="display:none"></div>
-
-  <section id="summary-results">
-    <p style="text-align:center;color:gray;">Generating detailed AI visibility analysis...</p>
-  </section>
-
-  <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 27.
-  </div>
-
-  <!-- Progress Overlay (full-screen) -->
-  <div id="progress-overlay" class="overlay">
-    <div class="progress-panel">
-      <div class="progress-header">
-        <div class="progress-title">Generating your comprehensive report...</div>
-        <div class="progress-pct" id="progress-pct">0%</div>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="progress-eta" id="progress-eta">
-        Performing deep AI analysis across multiple engines.<br>
-        This typically takes <strong>2–5 minutes</strong> for comprehensive insights.
-      </div>
+  <!-- Loading overlay -->
+  <div id="overlay" class="overlay" role="alert" aria-live="polite">
+    <div class="box">
+      <div style="font-weight:800">Generating Full Report… <span id="pct">0%</span></div>
+      <div class="prog"><div id="bar" class="bar"></div></div>
+      <div class="muted" style="margin-top:8px"><span class="spinner"></span> This can take a few seconds.</div>
     </div>
   </div>
 
   <script>
-    // === CONFIG ===
-    const API_BASE = "https://sniperank-v2-dev.onrender.com";
+    // ===== CONFIG =====
+    const API_BASE = "https://sniperank-v2-dev.onrender.com"; // Render backend
+    // ==================
 
-    // Multiple filename options — we try these in order, fallback to text if all fail.
-    const LOGO_CANDIDATES = {
-      ChatGPT: ["/img/chatgpt-logo.png","/img/chatgpt.png","/img/chatgpt.jpeg"],
-      Claude: ["/img/claude-logo.png","/img/claude.jpeg","/img/claude.png"],
-      Gemini: ["/img/gemini-logo.png","/img/gemini.jpeg","/img/gemini.png"],
-      Copilot: ["/img/copilot-logo.png","/img/copilot.jpeg","/img/copilot.png"],
-      Perplexity: ["/img/perplexity-logo.png","/img/perplexity.jpeg","/img/perplexity.png"]
-    };
+    const qs = new URLSearchParams(location.search);
+    const targetUrl = qs.get("url") || "";
+    const source     = qs.get("source") || "analyze";
+    const name       = qs.get("name") || "";
+    const email      = qs.get("email") || "";
+    const domain     = qs.get("domain") || "";
 
-    function logoDivFor(engine){
-      const wrap = document.createElement('div');
-      wrap.className = 'llm-logo';
-      const cands = LOGO_CANDIDATES[engine] || [];
-      if (!cands.length){
-        wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
-        return wrap;
-      }
-      // try the candidates in order
-      let idx = 0;
-      const img = document.createElement('img');
-      img.alt = `${engine} logo`;
-      img.src = cands[idx++];
-      img.onerror = () => {
-        if (idx < cands.length){
-          img.src = cands[idx++];
-        } else {
-          wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
-        }
-      };
-      img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
-      wrap.appendChild(img);
-      return wrap;
+    const urlEl = document.getElementById("target-url");
+    urlEl.textContent = targetUrl || "—";
+
+    const scoreEl = document.getElementById("score");
+    const p1 = document.getElementById("p1"), p2=document.getElementById("p2"),
+          p3 = document.getElementById("p3"), p4=document.getElementById("p4");
+    const needsEl = document.getElementById("needsList");
+    const workEl  = document.getElementById("workingList");
+    const enginesEl = document.getElementById("engineCards");
+    const noticeEl = document.getElementById("notice");
+    const overlay = document.getElementById("overlay");
+    const bar = document.getElementById("bar");
+    const pct = document.getElementById("pct");
+
+    function showOverlay(){ overlay.style.display='flex'; }
+    function hideOverlay(){ overlay.style.display='none'; }
+    function setProgress(n){
+      const v = Math.max(0, Math.min(100, Math.round(n)));
+      bar.style.width = v + '%'; pct.textContent = v + '%';
     }
 
-    function transformAIInsights(root){
-      // Find the "AI Engine Insights" section we inserted and convert <ul><li> into branded rows with logos
-      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')]
-        .find(n => /ai\s*engine\s*insights?/i.test((n.textContent || '').trim()));
-      if (!title) return;
-      let ul = title.nextElementSibling;
-      while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
-      if (!ul) return;
-
-      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent || '').trim());
-      if (!bullets.length) return;
-
-      // Map order: ChatGPT, Claude, Gemini, Copilot, Perplexity — but preserve whichever we have
-      const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
-      const rows = document.createElement('div'); rows.className = 'llm-insights';
-
-      engines.forEach((engine) => {
-        const match = bullets.find(b => new RegExp(engine, 'i').test(b)) || bullets.shift();
-        if (!match) return;
-        const row = document.createElement('div');
-        row.className = 'llm-row';
-        row.appendChild(logoDivFor(engine));
-        const p = document.createElement('p');
-        // Strip leading "Engine:" if present
-        p.textContent = match.replace(new RegExp(`^${engine}\\s*:\\s*`, 'i'), '');
-        row.appendChild(p);
-        rows.appendChild(row);
-      });
-
-      ul.replaceWith(rows);
+    function setNotice(msg){
+      noticeEl.textContent = msg;
+      noticeEl.style.display = 'block';
     }
 
-    function renderScoreCard(total, pillars, highlights){
-      document.getElementById("scoreNumber").textContent = `${total}/100`;
-      document.getElementById("scoreBand").textContent =
-        total >= 70 ? "Rank: Highly Visible ★★★★☆" :
-        total >= 55 ? "Rank: Partially Visible ★★★☆☆" :
-        total >= 40 ? "Rank: Needs Work ★★☆☆☆" :
-        "Rank: Low Visibility ★☆☆☆☆";
-      const grid = document.getElementById("pillarsGrid");
-      grid.innerHTML = "";
-      [
-        ["Content Clarity & Structure", pillars.clarity ?? Math.max(0,Math.min(25,Math.round(total/4)))],
-        ["AI Engine Optimization",     pillars.engines ?? Math.max(0,Math.min(25,Math.round(total/4)))],
-        ["Technical Implementation",   pillars.tech    ?? Math.max(0,Math.min(25,Math.round(total/4)))],
-        ["Competitive Positioning",    pillars.comp    ?? Math.max(0,Math.min(25,Math.round(total/4)))]
-      ].forEach(([label, val]) => {
-        const d = document.createElement("div");
-        d.className = "pillar";
-        d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`;
-        grid.appendChild(d);
-      });
+    function derivePillars(total){
+      // naive split into 4 buckets, visual only
+      const q = Math.max(0, Math.min(25, Math.round((total||0)/4)));
+      p1.textContent = q + "/25";
+      p2.textContent = q + "/25";
+      p3.textContent = q + "/25";
+      p4.textContent = q + "/25";
+    }
 
-      if (highlights && highlights.length) {
-        const host = document.getElementById('summary-results');
-        const block = document.createElement('div');
-        block.className = 'highlights';
-        block.innerHTML = `<h4>Priority Opportunities</h4><ul id="highlightsList"></ul>`;
-        const ul = block.querySelector('#highlightsList');
-        highlights.slice(0,8).forEach(h => {
+    function renderBullets(list, container){
+      container.innerHTML = "";
+      list.forEach(item=>{
+        if(typeof item === "string"){
+          // auto-add "How to fix" suggestions for short items
+          const fix = defaultFix(item);
           const li = document.createElement('li');
-          li.textContent = h;
-          ul.appendChild(li);
-        });
-        host.prepend(block);
-      }
-    }
-
-    function startProgress() {
-      document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 120000; // 2 min to ~95%
-      const startTime = Date.now();
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const ratio = Math.min(elapsed / expectedDuration, 1);
-        const progress = Math.floor(ratio * 95);
-
-        progressFill.style.width = progress + '%';
-        progressPct.textContent = progress + '%';
-
-        if (progress >= 95) clearInterval(interval);
-        if (progress > 30) {
-          document.getElementById('progress-eta').innerHTML =
-            'Analyzing content depth and AI optimization signals...<br>Generating detailed recommendations...';
+          li.innerHTML = `<div>${escapeHTML(item)}</div>${fix ? `<div class="fix"><strong>How to fix:</strong> ${fix}</div>`:''}`;
+          container.appendChild(li);
+        }else if(item && item.issue){
+          const li = document.createElement('li');
+          const how = item.how || defaultFix(item.issue);
+          li.innerHTML = `<div>${escapeHTML(item.issue)}</div>${how ? `<div class="fix"><strong>How to fix:</strong> ${how}</div>`:''}`;
+          container.appendChild(li);
         }
-        if (progress > 70) {
-          document.getElementById('progress-eta').innerHTML =
-            'Finalizing comprehensive insights and implementation guidance...<br>Almost complete!';
-        }
-      }, 120);
-
-      return interval;
-    }
-
-    function stopProgress() {
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-      progressFill.style.transition = 'width 0.5s ease';
-      progressFill.style.width = '100%';
-      progressPct.textContent = '100%';
-      setTimeout(() => { document.getElementById('progress-overlay').style.display = 'none'; }, 800);
-    }
-
-    function normalizeList(arr) {
-      // Accept strings or rich objects {title, why, solution, priority}
-      if (!Array.isArray(arr)) return [];
-      return arr.map(item => {
-        if (typeof item === 'string') return { title: null, why: item, solution: '', priority: '' };
-        const { title, why, solution, priority } = item || {};
-        return {
-          title: title || null,
-          why: (why || '').trim(),
-          solution: (solution || '').trim(),
-          priority: (priority || '').trim()
-        };
       });
     }
 
-    function renderRichSections(data) {
-      const host = document.getElementById('summary-results');
-      const ww  = normalizeList(data.whatsWorking);
-      const na  = normalizeList(data.needsAttention);
-      const eng = Array.isArray(data.engineInsights) ? data.engineInsights.slice() : [];
-
-      let html = '';
-
-      if (na.length) {
-        html += `<div class="section-title">🚨 Comprehensive Opportunities</div><ul>`;
-        na.forEach(i => {
-          html += `<li>${i.title ? `<strong>${i.title}</strong>${i.priority ? ` <em>(${i.priority})</em>`:''}: `:''}<span class="fix-why">${i.why}</span>${i.solution ? `<span class="fix-sol">Fix: ${i.solution}</span>`:''}</li>`;
-        });
-        html += `</ul>`;
+    const FIX_TEMPLATES = [
+      { key:/meta\s*description/i, how:"Write a 150–160 character, task-focused summary per page including primary entity and intent. Add `<meta name=\"description\" content=\"…\">` in `<head>`."},
+      { key:/alt\s*text|alt\s*attributes/i, how:"Add descriptive `alt` attributes to meaningful images. Use nouns + action (e.g., “Volunteer serving meals at community center”)."},
+      { key:/structured\s*data|schema/i, how:"Add JSON-LD for `Organization`, `WebSite`, and key `Service`/`Product` pages. Validate in Google’s Rich Results Test."},
+      { key:/internal\s*link/i, how:"Create 3–5 cross-links per page to semantically related pages using descriptive anchor text, not “click here.”"},
+      { key:/title/i, how:"Use `Brand | Specific Page Topic` format. Keep under ~60 characters; ensure uniqueness per page."},
+      { key:/speed|performance|lighthouse/i, how:"Compress images (AVIF/WebP), defer non-critical JS, enable HTTP caching, and lazy-load below-the-fold media."},
+      { key:/mobile|responsive/i, how:"Adopt mobile-first layout, larger tap targets (≥48px), and limit viewport shifts (CLS). Test with Lighthouse Mobile."},
+      { key:/faq/i, how:"Publish an FAQ block answering 6–10 task-level questions; mark up with FAQPage schema for stronger AI snippets."},
+      { key:/security|https|hsts|csp/i, how:"Enable HSTS, set a basic Content-Security-Policy, and ensure only HTTPS resources are loaded."}
+    ];
+    function defaultFix(txt){
+      for(const t of FIX_TEMPLATES){
+        if(t.key.test(txt)) return t.how;
       }
-
-      if (ww.length) {
-        html += `<div class="section-title">✅ What's Working</div><ul>`;
-        ww.forEach(i => {
-          html += `<li>${i.title ? `<strong>${i.title}</strong>${i.priority ? ` <em>(${i.priority})</em>`:''}: `:''}<span class="fix-why">${i.why}</span>${i.solution ? `<span class="fix-sol">Next: ${i.solution}</span>`:''}</li>`;
-        });
-        html += `</ul>`;
-      }
-
-      if (eng.length) {
-        // Render as a simple list first; transformAIInsights will convert to logo rows
-        html += `<div class="section-title">🤖 AI Engine Insights</div><ul>`;
-        eng.forEach(e => {
-          if (typeof e === 'string') {
-            html += `<li>${e}</li>`;
-          } else {
-            const engine = e.engine || '';
-            const tip = e.tip || '';
-            html += `<li>${engine ? `${engine}: `:''}${tip}</li>`;
-          }
-        });
-        html += `</ul>`;
-      }
-
-      host.innerHTML = html || `<p class="notice">No data returned.</p>`;
-      transformAIInsights(host);
+      return "";
     }
 
-    // Copy button
-    document.getElementById("copyBtn").addEventListener("click", async () => {
-      const url = document.getElementById("current-url").textContent || "";
-      const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
-      const highlights = [...document.querySelectorAll('#summary-results .highlights li')].map(li => li.textContent.trim());
-      const txt = [
-        `Comprehensive AI SEO Analysis`,
-        `Website: ${url}`,
-        `Overall Score: ${scoreText}`,
-        ``,
-        `Top Opportunities:`,
-        ...highlights.slice(0,8).map(h => `- ${h}`),
-        ``,
-        `Generated by SnipeRank`
-      ].join("\n");
-      try {
-        await navigator.clipboard.writeText(txt);
-        const b = document.getElementById("copyBtn");
-        const old = b.textContent;
-        b.textContent = "Copied!";
-        setTimeout(() => b.textContent = old, 1500);
-      } catch {
-        window.prompt("Copy the summary:", txt);
-      }
-    });
+    function renderEngines(lines){
+      // Expect array of strings; map each to a card with a logo if recognized
+      const map = [
+        { id:'ChatGPT',  logo:'/img/gpt.jpeg'    },
+        { id:'Claude',   logo:'/img/claude.jpeg' },
+        { id:'Gemini',   logo:'/img/gemini.jpeg' },
+        { id:'Perplexity', logo:'/img/gemini.jpeg' }, // reuse if no icon provided
+        { id:'Copilot',  logo:'/img/copilot.jpeg'}
+      ];
+      const findLogo = (text)=>{
+        const m = map.find(m=> new RegExp(m.id,'i').test(text||""));
+        return m ? m.logo : '/img/gpt.jpeg';
+      };
+      enginesEl.innerHTML = "";
+      (lines||[]).forEach(line=>{
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.marginBottom = '12px';
+        card.innerHTML = `
+          <div style="display:flex;gap:12px;align-items:center">
+            <img src="${findLogo(line)}" alt="" style="width:24px;height:24px;border-radius:6px;object-fit:cover">
+            <div>${escapeHTML(line)}</div>
+          </div>
+        `;
+        enginesEl.appendChild(card);
+      });
+    }
 
-    // Load analysis
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get("url");
-    document.getElementById("current-url").textContent = targetUrl || "No URL provided";
+    function escapeHTML(s){ return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      if (!targetUrl) {
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>No URL provided.</p>";
+    async function loadReport(){
+      if(!targetUrl){
+        setNotice("No URL provided.");
         return;
       }
+      try{
+        showOverlay(); setProgress(8);
 
-      const progressTimer = startProgress();
-
-      try {
-        const res = await fetch(`${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`);
+        // Build endpoint
+        const endpoint = `${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`;
+        // Simulated staged progress
+        setProgress(35);
+        const res = await fetch(endpoint);
+        setProgress(65);
         const data = await res.json();
+        setProgress(90);
 
-        if (!data || data.error) {
-          document.getElementById('notice').style.display = 'block';
-          document.getElementById('notice').textContent = 'Error loading comprehensive analysis. Please try again.';
-        } else if (data.success !== true) {
-          document.getElementById('notice').style.display = 'block';
-          document.getElementById('notice').textContent = '⚠️ Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.';
+        // Fallback / notice
+        if(!data || data.error){
+          setNotice("Error: comprehensive AI report unavailable. Showing Lite analysis.");
+        }
+        if(data && data.success !== true){
+          setNotice("⚠️ Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.");
         }
 
         // Score & pillars
-        const score = Number.isFinite(data.score) ? data.score : 50;
-        const pillars = {
-          clarity: Math.max(0, Math.min(25, Math.round(score/4))),
-          engines: Math.max(0, Math.min(25, Math.round(score/4))),
-          tech:    Math.max(0, Math.min(25, Math.round(score/4))),
-          comp:    Math.max(0, Math.min(25, Math.round(score/4)))
+        const score = Number(data?.score ?? 50);
+        scoreEl.textContent = `${score}/100`;
+        derivePillars(score);
+
+        // Lists
+        renderBullets(data?.needsAttention || [], needsEl);
+        renderBullets(data?.whatsWorking || [], workEl);
+        renderEngines(data?.engineInsights || []);
+
+        // Copy summary
+        document.getElementById("copyBtn").onclick = async () => {
+          const lines = [
+            `Comprehensive AI SEO Analysis`,
+            `Website: ${targetUrl}`,
+            `Overall Score: ${score}/100`,
+            ``,
+            `Top Opportunities:`,
+            ...(data?.needsAttention || []).slice(0,10).map(x => `- ${typeof x === 'string' ? x : x.issue}`),
+            ``,
+            `AI Engine Insights:`,
+            ...(data?.engineInsights || []).map(x => `- ${x}`),
+            ``,
+            `Generated by SnipeRank`
+          ].join("\n");
+          try{ await navigator.clipboard.writeText(lines);
+               const b = document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
+          }catch{ window.prompt("Copy the summary:", lines); }
         };
 
-        // Highlights from top needs
-        const topNeeds = (Array.isArray(data.needsAttention) ? data.needsAttention : []).slice(0, 8).map(i => {
-          if (typeof i === 'string') return i;
-          return i.title ? `${i.title}: ${i.solution || i.why || ''}` : (i.solution || i.why || '');
-        });
-
-        renderScoreCard(score, pillars, topNeeds);
-        renderRichSections(data);
-
-      } catch (e) {
-        console.error('Full report error:', e);
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading comprehensive analysis. Please try again.</p>";
-      } finally {
-        stopProgress();
+      }catch(err){
+        console.error(err);
+        setNotice("Error loading comprehensive analysis. Showing Lite suggestions.");
+      }finally{
+        setProgress(100); setTimeout(hideOverlay, 250);
       }
-    });
+    }
+
+    loadReport();
   </script>
 </body>
 </html>

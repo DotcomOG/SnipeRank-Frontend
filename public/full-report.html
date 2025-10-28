@@ -1,304 +1,357 @@
 <!DOCTYPE html>
-<!--
-  SnipeRank — Full Report (v1.0-main)
-  Last updated: 2025-10-27
-  Notes:
-  - Visual + structure mirror analyze.html (score card, pills, spacing)
-  - Loading overlay with progress bar
-  - LLM logos rendered from /public/img:
-      /img/claude.jpeg, /img/gemini.jpeg, /img/copilot.jpeg, /img/chatgpt-logo.png
-  - Backend: https://sniperank-v2-dev.onrender.com
--->
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>SnipeRank — Full AI SEO Analysis</title>
+  <!-- full-report.html - v3.2.0 (built from analyze.html shell; content replaced for full report) -->
+  <!-- Features: same scorecard/overlay/modal as analyze; pulls /api/full; rich "How to fix" guidance; LLM logos in Insights -->
+  <!-- Backend compatibility: /api/full (GET) -->
+  <!-- Last updated: October 27, 2025 -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnipeRank - Full AI SEO Analysis</title>
   <style>
     :root{
-      --max: 920px;
-      --pad: 24px;
-      --muted: #6b7280;
-      --border:#e5e7eb;
-      --ink:#0f172a;
-      --bg:#ffffff;
-      --accent:#e11d48;
-      --accent-2:#ef4444;
+      --max-width:760px; --pad-v:3vh; --pad-h:2rem;
+      --muted:#666; --border:#e5e5e5;
+      --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
+      --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
+      --btn-red:#dc3545; --btn-red-hover:#c82333;
       --ok:#16a34a;
-      --chip:#f8fafc;
-      --shadow:0 10px 30px rgba(0,0,0,.10);
-      --pill:#f1f5f9;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-    .wrap{max-width:var(--max);margin:36px auto;padding:0 18px}
-    h1{font-size:44px;line-height:1.05;margin:0 0 6px;background:linear-gradient(135deg,#0b1220 0%,#2563eb 100%);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
-    .sub{color:var(--muted);margin:2px 0 22px}
-    /* Score Card (same silhouette as analyze) */
-    .card{border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);padding:16px}
-    .scorebar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
-    .score-num{font-size:34px;font-weight:800}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .pill{background:var(--pill);border:1px solid var(--border);border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px;display:inline-flex;gap:8px;align-items:center}
-    .pill .subval{font-weight:700;border:1px solid var(--border);background:#fff;border-radius:999px;padding:2px 8px}
-    .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
-    .btn:disabled{opacity:.7;cursor:default}
-    .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:4px 8px;font-size:13px}
-    .engines{display:flex;gap:8px;flex-wrap:wrap}
-    .engine-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--chip);border-radius:999px;padding:6px 10px}
-    .engine-chip img{width:18px;height:18px;border-radius:4px;object-fit:cover}
-    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-top:20px}
-    .section{border:1px solid var(--border);border-radius:14px;background:#fff;padding:16px}
-    .section h3{margin:0 0 8px}
-    ul{margin:8px 0 0 20px}
-    li{margin:6px 0;line-height:1.6}
-    .howfix{background:#f8fafc;border:1px solid var(--border);border-left:3px solid var(--accent-2);border-radius:10px;padding:10px;margin:8px 0 2px}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
+    h1{font-size:4rem;font-weight:700;margin:0 0 .25em;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    h2{font-size:1.6rem;font-weight:700;margin:0 0 1rem}
+    p{font-size:1.075rem;line-height:1.65;margin:0 0 1rem}
+
+    .info-row{width:100%;display:flex;gap:1rem;align-items:center;justify-content:space-between;margin:.25rem 0 1rem}
+    .powered-by,.for-url{color:var(--muted);font-size:.95rem}
+    .powered-by a{color:#3182CE;text-decoration:none;font-weight:600}
+    .for-url strong{color:#000}
+
+    .card{width:100%;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff}
+    .score-card{padding:1rem;margin-bottom:2.25rem}
+    .score-top{display:flex;align-items:center;gap:.75rem;justify-content:space-between;flex-wrap:wrap}
+    .score-main{display:flex;align-items:baseline;gap:.5rem}
+    .score-number{font-size:2.25rem;font-weight:800}
+    .score-band{color:var(--muted);font-size:.95rem}
+    .btn-row{display:flex;gap:.5rem;align-items:center}
+    .btn-ghost{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem;transition:.2s}
+    .btn-ghost:hover{background:#f2f2f2}
+    .btn-primary{background:var(--btn-red);color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;display:inline-block;text-decoration:none;text-align:center}
+    .btn-primary:hover{background:var(--btn-red-hover)}
+    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+    .pillar{border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;font-size:.98rem;background:#fff}
+    .pillar .label{font-weight:600}
+    .badge{font-weight:700;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:.85rem;background:#fafafa}
+    .highlights{margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--border)}
+    .highlights h4{margin:0 0 .55rem;font-size:1.2rem;font-weight:800}
+    .highlights ul{margin:0;padding-left:1rem}
+    .highlights li{margin:.45rem 0;line-height:1.5}
+
+    .section-title{font-size:1.25rem!important;font-weight:700!important;margin:2rem 0 .6rem!important}
+    .howfix{background:#f8fafc;border:1px solid var(--border);border-left:3px solid #ef4444;border-radius:10px;padding:10px;margin:8px 0 2px}
     .ok{color:var(--ok)}
-    .warn{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;border-radius:8px;padding:10px;margin:12px 0}
-    .footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:13px}
-    /* Loading overlay */
-    .overlay{position:fixed;inset:0;background:rgba(248,250,252,.95);display:none;align-items:center;justify-content:center;z-index:50}
-    .panel{width:min(560px,92vw);border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);padding:22px}
-    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .fill{height:100%;width:0%;background:#2563eb;transition:width .35s ease}
-    .tiny{color:var(--muted);font-size:13px;margin-top:8px}
-    @media (max-width:880px){ .grid{grid-template-columns:1fr;}}
+
+    /* LLM insight rows (logos at the bottom section, per your spec) */
+    .llm-insights{margin:1rem 0 1.2rem}
+    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
+    .llm-row:last-child{border-bottom:0}
+    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
+    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
+    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
+
+    .consultation-section{text-align:center;padding:3rem 2rem;margin-top:3rem}
+    .consultation-section h3{margin:0 0 1rem;font-size:1.8rem;font-weight:700}
+    .consultation-section p{margin:0 0 2rem;color:var(--muted)}
+
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
+    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
+    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .progress-title{font-weight:700;font-size:18px}
+    .progress-pct{color:#666;font-size:16px;font-weight:600}
+    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
+    .progress-eta{color:#666;font-size:14px;line-height:1.4}
+
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1001}
+    .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .modal-title{font-size:20px;font-weight:700;margin:0}
+    .modal-close{background:transparent;border:0;font-size:24px;cursor:pointer;padding:4px;color:#666}
+    .modal-close:hover{color:#000}
+    .modal-content{line-height:1.6}
+    .modal-content p{margin:12px 0;color:#333}
+    .modal-content strong{color:#111}
+
+    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
+    .footer a{color:#3182CE;text-decoration:none}
+    .error-note{color:#c00;text-align:center;margin-top:.5rem;font-size:.95rem}
+    .notice{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;border-radius:10px;padding:12px;margin:0 0 1rem;display:none}
   </style>
 </head>
 <body>
-  <div class="overlay" id="overlay">
-    <div class="panel">
-      <h2 style="margin:0 0 8px">Generating comprehensive report…</h2>
-      <div class="bar"><div class="fill" id="bar"></div></div>
-      <div class="tiny" id="pct">0%</div>
+  <h1>SnipeRank</h1>
+  <h2>Full AI SEO Analysis</h2>
+
+  <div class="info-row">
+    <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
+  </div>
+
+  <div id="notice" class="notice"></div>
+
+  <!-- Score Card (same as analyze) -->
+  <section class="card score-card" id="scoreCard" aria-live="polite">
+    <div class="score-top">
+      <div class="score-main">
+        <div class="score-number" id="scoreNumber">-</div>
+        <div class="score-band" id="scoreBand">Generating…</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" id="breakdownBtn" type="button">What goes into this score?</button>
+        <button class="btn-ghost" id="copyBtn" type="button">Copy Comprehensive Summary</button>
+      </div>
+    </div>
+    <div class="pillars" id="pillarsGrid"></div>
+    <div class="highlights" id="highlightsBlock" hidden>
+      <h4>Highlights</h4>
+      <ul id="highlightsList"></ul>
+    </div>
+  </section>
+
+  <!-- Full Report Sections -->
+  <h3 class="section-title">🔴 Comprehensive Opportunities</h3>
+  <div id="needs-wrap"><p style="text-align:center;color:gray;">Compiling issues & fixes…</p></div>
+
+  <h3 class="section-title ok">✅ What’s Working</h3>
+  <div id="working-wrap"><p style="text-align:center;color:gray;">Collecting strengths…</p></div>
+
+  <h3 class="section-title">🤖 AI Engine Insights</h3>
+  <div id="insights-wrap"><p style="text-align:center;color:gray;">Loading per-engine guidance…</p></div>
+
+  <!-- Consultation Section -->
+  <section class="consultation-section">
+    <h3>Want help implementing the fixes?</h3>
+    <p>Book a free 30-minute session to prioritize the work and map a quick win plan.</p>
+    <a href="https://calendly.com/quontora" class="btn-primary" target="_blank" rel="noopener">Schedule Strategy Session</a>
+  </section>
+
+  <div class="footer">
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>.
+  </div>
+
+  <!-- Progress Overlay (same as analyze) -->
+  <div id="progress-overlay" class="overlay">
+    <div class="progress-panel">
+      <div class="progress-header">
+        <div class="progress-title">Generating your comprehensive report...</div>
+        <div class="progress-pct" id="progress-pct">0%</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-eta" id="progress-eta">
+        Processing technical checks, content structure, and AI-engine signals...
+      </div>
     </div>
   </div>
 
-  <div class="wrap">
-    <h1>SnipeRank</h1>
-    <div class="sub">Full AI SEO Analysis Report • Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
-
-    <div id="notice" class="warn" style="display:none"></div>
-
-    <div class="card">
-      <div class="scorebar">
-        <div>
-          <div class="muted" style="color:var(--muted)">Analysis for</div>
-          <div id="target" style="font-weight:800">—</div>
-        </div>
-        <div class="score-num" id="score">Generating…</div>
-        <button id="copyBtn" class="btn" type="button">Copy Comprehensive Summary</button>
+  <!-- Score Breakdown Modal (unchanged from analyze) -->
+  <div id="breakdown-modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">What goes into your SnipeRank score?</h3>
+        <button class="modal-close" id="modal-close">×</button>
       </div>
-
-      <div style="margin-top:12px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap">
-        <div class="pillrow" id="pillrow">
-          <div class="pill">AI Access Readiness <span class="subval" id="p1">—</span></div>
-          <div class="pill">Trust &amp; Verification Signals <span class="subval" id="p2">—</span></div>
-          <div class="pill">LLM Interpretability &amp; Clarity <span class="subval" id="p3">—</span></div>
-          <div class="pill">Prompt-Pattern Alignment <span class="subval" id="p4">—</span></div>
-        </div>
-        <div class="engines">
-          <span class="engine-chip"><img src="/img/claude.jpeg" alt="Claude"/>Claude</span>
-          <span class="engine-chip"><img src="/img/gemini.jpeg" alt="Gemini"/>Gemini</span>
-          <span class="engine-chip"><img src="/img/copilot.jpeg" alt="Copilot"/>Copilot</span>
-          <span class="engine-chip"><img src="/img/chatgpt-logo.png" alt="ChatGPT"/>ChatGPT</span>
-        </div>
+      <div class="modal-content">
+        <p>Your SnipeRank score reflects <strong>AI-search visibility</strong> across four pillars:</p>
+        <p><strong>🎯 AI Access Readiness (25)</strong> — discovery, crawlability, indexability.</p>
+        <p><strong>🔒 Trust & Verification Signals (25)</strong> — authority, security, brand signals.</p>
+        <p><strong>📝 LLM Interpretability & Clarity (25)</strong> — structure, semantics, clarity for LLMs.</p>
+        <p><strong>🔍 Prompt-Pattern Alignment (25)</strong> — content maps to user intents and Q/A patterns.</p>
       </div>
     </div>
-
-    <div class="grid">
-      <div class="section" id="opportunities">
-        <h3>🔴 Comprehensive Opportunities</h3>
-        <div id="needsList"><p style="color:var(--muted)">Building detailed recommendations…</p></div>
-      </div>
-
-      <div class="section" id="engines">
-        <h3>🤖 AI Engine Insights</h3>
-        <div id="engineList"><p style="color:var(--muted)">Loading per-engine insights…</p></div>
-      </div>
-    </div>
-
-    <div class="section" style="margin-top:18px" id="working">
-      <h3 class="ok">✅ What’s Working</h3>
-      <div id="workList"><p style="color:var(--muted)">Collecting strengths…</p></div>
-    </div>
-
-    <div style="margin-top:18px">
-      <a class="btn" href="https://calendly.com/quontora" target="_blank" rel="noopener">Schedule Strategy Session</a>
-    </div>
-
-    <div class="footer">© 2025 SnipeRank by quontora.com</div>
   </div>
 
   <script>
-    // === Config ===
-    const API_BASE = "https://sniperank-v2-dev.onrender.com"; // Render backend
-    const qs = new URLSearchParams(location.search);
-    const targetUrl = qs.get("url") || "";
-    document.getElementById("target").textContent = targetUrl || "—";
+    // v3.2.0 — Full report logic (built on analyze shell)
+    // Logos only in the Insights section (not in the score card).
+    const LOGO_SOURCES = {
+      ChatGPT: '/img/chatgpt-logo.png',
+      Claude: '/img/claude.jpeg',
+      Gemini: '/img/gemini.jpeg',
+      Copilot: '/img/copilot.jpeg',
+      Perplexity: null
+    };
 
-    // Loading overlay animation (simple, deterministic)
-    const overlay = document.getElementById('overlay');
-    const bar = document.getElementById('bar');
-    const pct = document.getElementById('pct');
-    let prog = 0, timer = null;
-    function startOverlay(){
-      overlay.style.display = "flex";
-      prog = 0;
-      timer = setInterval(()=>{
-        prog = Math.min(97, prog + Math.random()*6 + 2);
-        bar.style.width = prog.toFixed(0) + "%";
-        pct.textContent = bar.style.width;
-      }, 260);
+    // Helpers
+    function esc(s){return (''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+    function extractDomain(u){
+      if(!u) return '';
+      try{ const withProto = /^https?:\/\//i.test(u)?u:`https://${u}`;
+           return new URL(withProto).hostname.replace(/^www\./i,''); }
+      catch{ const m = String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i); return (m?m[1]:'').replace(/^www\./i,''); }
     }
-    function stopOverlay(){
-      if(timer){ clearInterval(timer); timer = null; }
-      bar.style.width = "100%"; pct.textContent = "100%";
-      setTimeout(()=>overlay.style.display="none", 250);
-    }
-
-    // Evenly split the overall score into 4 sub-pillars for display only
-    function splitScore(s){
-      const base = Math.max(0, Math.min(100, Number(s)||0));
-      const q = Math.floor(base/4);
-      const r = base - q*4; // distribute remainder
-      return [q+(r>0?1:0), q+(r>1?1:0), q+(r>2?1:0), q];
-    }
-
-    function esc(s){ return (""+s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
-
-    function renderNeeds(needs){
-      if(!Array.isArray(needs) || needs.length===0){
-        return `<p style="color:var(--muted)">No priority issues detected.</p>`;
+    function renderScoreCard(total, pillars, highlights){
+      const t = Number(total||0);
+      document.getElementById("scoreNumber").textContent = `${t}/100`;
+      document.getElementById("scoreBand").textContent =
+        t >= 70 ? "Rank: Highly Visible ★★★★☆" :
+        t >= 55 ? "Rank: Partially Visible ★★★☆☆" :
+        t >= 40 ? "Rank: Needs Work ★★☆☆☆" :
+                  "Rank: Low Visibility ★☆☆☆☆";
+      const grid = document.getElementById("pillarsGrid"); grid.innerHTML='';
+      const p = pillars || {};
+      [
+        ["AI Access Readiness", p.access ?? Math.round(t/4)],
+        ["Trust & Verification Signals", p.trust ?? Math.round(t/4)],
+        ["LLM Interpretability & Clarity", p.clarity ?? Math.round(t/4)],
+        ["Prompt-Pattern Alignment", p.alignment ?? Math.round(t/4)]
+      ].forEach(([label,val])=>{
+        const d = document.createElement('div'); d.className='pillar';
+        d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`;
+        grid.appendChild(d);
+      });
+      if (Array.isArray(highlights) && highlights.length){
+        const ul = document.getElementById("highlightsList"); ul.innerHTML='';
+        highlights.forEach(h=>{ const li=document.createElement('li'); li.textContent=h; ul.appendChild(li); });
+        document.getElementById("highlightsBlock").hidden = false;
       }
-      return `<ul>` + needs.map(txt=>{
-        // Heuristic: if incoming text lacks a fix, add a helper “How to fix” block beneath.
-        const t = ""+txt;
-        let fix = "";
-        if(/structured data|schema/i.test(t)){
-          fix = "Add JSON-LD for Organization, WebSite and key Service/Product pages. Validate in Google’s Rich Results Test.";
-        }else if(/meta description/i.test(t)){
-          fix = "Write a 150–160 character, task-focused description per page including primary entity and intent.";
-        }else if(/alt/i.test(t)){
-          fix = "Add descriptive <code>alt</code> text to meaningful images. Use nouns + action (e.g., “Volunteer serving meals at community center”).";
-        }
-        return `
-          <li>${esc(t)}</li>
-          ${fix ? `<div class="howfix"><strong>How to fix:</strong> ${fix}</div>` : ``}
-        `;
-      }).join("") + `</ul>`;
     }
-
-    function logoForEngine(name){
-      const key = (name||"").toLowerCase();
-      if(key.includes("claude")) return "/img/claude.jpeg";
-      if(key.includes("gemini")) return "/img/gemini.jpeg";
-      if(key.includes("copilot")) return "/img/copilot.jpeg";
-      // default chatgpt / perplexity fall back to chatgpt logo if not supplied
-      return "/img/chatgpt-logo.png";
+    function howToFixFor(text){
+      const s = text.toLowerCase();
+      if (s.includes("structured data")||s.includes("schema"))
+        return "Add JSON-LD for Organization, WebSite, and key Service/Product pages. Validate in Google Rich Results Test.";
+      if (s.includes("meta description"))
+        return "Write a 150–160 character, task-focused description per page including primary entity and intent.";
+      if (s.includes("alt"))
+        return "Add descriptive <code>alt</code> text. Use nouns + action (e.g., “Volunteer serving meals at community center”).";
+      if (s.includes("internal linking"))
+        return "Add 2–4 contextual links per page pointing to related pages. Ensure anchors use specific, descriptive phrases.";
+      if (s.includes("core web vitals")||s.includes("speed")||s.includes("loading"))
+        return "Compress images, defer non-critical JS, serve static assets over a CDN, and target LCP <2.5s.";
+      return "";
     }
-
-    function renderEngineInsights(items){
-      if(!Array.isArray(items) || items.length===0){
-        return `<p style="color:var(--muted)">No engine-specific notes available.</p>`;
-      }
-      return items.map(line=>{
-        const text = ""+line;
-        // Try to extract engine name before ":" else fallback
+    function renderNeeds(list){
+      if(!Array.isArray(list)||!list.length) return '<p style="color:gray">No priority issues detected.</p>';
+      return '<ul>'+list.map(t=>{
+        const fix = howToFixFor(t||'');
+        return `<li>${esc(t||'')}</li>${fix ? `<div class="howfix"><strong>How to fix:</strong> ${fix}</div>`:''}`;
+      }).join('')+'</ul>';
+    }
+    function renderWorking(list){
+      if(!Array.isArray(list)||!list.length) return '<p style="color:gray">No strengths detected.</p>';
+      return '<ul>'+list.map(t=>`<li>${esc(t||'')}</li>`).join('')+'</ul>';
+    }
+    function logoDivFor(engine){
+      const wrap = document.createElement('div'); wrap.className='llm-logo';
+      const src = LOGO_SOURCES[engine]||null;
+      if(!src){ wrap.innerHTML = `<span class="llm-fallback">${esc(engine)}</span>`; return wrap; }
+      const img = document.createElement('img'); img.alt=`${engine} logo`; img.src=src;
+      img.onload=()=>{wrap.innerHTML=''; wrap.appendChild(img)};
+      img.onerror=()=>{wrap.innerHTML = `<span class="llm-fallback">${esc(engine)}</span>`};
+      wrap.appendChild(img); return wrap;
+    }
+    function renderInsights(items){
+      if(!Array.isArray(items)||!items.length) return '<p style="color:gray">No engine-specific notes available.</p>';
+      const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
+      // Map notes to engines in order; fallback to raw line if includes "Engine:"
+      const rows = items.map((line,i)=>{
+        const text = ''+line;
         const m = text.match(/^([A-Za-z ]+)\s*:\s*(.+)$/);
-        const name = m ? m[1].trim() : "ChatGPT";
+        const name = m ? m[1].trim() : (engines[i] || 'ChatGPT');
         const note = m ? m[2].trim() : text;
-        const logo = logoForEngine(name);
-        return `
-          <div class="badge" style="display:flex;align-items:flex-start;gap:10px;margin:8px 0">
-            <img src="${logo}" alt="${esc(name)}" style="width:22px;height:22px;border-radius:4px;object-fit:cover"/>
-            <div><strong>${esc(name)}:</strong> ${esc(note)}</div>
-          </div>
-        `;
-      }).join("");
+        return {name, note};
+      });
+      return rows.map(({name,note})=>{
+        return `<div class="llm-row">${logoDivFor(name).outerHTML}<p><strong>${esc(name)}:</strong> ${esc(note)}</p></div>`;
+      }).join('');
     }
 
-    function renderList(list){
-      if(!Array.isArray(list) || list.length===0){
-        return `<p style="color:var(--muted)">No items found.</p>`;
-      }
-      return `<ul>` + list.map(x=>`<li>${esc(x)}</li>`).join("") + `</ul>`;
+    // Overlay
+    function startProgress(){
+      document.getElementById('progress-overlay').style.display='flex';
+      const fill = document.getElementById('progress-fill');
+      const pct = document.getElementById('progress-pct');
+      let p=0; const id=setInterval(()=>{ p=Math.min(97,p+2+Math.random()*4); fill.style.width=p+'%'; pct.textContent=Math.floor(p)+'%'; }, 220);
+      return ()=>{ clearInterval(id); fill.style.width='100%'; pct.textContent='100%'; setTimeout(()=>{document.getElementById('progress-overlay').style.display='none'},600); };
     }
 
-    async function loadReport(){
+    // Modal controls (unchanged)
+    document.getElementById('breakdownBtn').addEventListener('click', ()=>{document.getElementById('breakdown-modal').style.display='flex';});
+    document.getElementById('modal-close').addEventListener('click', ()=>{document.getElementById('breakdown-modal').style.display='none';});
+    document.getElementById('breakdown-modal').addEventListener('click', (e)=>{ if(e.target===document.getElementById('breakdown-modal')) document.getElementById('breakdown-modal').style.display='none'; });
+
+    // Copy summary
+    document.getElementById('copyBtn').addEventListener('click', async ()=>{
+      const score = document.getElementById('scoreNumber').textContent || '-/100';
+      const labels=[...document.querySelectorAll('.pillar .label')].map(x=>x.textContent.trim());
+      const vals=[...document.querySelectorAll('.pillar .badge')].map(x=>x.textContent.trim());
+      const needs=[...document.querySelectorAll('#needs-wrap li')].map(li=>li.textContent.trim()).slice(0,12);
+      const insights=[...document.querySelectorAll('.llm-row p')].map(p=>p.textContent.trim());
+      const txt=[
+        `Website: ${document.getElementById('current-url').textContent}`,
+        `SnipeRank Score: ${score}`,
+        `Pillars:`,...labels.map((l,i)=>`- ${l}: ${vals[i]||''}`),
+        ``,`Top Opportunities:`,...needs.map(n=>`- ${n}`),
+        ``,`AI Engine Insights:`,...insights.map(n=>`- ${n}`)
+      ].join('\n');
+      try{await navigator.clipboard.writeText(txt); const b=document.getElementById('copyBtn'); const o=b.textContent; b.textContent='Copied!'; setTimeout(()=>b.textContent=o,1200);}catch{window.prompt('Copy summary:',txt);}
+    });
+
+    // Load
+    const urlParams = new URLSearchParams(location.search);
+    const targetUrl = urlParams.get('url') || '';
+    document.getElementById('current-url').textContent = targetUrl || '—';
+
+    (async function init(){
       if(!targetUrl){
-        document.getElementById("notice").style.display="block";
-        document.getElementById("notice").textContent = "No URL provided.";
+        document.getElementById('notice').style.display='block';
+        document.getElementById('notice').textContent='No URL provided.';
         return;
       }
-      startOverlay();
+      const stopOverlay = startProgress();
+
+      // Probe local /api/full; fallback to Render
+      let apiBase = '';
       try{
-        const res = await fetch(`${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`);
+        const probe = await fetch('/api/full?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
+        if(!probe.ok) throw 0;
+      }catch{
+        apiBase = 'https://sniperank-v2-dev.onrender.com';
+      }
+
+      try{
+        const res = await fetch(`${apiBase}/api/full?url=${encodeURIComponent(targetUrl)}`);
         const data = await res.json();
 
-        // lite / fallback notice
         if(!data || data.error){
-          const n = document.getElementById("notice");
-          n.style.display="block";
-          n.textContent = "Error loading comprehensive analysis. Showing nothing.";
-          stopOverlay();
-          return;
+          const n=document.getElementById('notice'); n.style.display='block';
+          n.textContent='Error loading comprehensive analysis.';
+          stopOverlay(); return;
         }
-        if(data.success !== true){
-          const n = document.getElementById("notice");
-          n.style.display="block";
-          n.textContent = "Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.";
+        if(data.success!==true){
+          const n=document.getElementById('notice'); n.style.display='block';
+          n.textContent='Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.';
         }
 
-        // Score + pillars (visual parity with analyze)
-        const score = Number(data.score || 50);
-        document.getElementById("score").textContent = `${score}/100`;
-        const [a,b,c,d] = splitScore(score).map(v=>`${v}/25`);
-        document.getElementById("p1").textContent = a;
-        document.getElementById("p2").textContent = b;
-        document.getElementById("p3").textContent = c;
-        document.getElementById("p4").textContent = d;
+        // Score + pillars
+        const score = Number(data.score||50);
+        renderScoreCard(score, data.pillars||{}, data.highlights||[]);
 
         // Sections
-        document.getElementById("needsList").innerHTML = renderNeeds(data.needsAttention || []);
-        document.getElementById("workList").innerHTML  = renderList(data.whatsWorking || []);
-        document.getElementById("engineList").innerHTML= renderEngineInsights(data.engineInsights || []);
-
-        // Copy button
-        document.getElementById("copyBtn").onclick = async () => {
-          const lines = [
-            `SnipeRank — Comprehensive AI SEO Report`,
-            `Site: ${targetUrl}`,
-            `Score: ${score}/100`,
-            ``,
-            `Top Opportunities:`,
-            ...(data.needsAttention||[]).slice(0,12).map(x=>`- ${x}`),
-            ``,
-            `AI Engine Insights:`,
-            ...(data.engineInsights||[]).map(x=>`- ${x}`),
-            ``,
-            `Strengths:`,
-            ...(data.whatsWorking||[]).slice(0,10).map(x=>`- ${x}`)
-          ].join("\n");
-          try{
-            await navigator.clipboard.writeText(lines);
-            const btn = document.getElementById("copyBtn");
-            const old = btn.textContent; btn.textContent = "Copied!"; setTimeout(()=>btn.textContent=old,1200);
-          }catch{ window.prompt("Copy summary:", lines); }
-        };
+        document.getElementById('needs-wrap').innerHTML   = renderNeeds(data.needsAttention||[]);
+        document.getElementById('working-wrap').innerHTML = renderWorking(data.whatsWorking||[]);
+        document.getElementById('insights-wrap').innerHTML= renderInsights(data.engineInsights||[]);
 
       }catch(err){
-        const n = document.getElementById("notice");
-        n.style.display="block";
-        n.textContent = "Network error loading comprehensive analysis.";
         console.error(err);
+        const n=document.getElementById('notice'); n.style.display='block'; n.textContent='Network error loading report.';
       }finally{
         stopOverlay();
       }
-    }
-
-    loadReport();
+    })();
   </script>
 </body>
 </html>

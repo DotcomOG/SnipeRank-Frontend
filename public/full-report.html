@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- full-report.html - v1.2.1 - Comprehensive AI Visibility Analysis -->
-  <!-- Features: 20 detailed opportunities with priority sections, 15 strengths, fixed styling -->
+  <!-- full-report.html - v1.2.2 - Comprehensive AI Visibility Analysis -->
+  <!-- Features: Fixed logo sizing, improved spacing, enhanced typography, removed confusing ellipsis -->
   <!-- Compatible with: /api/full for comprehensive data -->
   <!-- Last updated: October 28, 2025 -->
   
@@ -50,7 +50,11 @@
     /* Report sections */
     .report-section{margin:2.5rem 0}
     .section-title{font-size:1.4rem;font-weight:700;margin:0 0 1.25rem;color:#111}
-    .section-subtitle{font-size:1.1rem;font-weight:600;margin:1.5rem 0 .75rem;color:#333}
+    .section-subtitle{font-size:1.2rem;font-weight:700;margin:2rem 0 .75rem;color:#111}
+    
+    /* Enhanced spacing for opportunities */
+    .opportunity-item, .working-item{margin:1.5rem 0;padding:1rem 0;border-bottom:1px solid #f0f0f0}
+    .opportunity-item:last-child, .working-item:last-child{border-bottom:none}
 
     /* Opportunities and What's Working */
     .opportunity-list, .working-list{list-style:none;padding:0;margin:0}
@@ -76,8 +80,8 @@
     .ai-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
     .ai-row:last-child{border-bottom:0}
     .ai-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
-    .ai-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
-    .ai-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
+    .ai-logo img{height:28px;width:120px;display:block;object-fit:contain}
+    .ai-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;width:120px;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
     .ai-text{font-size:1.05rem;line-height:1.6;color:#333}
 
     /* Progress overlay */
@@ -199,7 +203,7 @@
         <p class="item-text"><strong>Weak E-A-T Signal Implementation</strong> - Limited author information and credential display reduces content authority signals for LLMs. <em>Impact: 30-50% improvement in content trustworthiness assessment</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 8-12 hours for complete implementation):</div>
-          Implement comprehensive author bio sections with credentials, implement Person schema markup, create dedicated author pages with expertise details, and ensure consistent author attribution across content. This requires strategic content architecture planning and coordination with content team...
+          Implement comprehensive author bio sections with credentials, implement Person schema markup, create dedicated author pages with expertise details, and ensure consistent author attribution across content. This requires strategic content architecture planning and coordination with content team for optimal results.
         </div>
       </li>
       
@@ -207,7 +211,7 @@
         <p class="item-text"><strong>Insufficient Internal Linking Structure</strong> - Content lacks contextual internal links that help AI models understand topical relationships and site authority. <em>Impact: 25% boost in topical authority recognition</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 6-10 hours for site-wide audit):</div>
-          Audit existing content for strategic internal linking opportunities. Use descriptive anchor text with relevant keywords. Create topic clusters linking related content. Implement breadcrumb navigation with structured data markup for enhanced context understanding. Advanced link equity distribution strategies require...
+          Audit existing content for strategic internal linking opportunities. Use descriptive anchor text with relevant keywords. Create topic clusters linking related content. Implement breadcrumb navigation with structured data markup for enhanced context understanding. Advanced link equity distribution strategies require comprehensive site architecture review.
         </div>
       </li>
       
@@ -215,7 +219,7 @@
         <p class="item-text"><strong>Missing WebPage Schema Implementation</strong> - Individual pages lack WebPage schema that provides essential context to AI crawlers about page purpose and content type. <em>Impact: Better page categorization and understanding</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 4-6 hours for implementation):</div>
-          Add WebPage schema to each page with proper @type (WebPage, AboutPage, ContactPage, etc.), name, description, and isPartOf properties. This helps AI models categorize and understand page intent within your site structure. Advanced implementation requires template system integration...
+          Add WebPage schema to each page with proper @type (WebPage, AboutPage, ContactPage, etc.), name, description, and isPartOf properties. This helps AI models categorize and understand page intent within your site structure. Advanced implementation requires template system integration and CMS coordination.
         </div>
       </li>
       
@@ -223,7 +227,7 @@
         <p class="item-text"><strong>Inadequate Citation and Source Attribution</strong> - Content lacks proper external source citations that AI models use to verify information accuracy and authority. <em>Impact: 40% improvement in factual content credibility</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 3-5 hours per major article):</div>
-          Implement systematic source citation with links to authoritative external sources. Use Citation schema markup where applicable. Create a consistent attribution format that includes publication dates and author credentials for referenced material. Advanced citation strategy development requires...
+          Implement systematic source citation with links to authoritative external sources. Use Citation schema markup where applicable. Create a consistent attribution format that includes publication dates and author credentials for referenced material. Advanced citation strategy development requires editorial workflow optimization.
         </div>
       </li>
       
@@ -231,7 +235,7 @@
         <p class="item-text"><strong>Poor Content Freshness Signals</strong> - Missing or inconsistent publication and modification dates prevent AI models from assessing content currency and relevance. <em>Impact: Enhanced content recency assessment</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 5-8 hours for site-wide implementation):</div>
-          Implement consistent datePublished and dateModified markup across all content. Display visible publication dates to users. Establish a content update schedule and reflect changes in schema markup to signal freshness to AI models. Content calendar integration requires...
+          Implement consistent datePublished and dateModified markup across all content. Display visible publication dates to users. Establish a content update schedule and reflect changes in schema markup to signal freshness to AI models. Content calendar integration requires CMS workflow customization.
         </div>
       </li>
       
@@ -239,7 +243,7 @@
         <p class="item-text"><strong>Missing HowTo and Tutorial Markup</strong> - Instructional content lacks HowTo schema that AI models prioritize for procedural queries. <em>Impact: 60% higher visibility for how-to searches</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 2-4 hours per tutorial):</div>
-          Identify step-by-step content and implement HowTo schema with proper step structure, tools, supplies, and estimated time properties. Format content in clear numbered or bulleted sequences that AI models can easily parse and reference. Advanced tutorial optimization strategies include...
+          Identify step-by-step content and implement HowTo schema with proper step structure, tools, supplies, and estimated time properties. Format content in clear numbered or bulleted sequences that AI models can easily parse and reference. Advanced tutorial optimization strategies include interactive elements and progress tracking.
         </div>
       </li>
       
@@ -247,7 +251,7 @@
         <p class="item-text"><strong>Insufficient Video Content Optimization</strong> - Video content lacks proper VideoObject schema and transcript accessibility for AI content analysis. <em>Impact: Enhanced multimedia content understanding</em></p>
         <div class="fix-callout">
           <div class="fix-title">How to fix (Est. 3-5 hours per video):</div>
-          Implement VideoObject schema with name, description, duration, uploadDate, and thumbnail properties. Provide video transcripts and captions. Consider implementing video chapters with proper markup for enhanced AI understanding. Advanced video SEO strategies require...
+          Implement VideoObject schema with name, description, duration, uploadDate, and thumbnail properties. Provide video transcripts and captions. Consider implementing video chapters with proper markup for enhanced AI understanding. Advanced video SEO strategies require accessibility compliance and multi-platform optimization.
         </div>
       </li>
       

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- full-report.html - v1.2.0 - Comprehensive AI Visibility Analysis -->
-  <!-- Features: 20 detailed opportunities, 15 strengths, time estimates, impact metrics -->
+  <!-- full-report.html - v1.2.1 - Comprehensive AI Visibility Analysis -->
+  <!-- Features: 20 detailed opportunities with priority sections, 15 strengths, fixed styling -->
   <!-- Compatible with: /api/full for comprehensive data -->
   <!-- Last updated: October 28, 2025 -->
   
@@ -68,8 +68,8 @@
     .fix-title{font-weight:600;color:#495057;margin-bottom:.25rem}
 
     /* Harden callouts for strengths */
-    .harden-callout{background:#e8f5e8;border:1px solid #c3e6c3;border-radius:8px;padding:.75rem 1rem;margin:.5rem 0 0 1.5rem;font-size:.95rem;line-height:1.5}
-    .harden-title{font-weight:600;color:#155724;margin-bottom:.25rem}
+    .harden-callout{background:#e8f4fd;border:1px solid #b8daff;border-radius:8px;padding:.75rem 1rem;margin:.5rem 0 0 1.5rem;font-size:.95rem;line-height:1.5}
+    .harden-title{font-weight:600;color:#0056b3;margin-bottom:.25rem}
 
     /* AI Engine Insights */
     .ai-insights{margin:1.5rem 0}
@@ -140,6 +140,10 @@
     
     <ul class="opportunity-list" id="opportunitiesList">
       <!-- Dynamic content will be loaded here -->
+      
+      <h4 class="section-subtitle">Critical Priorities</h4>
+      <p style="color:#666;font-size:.95rem;margin-bottom:1.5rem;">These high-impact optimizations provide immediate benefits for AI visibility and should be implemented first.</p>
+      
       <li class="opportunity-item priority-high">
         <p class="item-text"><strong>Missing Article Schema Markup</strong> - Your content lacks structured data that helps LLMs understand article context, publication date, and author credentials. <em>Impact: 25-40% improvement in AI citation probability</em></p>
         <div class="fix-callout">
@@ -187,6 +191,9 @@
           Create FAQ sections with proper FAQPage schema markup. Structure as clear question-answer pairs addressing common user queries. This format significantly improves AI model citation probability for informational searches and voice queries.
         </div>
       </li>
+      
+      <h4 class="section-subtitle">Strategic Improvements</h4>
+      <p style="color:#666;font-size:.95rem;margin-bottom:1.5rem;">These optimizations require more planning but provide significant long-term value for AI model understanding.</p>
       
       <li class="opportunity-item priority-medium">
         <p class="item-text"><strong>Weak E-A-T Signal Implementation</strong> - Limited author information and credential display reduces content authority signals for LLMs. <em>Impact: 30-50% improvement in content trustworthiness assessment</em></p>
@@ -243,6 +250,9 @@
           Implement VideoObject schema with name, description, duration, uploadDate, and thumbnail properties. Provide video transcripts and captions. Consider implementing video chapters with proper markup for enhanced AI understanding. Advanced video SEO strategies require...
         </div>
       </li>
+      
+      <h4 class="section-subtitle">Incremental Enhancements</h4>
+      <p style="color:#666;font-size:.95rem;margin-bottom:1.5rem;">These smaller optimizations provide incremental gains and can be implemented when resources allow.</p>
       
       <li class="opportunity-item priority-low">
         <p class="item-text"><strong>Missing Image Alt Text Optimization</strong> - Images lack descriptive alt attributes that provide context for AI content analysis. <em>Impact: Improved accessibility and content comprehension</em></p>
@@ -438,35 +448,35 @@
       <!-- Dynamic content will be loaded here -->
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/logos/chatgpt-logo.png" alt="ChatGPT" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>ChatGPT</span>'">
+          <img src="/img/chatgpt-logo.png" alt="ChatGPT" onerror="console.log('ChatGPT logo failed to load'); this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>ChatGPT</span>'">
         </div>
         <div class="ai-text">Your content structure aligns well with GPT-4's preference for hierarchical information presentation. Consider implementing more conversational Q&A sections to match natural language query patterns.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/logos/claude-logo.png" alt="Claude" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Claude</span>'">
+          <img src="/img/claude.jpeg" alt="Claude" onerror="console.log('Claude logo failed to load'); this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Claude</span>'">
         </div>
         <div class="ai-text">Claude responds well to detailed, context-rich content. Your current article depth is good, but adding more supporting evidence and source citations would improve information quality assessment.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/logos/gemini-logo.png" alt="Gemini" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Gemini</span>'">
+          <img src="/img/gemini.jpeg" alt="Gemini" onerror="console.log('Gemini logo failed to load'); this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Gemini</span>'">
         </div>
         <div class="ai-text">Gemini values multimodal content signals. Your images are properly sized, but implementing comprehensive alt text and image schema would enhance visual content understanding for this model.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/logos/perplexity-logo.png" alt="Perplexity" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Perplexity</span>'">
+          <img src="/img/perplexity-logo.png" alt="Perplexity" onerror="console.log('Perplexity logo failed to load'); this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Perplexity</span>'">
         </div>
         <div class="ai-text">Perplexity prioritizes factual accuracy and source verification. Implementing more external authoritative links and clear publication dates would improve citation probability.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/logos/copilot-logo.png" alt="Copilot" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Copilot</span>'">
+          <img src="/img/copilot.jpeg" alt="Copilot" onerror="console.log('Copilot logo failed to load'); this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Copilot</span>'">
         </div>
         <div class="ai-text">Microsoft Copilot values structured data and clear information hierarchy. Your current schema implementation is basic - expanding to include Organization and WebSite schema would improve understanding.</div>
       </div>
@@ -750,11 +760,11 @@
           if (data.engineInsights && data.engineInsights.length > 0) {
             const aiInsights = document.getElementById('aiInsights');
             const engineMap = {
-              'ChatGPT': '/img/logos/chatgpt-logo.png',
-              'Claude': '/img/logos/claude-logo.png', 
-              'Gemini': '/img/logos/gemini-logo.png',
-              'Perplexity': '/img/logos/perplexity-logo.png',
-              'Copilot': '/img/logos/copilot-logo.png'
+              'ChatGPT': '/img/chatgpt-logo.png',
+              'Claude': '/img/claude.jpeg', 
+              'Gemini': '/img/gemini.jpeg',
+              'Perplexity': '/img/perplexity-logo.png',
+              'Copilot': '/img/copilot.jpeg'
             };
             
             aiInsights.innerHTML = data.engineInsights.map(insight => {

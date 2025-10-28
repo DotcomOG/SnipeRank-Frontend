@@ -56,7 +56,7 @@
     .opportunity-list, .working-list{list-style:none;padding:0;margin:0}
     .opportunity-item, .working-item{margin:1rem 0;padding:0}
     .opportunity-item::before{content:"⚠️";margin-right:.5rem;font-size:.9rem}
-    .working-item::before{content:"✅";margin-right:.5rem;font-size:.9rem}
+    .working-item::before{content:"";margin-right:0}
     .item-text{font-size:1.05rem;line-height:1.6;margin:0}
     .priority-high{border-left:3px solid #dc3545;padding-left:.75rem;background:#fef2f2}
     .priority-medium{border-left:3px solid #f59e0b;padding-left:.75rem;background:#fffbeb}
@@ -136,6 +136,8 @@
   <!-- Comprehensive Opportunities Section -->
   <section class="report-section">
     <h3 class="section-title">Comprehensive Opportunities</h3>
+    <p>These are specific, actionable improvements that will enhance your site's visibility to AI models and large language models. Each item is prioritized by impact and includes implementation guidance. High-priority items offer the greatest immediate benefit, while medium and low-priority optimizations provide incremental gains that compound over time.</p>
+    
     <ul class="opportunity-list" id="opportunitiesList">
       <!-- Dynamic content will be loaded here -->
       <li class="opportunity-item priority-high">
@@ -162,7 +164,23 @@
         </div>
       </li>
       
-      <li class="opportunity-item priority-medium">
+      <li class="opportunity-item priority-high">
+        <p class="item-text"><strong>Missing Organization Schema</strong> - Lack of Organization markup prevents AI models from understanding your business entity and credibility signals.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement Organization schema with name, url, logo, contactPoint, and sameAs properties. Include social media profiles and official contact information. This establishes entity recognition across AI platforms.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-high">
+        <p class="item-text"><strong>Insufficient Breadcrumb Navigation</strong> - Missing breadcrumb structure limits AI understanding of site hierarchy and content relationships.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement visual breadcrumbs with BreadcrumbList schema markup. Include proper JSON-LD structure with position, name, and item properties for each breadcrumb level. This improves contextual understanding for AI models.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-high">
         <p class="item-text"><strong>Limited FAQ Implementation</strong> - Missing FAQ schema and question-answer formatting that AI models prioritize for query responses.</p>
         <div class="fix-callout">
           <div class="fix-title">How to fix:</div>
@@ -186,6 +204,46 @@
         </div>
       </li>
       
+      <li class="opportunity-item priority-medium">
+        <p class="item-text"><strong>Missing WebPage Schema Implementation</strong> - Individual pages lack WebPage schema that provides essential context to AI crawlers about page purpose and content type.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Add WebPage schema to each page with proper @type (WebPage, AboutPage, ContactPage, etc.), name, description, and isPartOf properties. This helps AI models categorize and understand page intent within your site structure...
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-medium">
+        <p class="item-text"><strong>Inadequate Citation and Source Attribution</strong> - Content lacks proper external source citations that AI models use to verify information accuracy and authority.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement systematic source citation with links to authoritative external sources. Use Citation schema markup where applicable. Create a consistent attribution format that includes publication dates and author credentials for referenced material...
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-medium">
+        <p class="item-text"><strong>Poor Content Freshness Signals</strong> - Missing or inconsistent publication and modification dates prevent AI models from assessing content currency and relevance.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement consistent datePublished and dateModified markup across all content. Display visible publication dates to users. Establish a content update schedule and reflect changes in schema markup to signal freshness to AI models...
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-medium">
+        <p class="item-text"><strong>Missing HowTo and Tutorial Markup</strong> - Instructional content lacks HowTo schema that AI models prioritize for procedural queries.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Identify step-by-step content and implement HowTo schema with proper step structure, tools, supplies, and estimated time properties. Format content in clear numbered or bulleted sequences that AI models can easily parse and reference...
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-medium">
+        <p class="item-text"><strong>Insufficient Video Content Optimization</strong> - Video content lacks proper VideoObject schema and transcript accessibility for AI content analysis.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement VideoObject schema with name, description, duration, uploadDate, and thumbnail properties. Provide video transcripts and captions. Consider implementing video chapters with proper markup for enhanced AI understanding...
+        </div>
+      </li>
+      
       <li class="opportunity-item priority-low">
         <p class="item-text"><strong>Missing Image Alt Text Optimization</strong> - Images lack descriptive alt attributes that provide context for AI content analysis.</p>
         <div class="fix-callout">
@@ -195,10 +253,50 @@
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Limited Rich Snippet Opportunities</strong> - Content could benefit from additional schema types like HowTo, Review, or Product markup.</p>
+        <p class="item-text"><strong>Limited Rich Snippet Opportunities</strong> - Content could benefit from additional schema types like Review, Product, or Event markup.</p>
         <div class="fix-callout">
           <div class="fix-title">How to fix:</div>
-          Identify content types that match available schema categories. Implement appropriate structured data markup using JSON-LD format. Focus on HowTo schema for instructional content and Review schema for opinion pieces to increase AI citation opportunities.
+          Identify content types that match available schema categories. Implement appropriate structured data markup using JSON-LD format. Focus on Review schema for opinion pieces and Product schema for service descriptions to increase AI citation opportunities.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-low">
+        <p class="item-text"><strong>Weak Social Media Integration</strong> - Missing OpenGraph and Twitter Card markup reduces social sharing context that AI models factor into authority assessment.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement OpenGraph meta tags (og:title, og:description, og:image, og:url) and Twitter Card markup. Ensure consistent branding across social platforms and include proper image dimensions for optimal display.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-low">
+        <p class="item-text"><strong>Missing Contact Information Schema</strong> - Contact pages lack structured data that helps AI models verify business legitimacy and provide accurate contact details.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Add ContactPoint schema to contact pages with telephone, email, contactType, and availableLanguage properties. Include physical address with PostalAddress schema if applicable.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-low">
+        <p class="item-text"><strong>Inadequate Content Clustering</strong> - Related content lacks clear topical organization that would help AI models understand subject matter expertise depth.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Create content hubs or category pages that clearly group related topics. Implement tag taxonomy and related content suggestions. Use consistent internal linking patterns to reinforce topical relationships for AI understanding.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-low">
+        <p class="item-text"><strong>Missing Accessibility Markup</strong> - Limited ARIA labels and accessibility attributes reduce content accessibility for AI models simulating assistive technologies.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Implement proper ARIA labels, alt text, and semantic HTML structure. Ensure content is accessible to screen readers as AI models often simulate these tools for content understanding. Use descriptive link text and proper form labels.
+        </div>
+      </li>
+      
+      <li class="opportunity-item priority-low">
+        <p class="item-text"><strong>Limited Mobile-First Content Optimization</strong> - Content presentation doesn't fully optimize for mobile-first AI crawling patterns and touch interface considerations.</p>
+        <div class="fix-callout">
+          <div class="fix-title">How to fix:</div>
+          Review content display on mobile devices for readability and accessibility. Ensure critical information is visible above the fold on mobile. Optimize font sizes, button spacing, and navigation for mobile-first AI analysis patterns.
         </div>
       </li>
     </ul>
@@ -207,6 +305,8 @@
   <!-- What's Working Section -->
   <section class="report-section">
     <h3 class="section-title">What's Working</h3>
+    <p>These are the current strengths in your AI visibility strategy that are already supporting your site's discoverability by large language models. Maintaining and building upon these foundations will preserve your competitive advantages while you implement the optimization opportunities above.</p>
+    
     <ul class="working-list" id="workingList">
       <!-- Dynamic content will be loaded here -->
       <li class="working-item">

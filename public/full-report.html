@@ -1,322 +1,300 @@
 <!DOCTYPE html>
 <!--
-SnipeRank — Full AI SEO Analysis (v3.7.0)
-Last updated: 2025-10-27
-Notes:
-- Matches analyze.html look/feel (score card, pills, spacing, typography)
-- Uses LLM logos from /public/img (claude.jpeg, gemini.jpeg, copilot.jpeg, gpt.jpeg*)
-- Pulls comprehensive data from Render backend: https://sniperank-v2-dev.onrender.com/api/full?url=...
-- Shows full-screen loading overlay with progress
-- For each issue, renders “How to fix” guidance bullets
-- Safe fallback to Lite mode if backend returns success:false
-* If you don’t have gpt.jpeg, duplicate any logo for now and name it gpt.jpeg
+  SnipeRank — Full Report (v1.0-main)
+  Last updated: 2025-10-27
+  Notes:
+  - Visual + structure mirror analyze.html (score card, pills, spacing)
+  - Loading overlay with progress bar
+  - LLM logos rendered from /public/img:
+      /img/claude.jpeg, /img/gemini.jpeg, /img/copilot.jpeg, /img/chatgpt-logo.png
+  - Backend: https://sniperank-v2-dev.onrender.com
 -->
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>SnipeRank — Full AI SEO Analysis</title>
   <style>
     :root{
-      --wrap: 960px;
-      --pad: 22px;
-      --muted:#6b7280;
+      --max: 920px;
+      --pad: 24px;
+      --muted: #6b7280;
       --border:#e5e7eb;
       --ink:#0f172a;
-      --brand:#0a66c2;
-      --card:#ffffff;
+      --bg:#ffffff;
       --accent:#e11d48;
-      --accent-ink:#ffffff;
-      --pill:#f8fafc;
+      --accent-2:#ef4444;
       --ok:#16a34a;
-      --warn:#ca8a04;
-      --bad:#dc2626;
-      --shadow: 0 10px 30px rgba(0,0,0,.08);
-      --radius: 14px;
+      --chip:#f8fafc;
+      --shadow:0 10px 30px rgba(0,0,0,.10);
+      --pill:#f1f5f9;
     }
     *{box-sizing:border-box}
-    html,body{margin:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fff}
-    a{color:var(--brand);text-decoration:none}
-    .wrap{max-width:var(--wrap);margin:40px auto;padding:0 20px}
-    header h1{
-      margin:0 0 8px;
-      font-size:44px; line-height:1.05;
-      background:linear-gradient(135deg,#000 0%,#3182CE 100%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      letter-spacing:.3px;
-    }
-    header .sub{color:var(--muted);font-size:14px}
-    /* Score Card */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--pad)}
-    .score-row{display:flex;gap:18px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+    .wrap{max-width:var(--max);margin:36px auto;padding:0 18px}
+    h1{font-size:44px;line-height:1.05;margin:0 0 6px;background:linear-gradient(135deg,#0b1220 0%,#2563eb 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+    .sub{color:var(--muted);margin:2px 0 22px}
+    /* Score Card (same silhouette as analyze) */
+    .card{border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);padding:16px}
+    .scorebar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
     .score-num{font-size:34px;font-weight:800}
-    .score-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--pill);font-weight:600}
-    .score-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
-    .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 16px;font-weight:700;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:default}
-    /* Sections */
-    .section{margin-top:26px}
-    .section h3{margin:0 0 10px;font-size:18px}
-    .bullets{margin:0;padding-left:20px}
-    .bullets li{margin:8px 0;line-height:1.6}
-    .two-col{display:grid;grid-template-columns:1fr;gap:16px}
-    @media (min-width:900px){ .two-col{grid-template-columns:1fr 1fr} }
-    .fix{border-left:4px solid var(--brand);background:#f8fbff;padding:10px 12px;border-radius:8px}
-    .note{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;padding:10px;border-radius:8px;margin:14px 0}
-    .muted{color:var(--muted)}
-    .footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:13px}
-    /* Engine chips */
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .pill{background:var(--pill);border:1px solid var(--border);border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px;display:inline-flex;gap:8px;align-items:center}
+    .pill .subval{font-weight:700;border:1px solid var(--border);background:#fff;border-radius:999px;padding:2px 8px}
+    .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
+    .btn:disabled{opacity:.7;cursor:default}
+    .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:4px 8px;font-size:13px}
     .engines{display:flex;gap:8px;flex-wrap:wrap}
-    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 10px;font-weight:700}
-    .chip img{width:18px;height:18px;border-radius:4px;object-fit:cover}
+    .engine-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--chip);border-radius:999px;padding:6px 10px}
+    .engine-chip img{width:18px;height:18px;border-radius:4px;object-fit:cover}
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-top:20px}
+    .section{border:1px solid var(--border);border-radius:14px;background:#fff;padding:16px}
+    .section h3{margin:0 0 8px}
+    ul{margin:8px 0 0 20px}
+    li{margin:6px 0;line-height:1.6}
+    .howfix{background:#f8fafc;border:1px solid var(--border);border-left:3px solid var(--accent-2);border-radius:10px;padding:10px;margin:8px 0 2px}
+    .ok{color:var(--ok)}
+    .warn{background:#fff8e1;border:1px solid #ffe08a;color:#7a5b00;border-radius:8px;padding:10px;margin:12px 0}
+    .footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:13px}
     /* Loading overlay */
-    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.92);display:none;align-items:center;justify-content:center;z-index:9999}
-    .box{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:22px;min-width:320px;text-align:center}
-    .prog{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:10px}
-    .bar{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#22c55e);transition:width .35s ease}
-    .spinner{width:16px;height:16px;border:2px solid #ddd;border-top-color:#666;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:middle}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    .overlay{position:fixed;inset:0;background:rgba(248,250,252,.95);display:none;align-items:center;justify-content:center;z-index:50}
+    .panel{width:min(560px,92vw);border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);padding:22px}
+    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .fill{height:100%;width:0%;background:#2563eb;transition:width .35s ease}
+    .tiny{color:var(--muted);font-size:13px;margin-top:8px}
+    @media (max-width:880px){ .grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
+  <div class="overlay" id="overlay">
+    <div class="panel">
+      <h2 style="margin:0 0 8px">Generating comprehensive report…</h2>
+      <div class="bar"><div class="fill" id="bar"></div></div>
+      <div class="tiny" id="pct">0%</div>
+    </div>
+  </div>
+
   <div class="wrap">
-    <header>
-      <h1>SnipeRank</h1>
-      <div class="sub">Full AI SEO Analysis • Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
-    </header>
+    <h1>SnipeRank</h1>
+    <div class="sub">Full AI SEO Analysis Report • Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
 
-    <div id="notice" class="note" style="display:none"></div>
+    <div id="notice" class="warn" style="display:none"></div>
 
-    <section class="card" aria-label="Score">
-      <div class="score-row">
+    <div class="card">
+      <div class="scorebar">
         <div>
-          <div class="muted">Analysis for</div>
-          <div id="target-url" style="font-weight:800">—</div>
-          <div class="engines" style="margin-top:8px">
-            <span class="chip"><img src="/img/claude.jpeg" alt="">Claude</span>
-            <span class="chip"><img src="/img/gemini.jpeg" alt="">Gemini</span>
-            <span class="chip"><img src="/img/copilot.jpeg" alt="">Copilot</span>
-            <span class="chip"><img src="/img/gpt.jpeg" alt="">ChatGPT</span>
-          </div>
+          <div class="muted" style="color:var(--muted)">Analysis for</div>
+          <div id="target" style="font-weight:800">—</div>
         </div>
         <div class="score-num" id="score">Generating…</div>
         <button id="copyBtn" class="btn" type="button">Copy Comprehensive Summary</button>
       </div>
 
-      <div class="score-grid" style="margin-top:14px">
-        <div class="score-pill"><span>Content Clarity & Structure</span><span id="p1">—/25</span></div>
-        <div class="score-pill"><span>AI Engine Optimization</span><span id="p2">—/25</span></div>
-        <div class="score-pill"><span>Technical Implementation</span><span id="p3">—/25</span></div>
-        <div class="score-pill"><span>Competitive Positioning</span><span id="p4">—/25</span></div>
+      <div style="margin-top:12px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <div class="pillrow" id="pillrow">
+          <div class="pill">AI Access Readiness <span class="subval" id="p1">—</span></div>
+          <div class="pill">Trust &amp; Verification Signals <span class="subval" id="p2">—</span></div>
+          <div class="pill">LLM Interpretability &amp; Clarity <span class="subval" id="p3">—</span></div>
+          <div class="pill">Prompt-Pattern Alignment <span class="subval" id="p4">—</span></div>
+        </div>
+        <div class="engines">
+          <span class="engine-chip"><img src="/img/claude.jpeg" alt="Claude"/>Claude</span>
+          <span class="engine-chip"><img src="/img/gemini.jpeg" alt="Gemini"/>Gemini</span>
+          <span class="engine-chip"><img src="/img/copilot.jpeg" alt="Copilot"/>Copilot</span>
+          <span class="engine-chip"><img src="/img/chatgpt-logo.png" alt="ChatGPT"/>ChatGPT</span>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <section id="priorities" class="section">
-      <h3>🚨 Comprehensive Opportunities</h3>
-      <ul id="needsList" class="bullets"></ul>
-    </section>
-
-    <section class="two-col section">
-      <div>
-        <h3>✅ What’s Working</h3>
-        <ul id="workingList" class="bullets"></ul>
+    <div class="grid">
+      <div class="section" id="opportunities">
+        <h3>🔴 Comprehensive Opportunities</h3>
+        <div id="needsList"><p style="color:var(--muted)">Building detailed recommendations…</p></div>
       </div>
-      <div>
+
+      <div class="section" id="engines">
         <h3>🤖 AI Engine Insights</h3>
-        <div id="engineCards"></div>
+        <div id="engineList"><p style="color:var(--muted)">Loading per-engine insights…</p></div>
       </div>
-    </section>
+    </div>
 
-    <section class="section">
+    <div class="section" style="margin-top:18px" id="working">
+      <h3 class="ok">✅ What’s Working</h3>
+      <div id="workList"><p style="color:var(--muted)">Collecting strengths…</p></div>
+    </div>
+
+    <div style="margin-top:18px">
       <a class="btn" href="https://calendly.com/quontora" target="_blank" rel="noopener">Schedule Strategy Session</a>
-    </section>
+    </div>
 
     <div class="footer">© 2025 SnipeRank by quontora.com</div>
   </div>
 
-  <!-- Loading overlay -->
-  <div id="overlay" class="overlay" role="alert" aria-live="polite">
-    <div class="box">
-      <div style="font-weight:800">Generating Full Report… <span id="pct">0%</span></div>
-      <div class="prog"><div id="bar" class="bar"></div></div>
-      <div class="muted" style="margin-top:8px"><span class="spinner"></span> This can take a few seconds.</div>
-    </div>
-  </div>
-
   <script>
-    // ===== CONFIG =====
+    // === Config ===
     const API_BASE = "https://sniperank-v2-dev.onrender.com"; // Render backend
-    // ==================
-
     const qs = new URLSearchParams(location.search);
     const targetUrl = qs.get("url") || "";
-    const source     = qs.get("source") || "analyze";
-    const name       = qs.get("name") || "";
-    const email      = qs.get("email") || "";
-    const domain     = qs.get("domain") || "";
+    document.getElementById("target").textContent = targetUrl || "—";
 
-    const urlEl = document.getElementById("target-url");
-    urlEl.textContent = targetUrl || "—";
-
-    const scoreEl = document.getElementById("score");
-    const p1 = document.getElementById("p1"), p2=document.getElementById("p2"),
-          p3 = document.getElementById("p3"), p4=document.getElementById("p4");
-    const needsEl = document.getElementById("needsList");
-    const workEl  = document.getElementById("workingList");
-    const enginesEl = document.getElementById("engineCards");
-    const noticeEl = document.getElementById("notice");
-    const overlay = document.getElementById("overlay");
-    const bar = document.getElementById("bar");
-    const pct = document.getElementById("pct");
-
-    function showOverlay(){ overlay.style.display='flex'; }
-    function hideOverlay(){ overlay.style.display='none'; }
-    function setProgress(n){
-      const v = Math.max(0, Math.min(100, Math.round(n)));
-      bar.style.width = v + '%'; pct.textContent = v + '%';
+    // Loading overlay animation (simple, deterministic)
+    const overlay = document.getElementById('overlay');
+    const bar = document.getElementById('bar');
+    const pct = document.getElementById('pct');
+    let prog = 0, timer = null;
+    function startOverlay(){
+      overlay.style.display = "flex";
+      prog = 0;
+      timer = setInterval(()=>{
+        prog = Math.min(97, prog + Math.random()*6 + 2);
+        bar.style.width = prog.toFixed(0) + "%";
+        pct.textContent = bar.style.width;
+      }, 260);
+    }
+    function stopOverlay(){
+      if(timer){ clearInterval(timer); timer = null; }
+      bar.style.width = "100%"; pct.textContent = "100%";
+      setTimeout(()=>overlay.style.display="none", 250);
     }
 
-    function setNotice(msg){
-      noticeEl.textContent = msg;
-      noticeEl.style.display = 'block';
+    // Evenly split the overall score into 4 sub-pillars for display only
+    function splitScore(s){
+      const base = Math.max(0, Math.min(100, Number(s)||0));
+      const q = Math.floor(base/4);
+      const r = base - q*4; // distribute remainder
+      return [q+(r>0?1:0), q+(r>1?1:0), q+(r>2?1:0), q];
     }
 
-    function derivePillars(total){
-      // naive split into 4 buckets, visual only
-      const q = Math.max(0, Math.min(25, Math.round((total||0)/4)));
-      p1.textContent = q + "/25";
-      p2.textContent = q + "/25";
-      p3.textContent = q + "/25";
-      p4.textContent = q + "/25";
-    }
+    function esc(s){ return (""+s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 
-    function renderBullets(list, container){
-      container.innerHTML = "";
-      list.forEach(item=>{
-        if(typeof item === "string"){
-          // auto-add "How to fix" suggestions for short items
-          const fix = defaultFix(item);
-          const li = document.createElement('li');
-          li.innerHTML = `<div>${escapeHTML(item)}</div>${fix ? `<div class="fix"><strong>How to fix:</strong> ${fix}</div>`:''}`;
-          container.appendChild(li);
-        }else if(item && item.issue){
-          const li = document.createElement('li');
-          const how = item.how || defaultFix(item.issue);
-          li.innerHTML = `<div>${escapeHTML(item.issue)}</div>${how ? `<div class="fix"><strong>How to fix:</strong> ${how}</div>`:''}`;
-          container.appendChild(li);
-        }
-      });
-    }
-
-    const FIX_TEMPLATES = [
-      { key:/meta\s*description/i, how:"Write a 150–160 character, task-focused summary per page including primary entity and intent. Add `<meta name=\"description\" content=\"…\">` in `<head>`."},
-      { key:/alt\s*text|alt\s*attributes/i, how:"Add descriptive `alt` attributes to meaningful images. Use nouns + action (e.g., “Volunteer serving meals at community center”)."},
-      { key:/structured\s*data|schema/i, how:"Add JSON-LD for `Organization`, `WebSite`, and key `Service`/`Product` pages. Validate in Google’s Rich Results Test."},
-      { key:/internal\s*link/i, how:"Create 3–5 cross-links per page to semantically related pages using descriptive anchor text, not “click here.”"},
-      { key:/title/i, how:"Use `Brand | Specific Page Topic` format. Keep under ~60 characters; ensure uniqueness per page."},
-      { key:/speed|performance|lighthouse/i, how:"Compress images (AVIF/WebP), defer non-critical JS, enable HTTP caching, and lazy-load below-the-fold media."},
-      { key:/mobile|responsive/i, how:"Adopt mobile-first layout, larger tap targets (≥48px), and limit viewport shifts (CLS). Test with Lighthouse Mobile."},
-      { key:/faq/i, how:"Publish an FAQ block answering 6–10 task-level questions; mark up with FAQPage schema for stronger AI snippets."},
-      { key:/security|https|hsts|csp/i, how:"Enable HSTS, set a basic Content-Security-Policy, and ensure only HTTPS resources are loaded."}
-    ];
-    function defaultFix(txt){
-      for(const t of FIX_TEMPLATES){
-        if(t.key.test(txt)) return t.how;
+    function renderNeeds(needs){
+      if(!Array.isArray(needs) || needs.length===0){
+        return `<p style="color:var(--muted)">No priority issues detected.</p>`;
       }
-      return "";
+      return `<ul>` + needs.map(txt=>{
+        // Heuristic: if incoming text lacks a fix, add a helper “How to fix” block beneath.
+        const t = ""+txt;
+        let fix = "";
+        if(/structured data|schema/i.test(t)){
+          fix = "Add JSON-LD for Organization, WebSite and key Service/Product pages. Validate in Google’s Rich Results Test.";
+        }else if(/meta description/i.test(t)){
+          fix = "Write a 150–160 character, task-focused description per page including primary entity and intent.";
+        }else if(/alt/i.test(t)){
+          fix = "Add descriptive <code>alt</code> text to meaningful images. Use nouns + action (e.g., “Volunteer serving meals at community center”).";
+        }
+        return `
+          <li>${esc(t)}</li>
+          ${fix ? `<div class="howfix"><strong>How to fix:</strong> ${fix}</div>` : ``}
+        `;
+      }).join("") + `</ul>`;
     }
 
-    function renderEngines(lines){
-      // Expect array of strings; map each to a card with a logo if recognized
-      const map = [
-        { id:'ChatGPT',  logo:'/img/gpt.jpeg'    },
-        { id:'Claude',   logo:'/img/claude.jpeg' },
-        { id:'Gemini',   logo:'/img/gemini.jpeg' },
-        { id:'Perplexity', logo:'/img/gemini.jpeg' }, // reuse if no icon provided
-        { id:'Copilot',  logo:'/img/copilot.jpeg'}
-      ];
-      const findLogo = (text)=>{
-        const m = map.find(m=> new RegExp(m.id,'i').test(text||""));
-        return m ? m.logo : '/img/gpt.jpeg';
-      };
-      enginesEl.innerHTML = "";
-      (lines||[]).forEach(line=>{
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.marginBottom = '12px';
-        card.innerHTML = `
-          <div style="display:flex;gap:12px;align-items:center">
-            <img src="${findLogo(line)}" alt="" style="width:24px;height:24px;border-radius:6px;object-fit:cover">
-            <div>${escapeHTML(line)}</div>
+    function logoForEngine(name){
+      const key = (name||"").toLowerCase();
+      if(key.includes("claude")) return "/img/claude.jpeg";
+      if(key.includes("gemini")) return "/img/gemini.jpeg";
+      if(key.includes("copilot")) return "/img/copilot.jpeg";
+      // default chatgpt / perplexity fall back to chatgpt logo if not supplied
+      return "/img/chatgpt-logo.png";
+    }
+
+    function renderEngineInsights(items){
+      if(!Array.isArray(items) || items.length===0){
+        return `<p style="color:var(--muted)">No engine-specific notes available.</p>`;
+      }
+      return items.map(line=>{
+        const text = ""+line;
+        // Try to extract engine name before ":" else fallback
+        const m = text.match(/^([A-Za-z ]+)\s*:\s*(.+)$/);
+        const name = m ? m[1].trim() : "ChatGPT";
+        const note = m ? m[2].trim() : text;
+        const logo = logoForEngine(name);
+        return `
+          <div class="badge" style="display:flex;align-items:flex-start;gap:10px;margin:8px 0">
+            <img src="${logo}" alt="${esc(name)}" style="width:22px;height:22px;border-radius:4px;object-fit:cover"/>
+            <div><strong>${esc(name)}:</strong> ${esc(note)}</div>
           </div>
         `;
-        enginesEl.appendChild(card);
-      });
+      }).join("");
     }
 
-    function escapeHTML(s){ return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function renderList(list){
+      if(!Array.isArray(list) || list.length===0){
+        return `<p style="color:var(--muted)">No items found.</p>`;
+      }
+      return `<ul>` + list.map(x=>`<li>${esc(x)}</li>`).join("") + `</ul>`;
+    }
 
     async function loadReport(){
       if(!targetUrl){
-        setNotice("No URL provided.");
+        document.getElementById("notice").style.display="block";
+        document.getElementById("notice").textContent = "No URL provided.";
         return;
       }
+      startOverlay();
       try{
-        showOverlay(); setProgress(8);
-
-        // Build endpoint
-        const endpoint = `${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`;
-        // Simulated staged progress
-        setProgress(35);
-        const res = await fetch(endpoint);
-        setProgress(65);
+        const res = await fetch(`${API_BASE}/api/full?url=${encodeURIComponent(targetUrl)}`);
         const data = await res.json();
-        setProgress(90);
 
-        // Fallback / notice
+        // lite / fallback notice
         if(!data || data.error){
-          setNotice("Error: comprehensive AI report unavailable. Showing Lite analysis.");
+          const n = document.getElementById("notice");
+          n.style.display="block";
+          n.textContent = "Error loading comprehensive analysis. Showing nothing.";
+          stopOverlay();
+          return;
         }
-        if(data && data.success !== true){
-          setNotice("⚠️ Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.");
+        if(data.success !== true){
+          const n = document.getElementById("notice");
+          n.style.display="block";
+          n.textContent = "Showing Lite analysis (temporary). The comprehensive AI report service was unavailable.";
         }
 
-        // Score & pillars
-        const score = Number(data?.score ?? 50);
-        scoreEl.textContent = `${score}/100`;
-        derivePillars(score);
+        // Score + pillars (visual parity with analyze)
+        const score = Number(data.score || 50);
+        document.getElementById("score").textContent = `${score}/100`;
+        const [a,b,c,d] = splitScore(score).map(v=>`${v}/25`);
+        document.getElementById("p1").textContent = a;
+        document.getElementById("p2").textContent = b;
+        document.getElementById("p3").textContent = c;
+        document.getElementById("p4").textContent = d;
 
-        // Lists
-        renderBullets(data?.needsAttention || [], needsEl);
-        renderBullets(data?.whatsWorking || [], workEl);
-        renderEngines(data?.engineInsights || []);
+        // Sections
+        document.getElementById("needsList").innerHTML = renderNeeds(data.needsAttention || []);
+        document.getElementById("workList").innerHTML  = renderList(data.whatsWorking || []);
+        document.getElementById("engineList").innerHTML= renderEngineInsights(data.engineInsights || []);
 
-        // Copy summary
+        // Copy button
         document.getElementById("copyBtn").onclick = async () => {
           const lines = [
-            `Comprehensive AI SEO Analysis`,
-            `Website: ${targetUrl}`,
-            `Overall Score: ${score}/100`,
+            `SnipeRank — Comprehensive AI SEO Report`,
+            `Site: ${targetUrl}`,
+            `Score: ${score}/100`,
             ``,
             `Top Opportunities:`,
-            ...(data?.needsAttention || []).slice(0,10).map(x => `- ${typeof x === 'string' ? x : x.issue}`),
+            ...(data.needsAttention||[]).slice(0,12).map(x=>`- ${x}`),
             ``,
             `AI Engine Insights:`,
-            ...(data?.engineInsights || []).map(x => `- ${x}`),
+            ...(data.engineInsights||[]).map(x=>`- ${x}`),
             ``,
-            `Generated by SnipeRank`
+            `Strengths:`,
+            ...(data.whatsWorking||[]).slice(0,10).map(x=>`- ${x}`)
           ].join("\n");
-          try{ await navigator.clipboard.writeText(lines);
-               const b = document.getElementById("copyBtn"); const old=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=old,1500);
-          }catch{ window.prompt("Copy the summary:", lines); }
+          try{
+            await navigator.clipboard.writeText(lines);
+            const btn = document.getElementById("copyBtn");
+            const old = btn.textContent; btn.textContent = "Copied!"; setTimeout(()=>btn.textContent=old,1200);
+          }catch{ window.prompt("Copy summary:", lines); }
         };
 
       }catch(err){
+        const n = document.getElementById("notice");
+        n.style.display="block";
+        n.textContent = "Network error loading comprehensive analysis.";
         console.error(err);
-        setNotice("Error loading comprehensive analysis. Showing Lite suggestions.");
       }finally{
-        setProgress(100); setTimeout(hideOverlay, 250);
+        stopOverlay();
       }
     }
 

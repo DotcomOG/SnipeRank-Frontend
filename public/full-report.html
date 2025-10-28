@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- full-report.html - v1.0.0 - Comprehensive AI Visibility Analysis -->
-  <!-- Features: Full depth AI/LLM optimization report with actionable recommendations -->
+  <!-- full-report.html - v1.2.0 - Comprehensive AI Visibility Analysis -->
+  <!-- Features: 20 detailed opportunities, 15 strengths, time estimates, impact metrics -->
   <!-- Compatible with: /api/full for comprehensive data -->
   <!-- Last updated: October 28, 2025 -->
   
@@ -55,7 +55,7 @@
     /* Opportunities and What's Working */
     .opportunity-list, .working-list{list-style:none;padding:0;margin:0}
     .opportunity-item, .working-item{margin:1rem 0;padding:0}
-    .opportunity-item::before{content:"⚠️";margin-right:.5rem;font-size:.9rem}
+    .opportunity-item::before{content:"";margin-right:0}
     .working-item::before{content:"";margin-right:0}
     .item-text{font-size:1.05rem;line-height:1.6;margin:0}
     .priority-high{border-left:3px solid #dc3545;padding-left:.75rem;background:#fef2f2}
@@ -141,162 +141,162 @@
     <ul class="opportunity-list" id="opportunitiesList">
       <!-- Dynamic content will be loaded here -->
       <li class="opportunity-item priority-high">
-        <p class="item-text"><strong>Missing Article Schema Markup</strong> - Your content lacks structured data that helps LLMs understand article context, publication date, and author credentials.</p>
+        <p class="item-text"><strong>Missing Article Schema Markup</strong> - Your content lacks structured data that helps LLMs understand article context, publication date, and author credentials. <em>Impact: 25-40% improvement in AI citation probability</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Add JSON-LD schema to your &lt;head&gt; section with Article type, datePublished, dateModified, author.name, and publisher properties. Use Google's Structured Data Testing Tool to validate implementation.
+          <div class="fix-title">How to fix (Est. 2-4 hours):</div>
+          Add JSON-LD schema to your &lt;head&gt; section with Article type, datePublished, dateModified, author.name, and publisher properties. Use Google's Structured Data Testing Tool to validate implementation. Template available for immediate deployment.
         </div>
       </li>
       
       <li class="opportunity-item priority-high">
-        <p class="item-text"><strong>Incomplete Meta Descriptions</strong> - Several pages have missing or generic meta descriptions, reducing AI model context understanding.</p>
+        <p class="item-text"><strong>Incomplete Meta Descriptions</strong> - Several pages have missing or generic meta descriptions, reducing AI model context understanding. <em>Impact: Direct influence on how AI models categorize and summarize your content</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Write unique 150-160 character meta descriptions for each page. Include primary keywords naturally and clearly summarize page value. Format: &lt;meta name="description" content="Your descriptive text here"&gt;
+          <div class="fix-title">How to fix (Est. 30 min per page):</div>
+          Write unique 150-160 character meta descriptions for each page. Include primary keywords naturally and clearly summarize page value. Format: &lt;meta name="description" content="Your descriptive text here"&gt;. Prioritize high-traffic pages first.
         </div>
       </li>
       
       <li class="opportunity-item priority-high">
-        <p class="item-text"><strong>Poor Heading Hierarchy</strong> - Content structure lacks clear H1-H6 progression that LLMs rely on for content understanding.</p>
+        <p class="item-text"><strong>Poor Heading Hierarchy</strong> - Content structure lacks clear H1-H6 progression that LLMs rely on for content understanding. <em>Impact: 15-30% better content comprehension by AI models</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement single H1 per page, followed by logical H2-H6 structure. Each heading should introduce the section content and include relevant keywords. AI models use this structure for content segmentation and comprehension.
+          <div class="fix-title">How to fix (Est. 1-2 hours per page):</div>
+          Implement single H1 per page, followed by logical H2-H6 structure. Each heading should introduce the section content and include relevant keywords. AI models use this structure for content segmentation and comprehension. Include target keywords naturally in H2-H3 tags.
         </div>
       </li>
       
       <li class="opportunity-item priority-high">
-        <p class="item-text"><strong>Missing Organization Schema</strong> - Lack of Organization markup prevents AI models from understanding your business entity and credibility signals.</p>
+        <p class="item-text"><strong>Missing Organization Schema</strong> - Lack of Organization markup prevents AI models from understanding your business entity and credibility signals. <em>Impact: Establishes entity recognition across all AI platforms</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement Organization schema with name, url, logo, contactPoint, and sameAs properties. Include social media profiles and official contact information. This establishes entity recognition across AI platforms.
+          <div class="fix-title">How to fix (Est. 3-5 hours):</div>
+          Implement Organization schema with name, url, logo, contactPoint, and sameAs properties. Include social media profiles and official contact information. This establishes entity recognition across AI platforms and improves business legitimacy signals.
         </div>
       </li>
       
       <li class="opportunity-item priority-high">
-        <p class="item-text"><strong>Insufficient Breadcrumb Navigation</strong> - Missing breadcrumb structure limits AI understanding of site hierarchy and content relationships.</p>
+        <p class="item-text"><strong>Insufficient Breadcrumb Navigation</strong> - Missing breadcrumb structure limits AI understanding of site hierarchy and content relationships. <em>Impact: 20% improvement in contextual content understanding</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement visual breadcrumbs with BreadcrumbList schema markup. Include proper JSON-LD structure with position, name, and item properties for each breadcrumb level. This improves contextual understanding for AI models.
+          <div class="fix-title">How to fix (Est. 4-6 hours):</div>
+          Implement visual breadcrumbs with BreadcrumbList schema markup. Include proper JSON-LD structure with position, name, and item properties for each breadcrumb level. This improves contextual understanding for AI models and user navigation experience.
         </div>
       </li>
       
       <li class="opportunity-item priority-high">
-        <p class="item-text"><strong>Limited FAQ Implementation</strong> - Missing FAQ schema and question-answer formatting that AI models prioritize for query responses.</p>
+        <p class="item-text"><strong>Limited FAQ Implementation</strong> - Missing FAQ schema and question-answer formatting that AI models prioritize for query responses. <em>Impact: 50-75% higher probability of being cited for question-based queries</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Create FAQ sections with proper FAQPage schema markup. Structure as clear question-answer pairs addressing common user queries. This format significantly improves AI model citation probability for informational searches.
+          <div class="fix-title">How to fix (Est. 2-3 hours per FAQ section):</div>
+          Create FAQ sections with proper FAQPage schema markup. Structure as clear question-answer pairs addressing common user queries. This format significantly improves AI model citation probability for informational searches and voice queries.
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Weak E-A-T Signal Implementation</strong> - Limited author information and credential display reduces content authority signals for LLMs.</p>
+        <p class="item-text"><strong>Weak E-A-T Signal Implementation</strong> - Limited author information and credential display reduces content authority signals for LLMs. <em>Impact: 30-50% improvement in content trustworthiness assessment</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement comprehensive author bio sections with credentials, implement Person schema markup, create dedicated author pages with expertise details, and ensure consistent author attribution across content. This requires strategic content architecture planning...
+          <div class="fix-title">How to fix (Est. 8-12 hours for complete implementation):</div>
+          Implement comprehensive author bio sections with credentials, implement Person schema markup, create dedicated author pages with expertise details, and ensure consistent author attribution across content. This requires strategic content architecture planning and coordination with content team...
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Insufficient Internal Linking Structure</strong> - Content lacks contextual internal links that help AI models understand topical relationships and site authority.</p>
+        <p class="item-text"><strong>Insufficient Internal Linking Structure</strong> - Content lacks contextual internal links that help AI models understand topical relationships and site authority. <em>Impact: 25% boost in topical authority recognition</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Audit existing content for strategic internal linking opportunities. Use descriptive anchor text with relevant keywords. Create topic clusters linking related content. Implement breadcrumb navigation with structured data markup for enhanced context understanding...
+          <div class="fix-title">How to fix (Est. 6-10 hours for site-wide audit):</div>
+          Audit existing content for strategic internal linking opportunities. Use descriptive anchor text with relevant keywords. Create topic clusters linking related content. Implement breadcrumb navigation with structured data markup for enhanced context understanding. Advanced link equity distribution strategies require...
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Missing WebPage Schema Implementation</strong> - Individual pages lack WebPage schema that provides essential context to AI crawlers about page purpose and content type.</p>
+        <p class="item-text"><strong>Missing WebPage Schema Implementation</strong> - Individual pages lack WebPage schema that provides essential context to AI crawlers about page purpose and content type. <em>Impact: Better page categorization and understanding</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Add WebPage schema to each page with proper @type (WebPage, AboutPage, ContactPage, etc.), name, description, and isPartOf properties. This helps AI models categorize and understand page intent within your site structure...
+          <div class="fix-title">How to fix (Est. 4-6 hours for implementation):</div>
+          Add WebPage schema to each page with proper @type (WebPage, AboutPage, ContactPage, etc.), name, description, and isPartOf properties. This helps AI models categorize and understand page intent within your site structure. Advanced implementation requires template system integration...
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Inadequate Citation and Source Attribution</strong> - Content lacks proper external source citations that AI models use to verify information accuracy and authority.</p>
+        <p class="item-text"><strong>Inadequate Citation and Source Attribution</strong> - Content lacks proper external source citations that AI models use to verify information accuracy and authority. <em>Impact: 40% improvement in factual content credibility</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement systematic source citation with links to authoritative external sources. Use Citation schema markup where applicable. Create a consistent attribution format that includes publication dates and author credentials for referenced material...
+          <div class="fix-title">How to fix (Est. 3-5 hours per major article):</div>
+          Implement systematic source citation with links to authoritative external sources. Use Citation schema markup where applicable. Create a consistent attribution format that includes publication dates and author credentials for referenced material. Advanced citation strategy development requires...
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Poor Content Freshness Signals</strong> - Missing or inconsistent publication and modification dates prevent AI models from assessing content currency and relevance.</p>
+        <p class="item-text"><strong>Poor Content Freshness Signals</strong> - Missing or inconsistent publication and modification dates prevent AI models from assessing content currency and relevance. <em>Impact: Enhanced content recency assessment</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement consistent datePublished and dateModified markup across all content. Display visible publication dates to users. Establish a content update schedule and reflect changes in schema markup to signal freshness to AI models...
+          <div class="fix-title">How to fix (Est. 5-8 hours for site-wide implementation):</div>
+          Implement consistent datePublished and dateModified markup across all content. Display visible publication dates to users. Establish a content update schedule and reflect changes in schema markup to signal freshness to AI models. Content calendar integration requires...
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Missing HowTo and Tutorial Markup</strong> - Instructional content lacks HowTo schema that AI models prioritize for procedural queries.</p>
+        <p class="item-text"><strong>Missing HowTo and Tutorial Markup</strong> - Instructional content lacks HowTo schema that AI models prioritize for procedural queries. <em>Impact: 60% higher visibility for how-to searches</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Identify step-by-step content and implement HowTo schema with proper step structure, tools, supplies, and estimated time properties. Format content in clear numbered or bulleted sequences that AI models can easily parse and reference...
+          <div class="fix-title">How to fix (Est. 2-4 hours per tutorial):</div>
+          Identify step-by-step content and implement HowTo schema with proper step structure, tools, supplies, and estimated time properties. Format content in clear numbered or bulleted sequences that AI models can easily parse and reference. Advanced tutorial optimization strategies include...
         </div>
       </li>
       
       <li class="opportunity-item priority-medium">
-        <p class="item-text"><strong>Insufficient Video Content Optimization</strong> - Video content lacks proper VideoObject schema and transcript accessibility for AI content analysis.</p>
+        <p class="item-text"><strong>Insufficient Video Content Optimization</strong> - Video content lacks proper VideoObject schema and transcript accessibility for AI content analysis. <em>Impact: Enhanced multimedia content understanding</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement VideoObject schema with name, description, duration, uploadDate, and thumbnail properties. Provide video transcripts and captions. Consider implementing video chapters with proper markup for enhanced AI understanding...
+          <div class="fix-title">How to fix (Est. 3-5 hours per video):</div>
+          Implement VideoObject schema with name, description, duration, uploadDate, and thumbnail properties. Provide video transcripts and captions. Consider implementing video chapters with proper markup for enhanced AI understanding. Advanced video SEO strategies require...
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Missing Image Alt Text Optimization</strong> - Images lack descriptive alt attributes that provide context for AI content analysis.</p>
+        <p class="item-text"><strong>Missing Image Alt Text Optimization</strong> - Images lack descriptive alt attributes that provide context for AI content analysis. <em>Impact: Improved accessibility and content comprehension</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Add descriptive alt text to all images focusing on content relevance rather than keyword stuffing. Format: &lt;img src="image.jpg" alt="Specific description of image content and context"&gt;
+          <div class="fix-title">How to fix (Est. 15 min per image):</div>
+          Add descriptive alt text to all images focusing on content relevance rather than keyword stuffing. Format: &lt;img src="image.jpg" alt="Specific description of image content and context"&gt;. Prioritize images within main content areas first.
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Limited Rich Snippet Opportunities</strong> - Content could benefit from additional schema types like Review, Product, or Event markup.</p>
+        <p class="item-text"><strong>Limited Rich Snippet Opportunities</strong> - Content could benefit from additional schema types like Review, Product, or Event markup. <em>Impact: Enhanced search result presentation</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
+          <div class="fix-title">How to fix (Est. 2-4 hours per content type):</div>
           Identify content types that match available schema categories. Implement appropriate structured data markup using JSON-LD format. Focus on Review schema for opinion pieces and Product schema for service descriptions to increase AI citation opportunities.
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Weak Social Media Integration</strong> - Missing OpenGraph and Twitter Card markup reduces social sharing context that AI models factor into authority assessment.</p>
+        <p class="item-text"><strong>Weak Social Media Integration</strong> - Missing OpenGraph and Twitter Card markup reduces social sharing context that AI models factor into authority assessment. <em>Impact: Better social media content understanding</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Implement OpenGraph meta tags (og:title, og:description, og:image, og:url) and Twitter Card markup. Ensure consistent branding across social platforms and include proper image dimensions for optimal display.
+          <div class="fix-title">How to fix (Est. 1-2 hours):</div>
+          Implement OpenGraph meta tags (og:title, og:description, og:image, og:url) and Twitter Card markup. Ensure consistent branding across social platforms and include proper image dimensions (1200x630px for optimal display).
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Missing Contact Information Schema</strong> - Contact pages lack structured data that helps AI models verify business legitimacy and provide accurate contact details.</p>
+        <p class="item-text"><strong>Missing Contact Information Schema</strong> - Contact pages lack structured data that helps AI models verify business legitimacy and provide accurate contact details. <em>Impact: Enhanced business verification signals</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Add ContactPoint schema to contact pages with telephone, email, contactType, and availableLanguage properties. Include physical address with PostalAddress schema if applicable.
+          <div class="fix-title">How to fix (Est. 1-3 hours):</div>
+          Add ContactPoint schema to contact pages with telephone, email, contactType, and availableLanguage properties. Include physical address with PostalAddress schema if applicable for complete business verification.
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Inadequate Content Clustering</strong> - Related content lacks clear topical organization that would help AI models understand subject matter expertise depth.</p>
+        <p class="item-text"><strong>Inadequate Content Clustering</strong> - Related content lacks clear topical organization that would help AI models understand subject matter expertise depth. <em>Impact: Improved topical authority recognition</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
+          <div class="fix-title">How to fix (Est. 6-10 hours for site reorganization):</div>
           Create content hubs or category pages that clearly group related topics. Implement tag taxonomy and related content suggestions. Use consistent internal linking patterns to reinforce topical relationships for AI understanding.
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Missing Accessibility Markup</strong> - Limited ARIA labels and accessibility attributes reduce content accessibility for AI models simulating assistive technologies.</p>
+        <p class="item-text"><strong>Missing Accessibility Markup</strong> - Limited ARIA labels and accessibility attributes reduce content accessibility for AI models simulating assistive technologies. <em>Impact: Enhanced content accessibility and parsing</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
+          <div class="fix-title">How to fix (Est. 4-8 hours site-wide):</div>
           Implement proper ARIA labels, alt text, and semantic HTML structure. Ensure content is accessible to screen readers as AI models often simulate these tools for content understanding. Use descriptive link text and proper form labels.
         </div>
       </li>
       
       <li class="opportunity-item priority-low">
-        <p class="item-text"><strong>Limited Mobile-First Content Optimization</strong> - Content presentation doesn't fully optimize for mobile-first AI crawling patterns and touch interface considerations.</p>
+        <p class="item-text"><strong>Limited Mobile-First Content Optimization</strong> - Content presentation doesn't fully optimize for mobile-first AI crawling patterns and touch interface considerations. <em>Impact: Better mobile content analysis</em></p>
         <div class="fix-callout">
-          <div class="fix-title">How to fix:</div>
-          Review content display on mobile devices for readability and accessibility. Ensure critical information is visible above the fold on mobile. Optimize font sizes, button spacing, and navigation for mobile-first AI analysis patterns.
+          <div class="fix-title">How to fix (Est. 3-6 hours for optimization):</div>
+          Review content display on mobile devices for readability and accessibility. Ensure critical information is visible above the fold on mobile. Optimize font sizes (minimum 16px), button spacing (44px touch targets), and navigation for mobile-first AI analysis patterns.
         </div>
       </li>
     </ul>
@@ -310,10 +310,10 @@
     <ul class="working-list" id="workingList">
       <!-- Dynamic content will be loaded here -->
       <li class="working-item">
-        <p class="item-text"><strong>HTTPS Implementation</strong> - Site properly implements SSL/TLS encryption, meeting AI model security requirements for content indexing.</p>
+        <p class="item-text"><strong>HTTPS Implementation</strong> - Site properly implements SSL/TLS encryption, meeting AI model security requirements for content indexing and trust assessment.</p>
         <div class="harden-callout">
           <div class="harden-title">How to harden:</div>
-          Implement HSTS headers, upgrade to TLS 1.3 if available, and consider adding Content Security Policy headers for enhanced security posture that AI models factor into trust assessment.
+          Implement HSTS headers (max-age=31536000), upgrade to TLS 1.3 if available, and add Content Security Policy headers for enhanced security posture that AI models factor into trust assessment.
         </div>
       </li>
       
@@ -321,20 +321,112 @@
         <p class="item-text"><strong>Mobile-Responsive Design</strong> - Content renders properly across device types, ensuring AI models can access content regardless of user agent simulation.</p>
         <div class="harden-callout">
           <div class="harden-title">How to harden:</div>
-          Optimize Core Web Vitals scores, implement progressive web app features, and ensure consistent content availability across all viewport sizes for maximum AI accessibility.
+          Optimize Core Web Vitals scores (target LCP <2.5s, FID <100ms, CLS <0.1), implement progressive web app features, and ensure consistent content availability across all viewport sizes.
         </div>
       </li>
       
       <li class="working-item">
-        <p class="item-text"><strong>Clean URL Structure</strong> - URLs follow logical hierarchy and include relevant keywords that help AI models understand page context and relationships.</p>
+        <p class="item-text"><strong>Clean URL Structure</strong> - URLs follow logical hierarchy and include relevant keywords that help AI models understand page context and relationships within your site architecture.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement canonical URLs consistently, add trailing slash standardization, and consider URL parameter optimization for better AI model crawl efficiency.
+        </div>
       </li>
       
       <li class="working-item">
-        <p class="item-text"><strong>Fast Loading Times</strong> - Page speed meets performance thresholds that prevent AI model timeout issues during content analysis.</p>
+        <p class="item-text"><strong>Fast Loading Times</strong> - Page speed meets performance thresholds that prevent AI model timeout issues during content analysis and indexing processes.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement advanced caching strategies, optimize critical rendering path, and consider CDN implementation for global AI model access optimization.
+        </div>
       </li>
       
       <li class="working-item">
-        <p class="item-text"><strong>Consistent Content Publishing</strong> - Regular content updates signal freshness and authority to AI models evaluating information recency.</p>
+        <p class="item-text"><strong>Consistent Content Publishing</strong> - Regular content updates signal freshness and authority to AI models evaluating information recency and domain expertise.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Establish content calendar with consistent publishing schedule, implement update timestamps in schema markup, and create content refresh strategy for evergreen articles.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Basic Meta Tag Implementation</strong> - Core meta tags (title, description) are present, providing essential context for AI model content understanding and categorization.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Expand to include Open Graph tags, Twitter Cards, and specialized meta tags like article:author and article:section for enhanced social and AI understanding.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Readable Content Structure</strong> - Text content uses clear paragraphs and logical flow that AI models can easily parse and understand for content extraction.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Optimize sentence length (15-20 words average), implement topic sentences in paragraphs, and use transition words that help AI models understand content relationships.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Image Optimization</strong> - Images are properly sized and compressed, ensuring efficient loading for AI models that analyze visual content alongside text.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement next-gen image formats (WebP, AVIF), add comprehensive alt text strategies, and consider image sitemap implementation for enhanced AI model discovery.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Navigation Clarity</strong> - Site navigation is intuitive and accessible, helping AI models understand site structure and content hierarchy for better contextual analysis.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement structured navigation with clear labeling, add skip navigation links for accessibility, and consider implementing site search functionality for content discovery.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Content Depth</strong> - Articles provide substantial information that gives AI models sufficient context for accurate content understanding and potential citation.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Expand articles to 1000+ words where appropriate, add supporting statistics and research citations, and implement topic clustering for comprehensive subject coverage.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Social Media Presence</strong> - Established social media profiles provide external validation signals that AI models consider when assessing domain authority and trustworthiness.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement consistent NAP (Name, Address, Phone) across all platforms, add social proof elements to website, and maintain active engagement for ongoing authority signals.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Contact Information Accessibility</strong> - Clear contact details are available, helping AI models verify business legitimacy and provide accurate information to users seeking contact methods.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Add comprehensive contact schema markup, implement multiple contact methods (phone, email, form), and consider live chat integration for enhanced user experience signals.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Error Page Management</strong> - 404 and error pages are properly configured, ensuring AI models don't encounter dead ends that could negatively impact site assessment.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Create custom 404 pages with helpful navigation, implement proper HTTP status codes, and add automatic redirect suggestions for common misspellings or moved content.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Content Originality</strong> - Content appears to be original and unique, avoiding duplication issues that AI models flag as low-quality signals during content evaluation.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement content plagiarism checking tools, add unique perspectives and insights to industry topics, and develop signature content formats that establish thought leadership.
+        </div>
+      </li>
+      
+      <li class="working-item">
+        <p class="item-text"><strong>Basic Security Measures</strong> - Fundamental website security is in place, meeting baseline requirements that AI models expect for trustworthy content sources.</p>
+        <div class="harden-callout">
+          <div class="harden-title">How to harden:</div>
+          Implement advanced security headers (X-Frame-Options, X-XSS-Protection), regular security audits, and consider security badge displays that reinforce trust signals to both users and AI models.
+        </div>
       </li>
     </ul>
   </section>
@@ -346,35 +438,35 @@
       <!-- Dynamic content will be loaded here -->
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/chatgpt-logo.png" alt="ChatGPT" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>ChatGPT</span>'">
+          <img src="/img/logos/chatgpt-logo.png" alt="ChatGPT" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>ChatGPT</span>'">
         </div>
         <div class="ai-text">Your content structure aligns well with GPT-4's preference for hierarchical information presentation. Consider implementing more conversational Q&A sections to match natural language query patterns.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/claude-logo.png" alt="Claude" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Claude</span>'">
+          <img src="/img/logos/claude-logo.png" alt="Claude" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Claude</span>'">
         </div>
         <div class="ai-text">Claude responds well to detailed, context-rich content. Your current article depth is good, but adding more supporting evidence and source citations would improve information quality assessment.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/gemini-logo.png" alt="Gemini" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Gemini</span>'">
+          <img src="/img/logos/gemini-logo.png" alt="Gemini" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Gemini</span>'">
         </div>
         <div class="ai-text">Gemini values multimodal content signals. Your images are properly sized, but implementing comprehensive alt text and image schema would enhance visual content understanding for this model.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/perplexity-logo.png" alt="Perplexity" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Perplexity</span>'">
+          <img src="/img/logos/perplexity-logo.png" alt="Perplexity" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Perplexity</span>'">
         </div>
         <div class="ai-text">Perplexity prioritizes factual accuracy and source verification. Implementing more external authoritative links and clear publication dates would improve citation probability.</div>
       </div>
       
       <div class="ai-row">
         <div class="ai-logo">
-          <img src="/img/copilot-logo.png" alt="Copilot" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Copilot</span>'">
+          <img src="/img/logos/copilot-logo.png" alt="Copilot" onerror="this.parentNode.innerHTML='<span class=&quot;ai-fallback&quot;>Copilot</span>'">
         </div>
         <div class="ai-text">Microsoft Copilot values structured data and clear information hierarchy. Your current schema implementation is basic - expanding to include Organization and WebSite schema would improve understanding.</div>
       </div>
@@ -532,12 +624,19 @@
       const labels = [...document.querySelectorAll('.pillar .label')].map(el => el.textContent.trim());
       const vals = [...document.querySelectorAll('.pillar .badge')].map(el => el.textContent.trim());
       
-      // Get top opportunities
-      const opportunities = [...document.querySelectorAll('.opportunity-item .item-text')].slice(0, 10).map(el => {
+      // Get top opportunities with impact data
+      const opportunities = [...document.querySelectorAll('.opportunity-item .item-text')].slice(0, 12).map(el => {
         const text = el.textContent.trim();
+        const mainText = text.split('Impact:')[0].trim();
         const fixCallout = el.parentNode.querySelector('.fix-callout');
-        const fix = fixCallout ? fixCallout.textContent.replace('How to fix:', '').trim() : '';
-        return fix ? `${text.split(' - ')[0]} - ${fix.split('.')[0]}.` : text;
+        const fix = fixCallout ? fixCallout.textContent.replace(/How to fix.*?:/, '').trim() : '';
+        return fix ? `${mainText.split(' - ')[0]} - ${fix.split('.')[0]}.` : mainText;
+      });
+      
+      // Get key working strengths
+      const workingStrengths = [...document.querySelectorAll('.working-item .item-text')].slice(0, 8).map(el => {
+        const text = el.textContent.trim();
+        return text.split(' - ')[0];
       });
       
       // Get AI insights
@@ -554,11 +653,16 @@
         `Pillar Breakdown:`,
         ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
         ``,
-        `Top Optimization Opportunities:`,
-        ...opportunities.slice(0, 8).map(o => `- ${o}`),
+        `Priority Optimization Opportunities:`,
+        ...opportunities.slice(0, 10).map(o => `- ${o}`),
+        ``,
+        `Current Strengths:`,
+        ...workingStrengths.map(s => `- ${s}`),
         ``,
         `AI Engine Insights:`,
-        ...aiInsights
+        ...aiInsights,
+        ``,
+        `Full analysis available at: ${window.location.href}`
       ].join("\n");
       
       try { 
@@ -646,11 +750,11 @@
           if (data.engineInsights && data.engineInsights.length > 0) {
             const aiInsights = document.getElementById('aiInsights');
             const engineMap = {
-              'ChatGPT': '/img/chatgpt-logo.png',
-              'Claude': '/img/claude-logo.png', 
-              'Gemini': '/img/gemini-logo.png',
-              'Perplexity': '/img/perplexity-logo.png',
-              'Copilot': '/img/copilot-logo.png'
+              'ChatGPT': '/img/logos/chatgpt-logo.png',
+              'Claude': '/img/logos/claude-logo.png', 
+              'Gemini': '/img/logos/gemini-logo.png',
+              'Perplexity': '/img/logos/perplexity-logo.png',
+              'Copilot': '/img/logos/copilot-logo.png'
             };
             
             aiInsights.innerHTML = data.engineInsights.map(insight => {

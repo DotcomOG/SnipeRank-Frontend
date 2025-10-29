@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.2.1 - Speed + Conversion Optimized (Logo & Content Fixes) -->
+  <!-- analyze.html - v3.3.1 - SPEED OPTIMIZED: Fixed logo paths to match actual filenames -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields, caching, improved conversion -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
   <!-- Last updated: October 29, 2025 -->
@@ -9,6 +9,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SnipeRank - AI SEO Analysis</title>
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="/img/claude.jpeg" as="image">
+  <link rel="preload" href="/img/chatgpt-logo.png" as="image">
+  <link rel="preload" href="/img/gemini.jpeg" as="image">
+  <link rel="preload" href="/img/copilot.jpeg" as="image">
+  <link rel="preload" href="/img/perplexity-logo.png" as="image">
+  
+  <!-- DNS prefetch for API calls -->
+  <link rel="dns-prefetch" href="//sniperank-app2.onrender.com">
   <style>
     :root{
       --max-width:760px; --pad-v:3vh; --pad-h:2rem;
@@ -229,14 +239,14 @@
   </div>
 
   <script>
-    // v3.2.1 JS — Speed + Conversion Optimized with caching, improved API handling, and logo fixes
+    // v3.3.1 JS — SPEED OPTIMIZED + LOGO FIXES: Correct paths matching actual filenames
 
     const LOGO_SOURCES = {
-      ChatGPT: '/img/chatgpt.jpeg',
+      ChatGPT: '/img/chatgpt-logo.png',
       Claude: '/img/claude.jpeg',
       Gemini: '/img/gemini.jpeg',
       Copilot: '/img/copilot.jpeg',
-      Perplexity: '/img/perplexity.jpeg',
+      Perplexity: '/img/perplexity-logo.png',
     };
 
     // Cache management for speed optimization
@@ -273,8 +283,8 @@
       }
     }
 
-    // Improved API fetch with retries and better error handling
-    async function fetchWithRetry(url, maxRetries = 2, timeout = 15000) {
+    // Improved API fetch with faster timeouts and better error handling
+    async function fetchWithRetry(url, maxRetries = 1, timeout = 8000) {
       for (let i = 0; i <= maxRetries; i++) {
         try {
           const controller = new AbortController();
@@ -302,8 +312,8 @@
             throw error;
           }
           
-          // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+          // Faster backoff for quicker recovery
+          await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
         }
       }
     }
@@ -410,10 +420,9 @@
       }
     }
 
-    // Enhanced progress simulation with dynamic messaging
+    // Enhanced progress simulation with dynamic adaptation to actual loading speed
     function startProgress() {
       document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 25000; // Faster perceived loading
       const startTime = Date.now();
       const progressFill = document.getElementById('progress-fill');
       const progressPct = document.getElementById('progress-pct');
@@ -428,11 +437,18 @@
       ];
       
       let messageIndex = 0;
+      let completed = false;
+      let targetProgress = 0;
       
       const interval = setInterval(() => {
+        if (completed) return;
+        
         const elapsed = Date.now() - startTime;
-        const ratio = Math.min(elapsed / expectedDuration, 1);
-        const progress = ratio * 95;
+        
+        // Adaptive speed - faster if no actual loading happening
+        const baseSpeed = targetProgress > 0 ? 8000 : 15000; // Speed up if we have real progress
+        const ratio = Math.min(elapsed / baseSpeed, 1);
+        const progress = Math.min(ratio * 90, targetProgress || 90); // Don't go past real progress
         
         progressFill.style.width = progress + '%';
         progressPct.textContent = Math.floor(progress) + '%';
@@ -444,9 +460,17 @@
           progressEta.innerHTML = messages[messageIndex] + '<br>Almost done!';
         }
         
-        if (progress >= 95) clearInterval(interval);
-      }, 150);
-      return interval;
+        if (progress >= 90 && !targetProgress) clearInterval(interval);
+      }, 100);
+      
+      return {
+        interval,
+        setProgress: (pct) => { targetProgress = Math.max(targetProgress, pct); },
+        complete: () => { 
+          completed = true; 
+          clearInterval(interval);
+        }
+      };
     }
 
     function stopProgress() {
@@ -567,7 +591,7 @@
       window.location.href = `full-report.html?${q}`;
     });
     
-    // Load analysis with caching and optimization
+    // Load analysis with parallel requests and optimized caching
     document.addEventListener("DOMContentLoaded", async () => {
       if (!targetUrl) {
         document.getElementById("current-url").textContent = "No URL provided";
@@ -577,96 +601,136 @@
       
       document.getElementById("current-url").textContent = targetUrl;
       
-      // Check for cached data first
+      // Preload logo images for faster rendering
+      Object.values(LOGO_SOURCES).forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+      
+      // Check for cached data first - if exists, show immediately without progress
       const cachedData = getCachedData(targetUrl);
+      let progressController = null;
+      
       if (cachedData) {
-        console.log('Using cached data for faster loading');
+        console.log('Using cached data for instant loading');
         renderScoreCard(cachedData.score, cachedData.pillars, cachedData.highlights, true);
         if (cachedData.reportHtml) {
           const host = document.getElementById('summary-results'); 
           host.innerHTML = cachedData.reportHtml; 
           transformAIInsights(host);
         }
-        // Still fetch fresh data in background but don't show loading
+        // Skip progress bar for cached content
       } else {
-        const progressTimer = startProgress();
+        // Only show progress for fresh requests
+        progressController = startProgress();
       }
 
-      // Enhanced API base detection with better fallback logic
+      // Enhanced API base detection with ultra-fast probe
       let apiBase = '';
       try {
-        // Quick probe with shorter timeout for better UX
-        const probe = await fetchWithRetry('/api/score?url=' + encodeURIComponent('https://example.com'), 0, 3000);
+        // Super quick probe - just check if local API responds
+        const probe = await fetch('/api/health', { 
+          method: 'HEAD', 
+          signal: AbortSignal.timeout(1000) // 1 second max
+        });
         if (!probe.ok) throw new Error('Local API not available');
       } catch { 
         apiBase = 'https://sniperank-app2.onrender.com'; 
         console.log('Using Render API fallback');
       }
 
-      // Load score data with caching
-      try {
-        if (!cachedData) {
-          const scoreResponse = await fetchWithRetry(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
-          const scoreData = await scoreResponse.json();
-          renderScoreCard(scoreData.score, scoreData.pillars, scoreData.highlights);
-          
-          // Cache the score data
-          setCachedData(targetUrl, { 
-            score: scoreData.score, 
-            pillars: scoreData.pillars, 
-            highlights: scoreData.highlights 
-          });
-        }
-      } catch (e) {
-        console.error('Score API error:', e);
-        // Show conversion-focused error message
-        document.getElementById('summary-results').innerHTML = `
-          <div style="text-align:center;padding:2rem;border:1px solid #f56565;border-radius:8px;background:#fed7d7">
-            <h3 style="color:#c53030;margin:0 0 1rem">Analysis Temporarily Unavailable</h3>
-            <p style="color:#742a2a;margin:0 0 1rem">Our analysis servers are experiencing high demand. Your full report will include complete scoring and insights.</p>
-            <p style="color:#742a2a;margin:0"><strong>Submit your details below to receive your comprehensive report via email.</strong></p>
-          </div>
-        `;
+      // PARALLEL API CALLS - Load score and report simultaneously for speed
+      const requests = [];
+      
+      // Only fetch if not cached
+      if (!cachedData || !cachedData.score) {
+        requests.push(
+          fetchWithRetry(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, 1, 8000)
+            .then(response => response.json())
+            .then(scoreData => {
+              if (progressController) progressController.setProgress(50);
+              renderScoreCard(scoreData.score, scoreData.pillars, scoreData.highlights);
+              setCachedData(targetUrl, { 
+                score: scoreData.score, 
+                pillars: scoreData.pillars, 
+                highlights: scoreData.highlights 
+              });
+              return { type: 'score', data: scoreData };
+            })
+            .catch(e => {
+              console.error('Score API error:', e);
+              return { type: 'score', error: e };
+            })
+        );
+      }
+      
+      if (!cachedData || !cachedData.reportHtml) {
+        requests.push(
+          fetchWithRetry(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, 1, 10000)
+            .then(response => response.text())
+            .then(reportHtml => {
+              if (progressController) progressController.setProgress(90);
+              const host = document.getElementById('summary-results'); 
+              host.innerHTML = reportHtml; 
+              transformAIInsights(host);
+              
+              // Update cache with report HTML
+              const existing = getCachedData(targetUrl) || {};
+              setCachedData(targetUrl, { ...existing, reportHtml });
+              return { type: 'report', data: reportHtml };
+            })
+            .catch(e => {
+              console.error('Report API error:', e);
+              return { type: 'report', error: e };
+            })
+        );
       }
 
-      // Load report content with caching
-      try {
-        if (!cachedData || !cachedData.reportHtml) {
-          const reportResponse = await fetchWithRetry(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);
-          const reportHtml = await reportResponse.text();
+      // Wait for all requests to complete (or fail)
+      if (requests.length > 0) {
+        try {
+          const results = await Promise.all(requests);
           
-          const host = document.getElementById('summary-results'); 
-          host.innerHTML = reportHtml; 
-          transformAIInsights(host);
+          // Handle any errors with conversion-focused messaging
+          const scoreError = results.find(r => r.type === 'score' && r.error);
+          const reportError = results.find(r => r.type === 'report' && r.error);
           
-          // Update cache with report HTML
-          if (cachedData) {
-            setCachedData(targetUrl, { ...cachedData, reportHtml });
-          } else {
-            setCachedData(targetUrl, { reportHtml });
+          if (scoreError && reportError) {
+            document.getElementById('summary-results').innerHTML = `
+              <div style="text-align:center;padding:2rem;border:1px solid #f56565;border-radius:8px;background:#fed7d7">
+                <h3 style="color:#c53030;margin:0 0 1rem">Analysis Temporarily Unavailable</h3>
+                <p style="color:#742a2a;margin:0 0 1rem">Our analysis servers are experiencing high demand. Your full report will include complete scoring and insights.</p>
+                <p style="color:#742a2a;margin:0"><strong>Submit your details below to receive your comprehensive report via email.</strong></p>
+              </div>
+            `;
+          } else if (reportError && !cachedData) {
+            document.getElementById('summary-results').innerHTML = `
+              <div style="text-align:center;padding:2rem">
+                <p style="color:#666">Comprehensive analysis loading...</p>
+                <p style="color:#999;font-size:.9rem">Your full report will include detailed insights and recommendations.</p>
+              </div>
+            `;
           }
+        } catch (e) {
+          console.error('Loading error:', e);
         }
-      } catch (e) {
-        console.error('Report API error:', e);
-        if (!cachedData) {
-          document.getElementById('summary-results').innerHTML = `
-            <div style="text-align:center;padding:2rem">
-              <p style="color:#666">Comprehensive analysis loading...</p>
-              <p style="color:#999;font-size:.9rem">Your full report will include detailed insights and recommendations.</p>
-            </div>
-          `;
-        }
-      } finally {
-        if (!cachedData) {
+      }
+
+      // Complete progress animation
+      if (progressController) {
+        progressController.setProgress(100);
+        setTimeout(() => {
+          progressController.complete();
           stopProgress();
-        }
+        }, 300);
       }
 
       // Track page views for analytics
       if (typeof gtag !== 'undefined') {
         gtag('event', 'page_view', {
           page_title: 'SnipeRank Analysis',
-          custom_map: { dimension1: extractDomain(targetUrl) }
+          custom_map: { dimension1: extractDomain(targetUrl) },
+          load_time: Date.now() - performance.timing.navigationStart
         });
       }
     });

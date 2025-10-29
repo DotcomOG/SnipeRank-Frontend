@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.1.7 - MINIMAL FIXES: Only logo paths and pricing text, loading logic untouched -->
+  <!-- analyze.html - v3.1.8 - LOGO ALIGNMENT FIXES: Proper sizing and vertical centering -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
   <!-- Last updated: October 29, 2025 -->
@@ -54,11 +54,16 @@
     #summary-results li{line-height:1.7!important;margin:.6rem 0!important;font-size:1.05rem!important}
 
     .llm-insights{margin:.4rem 0 1.2rem}
-    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
+    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:center;padding:.8rem 0;border-bottom:1px dashed var(--border)}
     .llm-row:last-child{border-bottom:0}
-    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
-    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
-    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
+    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:40px}
+    .llm-logo img{height:32px;width:auto;display:block;object-fit:contain;max-width:120px}
+    .llm-logo img[src*="gemini"]{height:40px}
+    .llm-logo img[src*="copilot"]{height:36px}
+    .llm-logo img[src*="perplexity"]{height:36px}
+    .llm-logo img[src*="chatgpt"]{height:32px}
+    .llm-logo img[src*="claude"]{height:32px}
+    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
 
     .form-section{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);margin-top:3rem;width:100%}
     .form-section h3{margin:0 0 2rem;font-size:1.8rem;font-weight:700}
@@ -76,14 +81,20 @@
     .consultation-info{color:var(--muted);font-size:.95rem;margin-top:1rem}
     .consultation-info strong{color:#000}
 
-    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
-    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
-    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .progress-title{font-weight:700;font-size:18px}
-    .progress-pct{color:#666;font-size:16px;font-weight:600}
-    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
-    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
-    .progress-eta{color:#666;font-size:14px;line-height:1.4}
+    .progress-bar-simple {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 4px;
+      background: linear-gradient(90deg, #3182CE, #10B981);
+      transition: width 0.3s ease;
+      z-index: 1000;
+      opacity: 0;
+    }
+    .progress-bar-simple.visible {
+      opacity: 1;
+    }
 
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1001}
     .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -127,7 +138,7 @@
     </div>
   </section>
 
-  <section id="summary-results">
+  <section id="summary-results" style="min-height: 400px; padding: 2rem 0;">
     <p style="text-align:center;color:gray;">Loading analysis...</p>
   </section>
 
@@ -163,22 +174,8 @@
     © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 29.
   </div>
 
-  <!-- Progress Overlay -->
-  <div id="progress-overlay" class="overlay">
-    <div class="progress-panel">
-      <div class="progress-header">
-        <div class="progress-title">Analyzing your website...</div>
-        <div class="progress-pct" id="progress-pct">0%</div>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="progress-eta" id="progress-eta">
-        Performing comprehensive website analysis.<br>
-        This typically takes <strong>15-45 seconds</strong>.
-      </div>
-    </div>
-  </div>
+  <!-- Simple Top Progress Bar -->
+  <div id="progress-bar-simple" class="progress-bar-simple"></div>
 
   <!-- Score Breakdown Modal -->
   <div id="breakdown-modal" class="modal-backdrop">
@@ -310,39 +307,28 @@
       }
     }
 
-    // Progress simulation
+    // Simple progress bar
     function startProgress() {
-      document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 30000; // ~95%
-      const startTime = Date.now();
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
+      const progressBar = document.getElementById('progress-bar-simple');
+      progressBar.classList.add('visible');
       
+      let progress = 0;
       const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const ratio = Math.min(elapsed / expectedDuration, 1);
-        const progress = ratio * 95;
-        
-        progressFill.style.width = progress + '%';
-        progressPct.textContent = Math.floor(progress) + '%';
-        
-        if (progress >= 95) clearInterval(interval);
-        if (progress > 30) {
-          document.getElementById('progress-eta').innerHTML = 'Processing content structure and AI optimization signals...<br>Almost done!';
-        }
-      }, 100);
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        progressBar.style.width = progress + '%';
+      }, 200);
+      
       return interval;
     }
 
     function stopProgress() {
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-      progressFill.style.transition = 'width 0.5s ease';
-      progressFill.style.width = '100%';
-      progressPct.textContent = '100%';
+      const progressBar = document.getElementById('progress-bar-simple');
+      progressBar.style.width = '100%';
       setTimeout(() => {
-        document.getElementById('progress-overlay').style.display = 'none';
-      }, 800);
+        progressBar.classList.remove('visible');
+        progressBar.style.width = '0%';
+      }, 500);
     }
 
     // Modal controls

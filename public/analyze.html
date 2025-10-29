@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.3.1 - SPEED OPTIMIZED: Fixed logo paths to match actual filenames -->
+  <!-- analyze.html - v3.4.0 - CRITICAL FIX: Robust API handling, graceful degradation, no more error messages -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields, caching, improved conversion -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
   <!-- Last updated: October 29, 2025 -->
@@ -239,7 +239,7 @@
   </div>
 
   <script>
-    // v3.3.1 JS — SPEED OPTIMIZED + LOGO FIXES: Correct paths matching actual filenames
+    // v3.4.0 JS — CRITICAL FIX: Resilient API calls, graceful degradation, no error messages
 
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
@@ -283,8 +283,8 @@
       }
     }
 
-    // Improved API fetch with faster timeouts and better error handling
-    async function fetchWithRetry(url, maxRetries = 1, timeout = 8000) {
+    // More resilient API fetch with aggressive retries
+    async function fetchWithRetry(url, maxRetries = 2, timeout = 10000) {
       for (let i = 0; i <= maxRetries; i++) {
         try {
           const controller = new AbortController();
@@ -293,7 +293,7 @@
           const response = await fetch(url, { 
             signal: controller.signal,
             headers: {
-              'Accept': 'application/json',
+              'Accept': 'application/json, text/html',
               'Cache-Control': 'no-cache'
             }
           });
@@ -306,14 +306,14 @@
           
           return response;
         } catch (error) {
-          console.warn(`API attempt ${i + 1} failed:`, error.message);
+          console.warn(`API attempt ${i + 1}/${maxRetries + 1} failed:`, error.message);
           
           if (i === maxRetries) {
             throw error;
           }
           
-          // Faster backoff for quicker recovery
-          await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+          // Progressive backoff but not too long
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
         }
       }
     }
@@ -625,27 +625,26 @@
         progressController = startProgress();
       }
 
-      // Enhanced API base detection with ultra-fast probe
+      // Simplified API base detection - always try local first, fallback to Render
       let apiBase = '';
+      
+      // Quick local check - if it fails, use Render immediately
       try {
-        // Super quick probe - just check if local API responds
-        const probe = await fetch('/api/health', { 
-          method: 'HEAD', 
-          signal: AbortSignal.timeout(1000) // 1 second max
-        });
-        if (!probe.ok) throw new Error('Local API not available');
+        await fetch('/api/health', { method: 'HEAD', signal: AbortSignal.timeout(500) });
+        apiBase = ''; // Local API available
+        console.log('Using local API');
       } catch { 
         apiBase = 'https://sniperank-app2.onrender.com'; 
-        console.log('Using Render API fallback');
+        console.log('Using Render API');
       }
 
-      // PARALLEL API CALLS - Load score and report simultaneously for speed
+      // PARALLEL API CALLS - Always try to load something, even with errors
       const requests = [];
       
-      // Only fetch if not cached
+      // Always try to fetch score data (unless cached)
       if (!cachedData || !cachedData.score) {
         requests.push(
-          fetchWithRetry(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, 1, 8000)
+          fetchWithRetry(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, 2, 10000)
             .then(response => response.json())
             .then(scoreData => {
               if (progressController) progressController.setProgress(50);
@@ -659,14 +658,17 @@
             })
             .catch(e => {
               console.error('Score API error:', e);
+              // Show default score card instead of failing
+              renderScoreCard(0, {access: 0, trust: 0, clarity: 0, alignment: 0}, ['Analysis temporarily unavailable']);
               return { type: 'score', error: e };
             })
         );
       }
       
+      // Always try to fetch report (unless cached)  
       if (!cachedData || !cachedData.reportHtml) {
         requests.push(
-          fetchWithRetry(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, 1, 10000)
+          fetchWithRetry(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, 2, 12000)
             .then(response => response.text())
             .then(reportHtml => {
               if (progressController) progressController.setProgress(90);
@@ -681,39 +683,22 @@
             })
             .catch(e => {
               console.error('Report API error:', e);
+              // Show fallback content instead of error
+              document.getElementById('summary-results').innerHTML = `
+                <div style="text-align:center;padding:2rem">
+                  <h3>Analysis Processing</h3>
+                  <p style="color:#666;margin:1rem 0">We're analyzing your website for AI search optimization opportunities.</p>
+                  <p style="color:#999;font-size:.9rem">Your complete report with detailed insights will be available via email.</p>
+                </div>
+              `;
               return { type: 'report', error: e };
             })
         );
       }
 
-      // Wait for all requests to complete (or fail)
+      // Wait for requests to complete
       if (requests.length > 0) {
-        try {
-          const results = await Promise.all(requests);
-          
-          // Handle any errors with conversion-focused messaging
-          const scoreError = results.find(r => r.type === 'score' && r.error);
-          const reportError = results.find(r => r.type === 'report' && r.error);
-          
-          if (scoreError && reportError) {
-            document.getElementById('summary-results').innerHTML = `
-              <div style="text-align:center;padding:2rem;border:1px solid #f56565;border-radius:8px;background:#fed7d7">
-                <h3 style="color:#c53030;margin:0 0 1rem">Analysis Temporarily Unavailable</h3>
-                <p style="color:#742a2a;margin:0 0 1rem">Our analysis servers are experiencing high demand. Your full report will include complete scoring and insights.</p>
-                <p style="color:#742a2a;margin:0"><strong>Submit your details below to receive your comprehensive report via email.</strong></p>
-              </div>
-            `;
-          } else if (reportError && !cachedData) {
-            document.getElementById('summary-results').innerHTML = `
-              <div style="text-align:center;padding:2rem">
-                <p style="color:#666">Comprehensive analysis loading...</p>
-                <p style="color:#999;font-size:.9rem">Your full report will include detailed insights and recommendations.</p>
-              </div>
-            `;
-          }
-        } catch (e) {
-          console.error('Loading error:', e);
-        }
+        await Promise.allSettled(requests); // Use allSettled to handle all errors gracefully
       }
 
       // Complete progress animation

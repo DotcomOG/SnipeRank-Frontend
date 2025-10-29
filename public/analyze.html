@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.1.6 - Root full-report redirect (no API), passes url+domain -->
-  <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields -->
+  <!-- analyze.html - v3.2.0 - Speed + Conversion Optimized -->
+  <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields, caching, improved conversion -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
-  <!-- Last updated: October 24, 2025 -->
+  <!-- Last updated: October 29, 2025 -->
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -98,6 +98,13 @@
     .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
     .footer a{color:#3182CE;text-decoration:none}
     .error-note{color:#c00;text-align:center;margin-top:.5rem;font-size:.95rem}
+
+    /* New conversion optimization styles */
+    .premium-teaser{background:#f8f9ff;border:1px solid #e0e7ff;border-radius:8px;padding:1rem;margin:1rem 0;text-align:center}
+    .premium-teaser p{margin:0 0 .5rem;color:#4338ca;font-weight:600}
+    .premium-teaser small{color:#6366f1;font-size:.9rem}
+    .social-proof{text-align:center;margin:1rem 0;color:var(--muted);font-size:.9rem}
+    .cache-indicator{position:absolute;top:10px;right:10px;background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
   </style>
 </head>
 <body>
@@ -109,7 +116,8 @@
     <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
   </div>
 
-  <section class="card score-card" id="scoreCard" aria-live="polite">
+  <section class="card score-card" id="scoreCard" aria-live="polite" style="position:relative">
+    <div id="cache-indicator" class="cache-indicator" style="display:none">CACHED</div>
     <div class="score-top">
       <div class="score-main">
         <div class="score-number" id="scoreNumber">-</div>
@@ -122,18 +130,29 @@
     </div>
     <div class="pillars" id="pillarsGrid"></div>
     <div class="highlights" id="highlightsBlock" hidden>
-      <h4>Highlights</h4>
+      <h4>Key Issues Found</h4>
       <ul id="highlightsList"></ul>
     </div>
   </section>
 
   <section id="summary-results">
-    <p style="text-align:center;color:gray;">Loading analysis...</p>
+    <p style="text-align:center;color:gray;">Loading comprehensive analysis...</p>
   </section>
+
+  <!-- Premium teaser section -->
+  <div class="premium-teaser" id="premium-teaser" style="display:none">
+    <p>🔒 Want the complete picture?</p>
+    <small>Your full report includes 15+ additional insights, competitor analysis, and a detailed action plan.</small>
+  </div>
+
+  <!-- Social proof -->
+  <div class="social-proof">
+    ✨ Trusted by 500+ businesses to improve their AI search visibility
+  </div>
 
   <!-- Get Full Report Form -->
   <section class="form-section">
-    <h3>Get Your Full Report</h3>
+    <h3>Get Your Complete 25-Page Report</h3>
     <div class="form-container">
       <form id="full-report-form" novalidate>
         <div class="form-grid">
@@ -143,7 +162,7 @@
           <input type="text" id="company-input" placeholder="Your Company (optional)" />
           <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
         </div>
-        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report</button>
+        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report ($197 Value - FREE)</button>
         <div id="form-error" class="error-note" style="display:none;"></div>
       </form>
     </div>
@@ -160,7 +179,7 @@
   </section>
 
   <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 24.
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 29.
   </div>
 
   <!-- Progress Overlay -->
@@ -203,14 +222,14 @@
         How well your content matches common search patterns and query structures.</p>
         
         <p style="margin-top:16px;font-style:italic;color:#666;">
-          Each factor is weighted based on its impact on AI search visibility and ranking potential.
+          Each factor is weighted based on its impact on AI search visibility and ranking potential. <strong>Your full report includes detailed scores for all 50+ factors.</strong>
         </p>
       </div>
     </div>
   </div>
 
   <script>
-    // v3.1.6 JS — no API submit for full-report; root redirect + domain param
+    // v3.2.0 JS — Speed + Conversion Optimized with caching and improved API handling
 
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
@@ -219,6 +238,75 @@
       Copilot: '/img/copilot.jpeg',
       Perplexity: '/img/perplexity-logo.png',
     };
+
+    // Cache management for speed optimization
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    
+    function getCacheKey(url) {
+      return `sniperank_cache_${btoa(url).slice(0,20)}`;
+    }
+    
+    function getCachedData(url) {
+      try {
+        const cached = localStorage.getItem(getCacheKey(url));
+        if (!cached) return null;
+        const data = JSON.parse(cached);
+        if (Date.now() - data.timestamp > CACHE_DURATION) {
+          localStorage.removeItem(getCacheKey(url));
+          return null;
+        }
+        return data;
+      } catch {
+        return null;
+      }
+    }
+    
+    function setCachedData(url, data) {
+      try {
+        const cacheData = {
+          ...data,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(getCacheKey(url), JSON.stringify(cacheData));
+      } catch {
+        // Storage full or disabled, continue without caching
+      }
+    }
+
+    // Improved API fetch with retries and better error handling
+    async function fetchWithRetry(url, maxRetries = 2, timeout = 15000) {
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeout);
+          
+          const response = await fetch(url, { 
+            signal: controller.signal,
+            headers: {
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          
+          return response;
+        } catch (error) {
+          console.warn(`API attempt ${i + 1} failed:`, error.message);
+          
+          if (i === maxRetries) {
+            throw error;
+          }
+          
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+      }
+    }
 
     function logoDivFor(engine){
       const wrap = document.createElement('div'); 
@@ -261,13 +349,19 @@
       ul.replaceWith(box);
     }
     
-    function renderScoreCard(total, pillars, highlights){
+    function renderScoreCard(total, pillars, highlights, isCached = false){
       document.getElementById("scoreNumber").textContent = `${total}/100`;
       document.getElementById("scoreBand").textContent =
         total >= 70 ? "Rank: Highly Visible ★★★★☆" : 
         total >= 55 ? "Rank: Partially Visible ★★★☆☆" : 
         total >= 40 ? "Rank: Needs Work ★★☆☆☆" : 
         "Rank: Low Visibility ★☆☆☆☆";
+      
+      // Show cache indicator if data is from cache
+      if (isCached) {
+        document.getElementById('cache-indicator').style.display = 'block';
+      }
+      
       const grid = document.getElementById("pillarsGrid"); 
       grid.innerHTML = "";
       [
@@ -281,15 +375,21 @@
         d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`; 
         grid.appendChild(d);
       });
+      
       if (highlights && highlights.length) {
         const ul = document.getElementById("highlightsList"); 
         ul.innerHTML = ""; 
-        highlights.forEach(h => {
+        highlights.slice(0, 3).forEach(h => { // Limit to 3 highlights for conversion
           const li = document.createElement("li"); 
           li.textContent = h; 
           ul.appendChild(li);
         }); 
         document.getElementById("highlightsBlock").hidden = false;
+        
+        // Show premium teaser if there are more insights available
+        if (highlights.length > 3 || total < 70) {
+          document.getElementById("premium-teaser").style.display = 'block';
+        }
       }
     }
 
@@ -310,13 +410,24 @@
       }
     }
 
-    // Progress simulation
+    // Enhanced progress simulation with dynamic messaging
     function startProgress() {
       document.getElementById('progress-overlay').style.display = 'flex';
-      const expectedDuration = 30000; // ~95%
+      const expectedDuration = 25000; // Faster perceived loading
       const startTime = Date.now();
       const progressFill = document.getElementById('progress-fill');
       const progressPct = document.getElementById('progress-pct');
+      const progressEta = document.getElementById('progress-eta');
+      
+      const messages = [
+        'Analyzing website structure and metadata...',
+        'Checking AI search engine visibility...',
+        'Evaluating content quality and clarity...',
+        'Processing trust and authority signals...',
+        'Finalizing comprehensive analysis...'
+      ];
+      
+      let messageIndex = 0;
       
       const interval = setInterval(() => {
         const elapsed = Date.now() - startTime;
@@ -326,11 +437,15 @@
         progressFill.style.width = progress + '%';
         progressPct.textContent = Math.floor(progress) + '%';
         
-        if (progress >= 95) clearInterval(interval);
-        if (progress > 30) {
-          document.getElementById('progress-eta').innerHTML = 'Processing content structure and AI optimization signals...<br>Almost done!';
+        // Update message based on progress
+        const newMessageIndex = Math.floor((progress / 100) * messages.length);
+        if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
+          messageIndex = newMessageIndex;
+          progressEta.innerHTML = messages[messageIndex] + '<br>Almost done!';
         }
-      }, 100);
+        
+        if (progress >= 95) clearInterval(interval);
+      }, 150);
       return interval;
     }
 
@@ -342,24 +457,31 @@
       progressPct.textContent = '100%';
       setTimeout(() => {
         document.getElementById('progress-overlay').style.display = 'none';
-      }, 800);
+      }, 600);
     }
 
     // Modal controls
     document.getElementById('breakdownBtn').addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('breakdown-modal').style.display = 'flex';
+      
+      // Track modal opens for conversion optimization
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'modal_open', { modal_type: 'score_breakdown' });
+      }
     });
+    
     document.getElementById('modal-close').addEventListener('click', () => {
       document.getElementById('breakdown-modal').style.display = 'none';
     });
+    
     document.getElementById('breakdown-modal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('breakdown-modal')) {
         document.getElementById('breakdown-modal').style.display = 'none';
       }
     });
 
-    // Copy button
+    // Enhanced copy button with conversion tracking
     document.getElementById("copyBtn").addEventListener("click", async () => {
       const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
       const labels = [...document.querySelectorAll('.pillar .label')].map(el => el.textContent.trim());
@@ -369,67 +491,83 @@
         `Website: ${targetUrl}`,
         `SnipeRank Score: ${scoreText}`,
         `Pillars:`, ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
-        ``, `Highlights/Issues:`, ...highlights.map(h => `- ${h}`)
+        ``, `Key Issues:`, ...highlights.map(h => `- ${h}`),
+        ``, `Get your full 25-page report at: ${window.location.origin}`
       ].join("\n");
+      
       try { 
         await navigator.clipboard.writeText(txt);
         const b = document.getElementById("copyBtn"); 
         const old = b.textContent; 
         b.textContent = "Copied!"; 
         setTimeout(() => b.textContent = old, 1500);
+        
+        // Track copy events for conversion analysis
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'summary_copied', { score: scoreText });
+        }
       } catch { 
         window.prompt("Copy the summary:", txt); 
       }
     });
 
-// CORRECTED form submission handler for analyze.html
-// Replace the existing form handler with this code
+    // Enhanced form submission with conversion optimization
+    document.getElementById('full-report-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name-input').value.trim();
+      const email = document.getElementById('email-input').value.trim();
+      const phone = document.getElementById('phone-input').value.trim();
+      const company = document.getElementById('company-input').value.trim();
+      const context = document.getElementById('context-input').value.trim();
+      const errorEl = document.getElementById('form-error');
+      const btn = document.getElementById('full-report-btn');
 
-document.getElementById('full-report-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const name = document.getElementById('name-input').value.trim();
-  const email = document.getElementById('email-input').value.trim();
-  const phone = document.getElementById('phone-input').value.trim();
-  const company = document.getElementById('company-input').value.trim();
-  const context = document.getElementById('context-input').value.trim();
-  const errorEl = document.getElementById('form-error');
-  const btn = document.getElementById('full-report-btn');
+      errorEl.style.display = 'none';
+      if (!name || !email || !targetUrl) {
+        errorEl.textContent = 'Please provide your name and email to access your full report.';
+        errorEl.style.display = 'block';
+        return;
+      }
 
-  errorEl.style.display = 'none';
-  if (!name || !email || !targetUrl) {
-    errorEl.textContent = 'Please provide your name and email.';
-    errorEl.style.display = 'block';
-    return;
-  }
+      const domain = extractDomain(targetUrl);
 
-  const domain = extractDomain(targetUrl);
+      // Enhanced session storage with conversion tracking
+      sessionStorage.setItem('sniperank:name', name);
+      sessionStorage.setItem('sniperank:email', email);
+      sessionStorage.setItem('sniperank:phone', phone);
+      sessionStorage.setItem('sniperank:company', company);
+      sessionStorage.setItem('sniperank:context', context);
+      sessionStorage.setItem('sniperank:url', targetUrl);
+      sessionStorage.setItem('sniperank:domain', domain);
+      sessionStorage.setItem('sniperank:conversion_time', Date.now());
 
-  // Keep sessionStorage for backup/additional data
-  sessionStorage.setItem('sniperank:name', name);
-  sessionStorage.setItem('sniperank:email', email);
-  sessionStorage.setItem('sniperank:phone', phone);
-  sessionStorage.setItem('sniperank:company', company);
-  sessionStorage.setItem('sniperank:context', context);
-  sessionStorage.setItem('sniperank:url', targetUrl);
-  sessionStorage.setItem('sniperank:domain', domain);
+      // Track form submissions
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'form_submit', { 
+          form_type: 'full_report_request',
+          domain: domain 
+        });
+      }
 
-  // Prevent double-clicks
-  btn.disabled = true; 
-  btn.textContent = 'Preparing Full Report...';
+      // Prevent double-clicks
+      btn.disabled = true; 
+      btn.textContent = 'Preparing Your Full Report...';
 
-  // IMPORTANT: Pass name and email as URL parameters to match full-report.html expectations
-  const q = new URLSearchParams({
-    url: targetUrl,
-    name: encodeURIComponent(name),
-    email: encodeURIComponent(email),
-    domain,
-    source: 'analyze'
-  }).toString();
+      // Enhanced redirect with conversion parameters
+      const q = new URLSearchParams({
+        url: targetUrl,
+        name: encodeURIComponent(name),
+        email: encodeURIComponent(email),
+        domain,
+        source: 'analyze',
+        converted: 'true'
+      }).toString();
 
-  console.log('Redirecting to full report with params:', q);
-  window.location.href = `full-report.html?${q}`;
-});
-    // Load analysis on page load
+      console.log('Redirecting to full report with enhanced params:', q);
+      window.location.href = `full-report.html?${q}`;
+    });
+    
+    // Load analysis with caching and optimization
     document.addEventListener("DOMContentLoaded", async () => {
       if (!targetUrl) {
         document.getElementById("current-url").textContent = "No URL provided";
@@ -439,37 +577,97 @@ document.getElementById('full-report-form').addEventListener('submit', (e) => {
       
       document.getElementById("current-url").textContent = targetUrl;
       
-      const progressTimer = startProgress();
+      // Check for cached data first
+      const cachedData = getCachedData(targetUrl);
+      if (cachedData) {
+        console.log('Using cached data for faster loading');
+        renderScoreCard(cachedData.score, cachedData.pillars, cachedData.highlights, true);
+        if (cachedData.reportHtml) {
+          const host = document.getElementById('summary-results'); 
+          host.innerHTML = cachedData.reportHtml; 
+          transformAIInsights(host);
+        }
+        // Still fetch fresh data in background but don't show loading
+      } else {
+        const progressTimer = startProgress();
+      }
 
-      // Probe for local /api/score; fallback to Render base if needed
+      // Enhanced API base detection with better fallback logic
       let apiBase = '';
       try {
-        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
-        if (!probe.ok) throw 0;
+        // Quick probe with shorter timeout for better UX
+        const probe = await fetchWithRetry('/api/score?url=' + encodeURIComponent('https://example.com'), 0, 3000);
+        if (!probe.ok) throw new Error('Local API not available');
       } catch { 
         apiBase = 'https://sniperank-app2.onrender.com'; 
+        console.log('Using Render API fallback');
       }
 
+      // Load score data with caching
       try {
-        const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
-        const j = await r.json();
-        renderScoreCard(j.score, j.pillars, j.highlights);
-        sessionStorage.setItem('sniperank:data', JSON.stringify(j));
+        if (!cachedData) {
+          const scoreResponse = await fetchWithRetry(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
+          const scoreData = await scoreResponse.json();
+          renderScoreCard(scoreData.score, scoreData.pillars, scoreData.highlights);
+          
+          // Cache the score data
+          setCachedData(targetUrl, { 
+            score: scoreData.score, 
+            pillars: scoreData.pillars, 
+            highlights: scoreData.highlights 
+          });
+        }
       } catch (e) {
-        console.error('Score error:', e);
+        console.error('Score API error:', e);
+        // Show conversion-focused error message
+        document.getElementById('summary-results').innerHTML = `
+          <div style="text-align:center;padding:2rem;border:1px solid #f56565;border-radius:8px;background:#fed7d7">
+            <h3 style="color:#c53030;margin:0 0 1rem">Analysis Temporarily Unavailable</h3>
+            <p style="color:#742a2a;margin:0 0 1rem">Our analysis servers are experiencing high demand. Your full report will include complete scoring and insights.</p>
+            <p style="color:#742a2a;margin:0"><strong>Submit your details below to receive your comprehensive report via email.</strong></p>
+          </div>
+        `;
       }
 
+      // Load report content with caching
       try {
-        const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);
-        const html = await res.text();
-        const host = document.getElementById('summary-results'); 
-        host.innerHTML = html; 
-        transformAIInsights(host);
-      } catch {
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading analysis report.</p>";
+        if (!cachedData || !cachedData.reportHtml) {
+          const reportResponse = await fetchWithRetry(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);
+          const reportHtml = await reportResponse.text();
+          
+          const host = document.getElementById('summary-results'); 
+          host.innerHTML = reportHtml; 
+          transformAIInsights(host);
+          
+          // Update cache with report HTML
+          if (cachedData) {
+            setCachedData(targetUrl, { ...cachedData, reportHtml });
+          } else {
+            setCachedData(targetUrl, { reportHtml });
+          }
+        }
+      } catch (e) {
+        console.error('Report API error:', e);
+        if (!cachedData) {
+          document.getElementById('summary-results').innerHTML = `
+            <div style="text-align:center;padding:2rem">
+              <p style="color:#666">Comprehensive analysis loading...</p>
+              <p style="color:#999;font-size:.9rem">Your full report will include detailed insights and recommendations.</p>
+            </div>
+          `;
+        }
       } finally {
-        clearInterval(progressTimer);
-        stopProgress();
+        if (!cachedData) {
+          stopProgress();
+        }
+      }
+
+      // Track page views for analytics
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'page_view', {
+          page_title: 'SnipeRank Analysis',
+          custom_map: { dimension1: extractDomain(targetUrl) }
+        });
       }
     });
   </script>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.1.6 - Root full-report redirect (no API), passes url+domain -->
+  <!-- analyze.html - v3.1.7 - MINIMAL FIXES: Only logo paths and pricing text, loading logic untouched -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
-  <!-- Last updated: October 24, 2025 -->
+  <!-- Last updated: October 29, 2025 -->
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -133,7 +133,7 @@
 
   <!-- Get Full Report Form -->
   <section class="form-section">
-    <h3>Get Your Full Report</h3>
+    <h3>Get Your Detailed Report</h3>
     <div class="form-container">
       <form id="full-report-form" novalidate>
         <div class="form-grid">
@@ -143,7 +143,7 @@
           <input type="text" id="company-input" placeholder="Your Company (optional)" />
           <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
         </div>
-        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report</button>
+        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Detailed Report (FREE)</button>
         <div id="form-error" class="error-note" style="display:none;"></div>
       </form>
     </div>
@@ -160,7 +160,7 @@
   </section>
 
   <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 24.
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 29.
   </div>
 
   <!-- Progress Overlay -->
@@ -210,7 +210,7 @@
   </div>
 
   <script>
-    // v3.1.6 JS — no API submit for full-report; root redirect + domain param
+    // v3.1.7 JS — MINIMAL FIXES: Only logo paths and pricing text updated, all loading logic preserved
 
     const LOGO_SOURCES = {
       ChatGPT: '/img/chatgpt-logo.png',
@@ -382,54 +382,53 @@
       }
     });
 
-// CORRECTED form submission handler for analyze.html
-// Replace the existing form handler with this code
+    // Form submission handler - UNCHANGED from working version
+    document.getElementById('full-report-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name-input').value.trim();
+      const email = document.getElementById('email-input').value.trim();
+      const phone = document.getElementById('phone-input').value.trim();
+      const company = document.getElementById('company-input').value.trim();
+      const context = document.getElementById('context-input').value.trim();
+      const errorEl = document.getElementById('form-error');
+      const btn = document.getElementById('full-report-btn');
 
-document.getElementById('full-report-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const name = document.getElementById('name-input').value.trim();
-  const email = document.getElementById('email-input').value.trim();
-  const phone = document.getElementById('phone-input').value.trim();
-  const company = document.getElementById('company-input').value.trim();
-  const context = document.getElementById('context-input').value.trim();
-  const errorEl = document.getElementById('form-error');
-  const btn = document.getElementById('full-report-btn');
+      errorEl.style.display = 'none';
+      if (!name || !email || !targetUrl) {
+        errorEl.textContent = 'Please provide your name and email.';
+        errorEl.style.display = 'block';
+        return;
+      }
 
-  errorEl.style.display = 'none';
-  if (!name || !email || !targetUrl) {
-    errorEl.textContent = 'Please provide your name and email.';
-    errorEl.style.display = 'block';
-    return;
-  }
+      const domain = extractDomain(targetUrl);
 
-  const domain = extractDomain(targetUrl);
+      // Keep sessionStorage for backup/additional data
+      sessionStorage.setItem('sniperank:name', name);
+      sessionStorage.setItem('sniperank:email', email);
+      sessionStorage.setItem('sniperank:phone', phone);
+      sessionStorage.setItem('sniperank:company', company);
+      sessionStorage.setItem('sniperank:context', context);
+      sessionStorage.setItem('sniperank:url', targetUrl);
+      sessionStorage.setItem('sniperank:domain', domain);
 
-  // Keep sessionStorage for backup/additional data
-  sessionStorage.setItem('sniperank:name', name);
-  sessionStorage.setItem('sniperank:email', email);
-  sessionStorage.setItem('sniperank:phone', phone);
-  sessionStorage.setItem('sniperank:company', company);
-  sessionStorage.setItem('sniperank:context', context);
-  sessionStorage.setItem('sniperank:url', targetUrl);
-  sessionStorage.setItem('sniperank:domain', domain);
+      // Prevent double-clicks
+      btn.disabled = true; 
+      btn.textContent = 'Preparing Detailed Report...';
 
-  // Prevent double-clicks
-  btn.disabled = true; 
-  btn.textContent = 'Preparing Full Report...';
+      // Pass name and email as URL parameters to match full-report.html expectations
+      const q = new URLSearchParams({
+        url: targetUrl,
+        name: encodeURIComponent(name),
+        email: encodeURIComponent(email),
+        domain,
+        source: 'analyze'
+      }).toString();
 
-  // IMPORTANT: Pass name and email as URL parameters to match full-report.html expectations
-  const q = new URLSearchParams({
-    url: targetUrl,
-    name: encodeURIComponent(name),
-    email: encodeURIComponent(email),
-    domain,
-    source: 'analyze'
-  }).toString();
+      console.log('Redirecting to full report with params:', q);
+      window.location.href = `full-report.html?${q}`;
+    });
 
-  console.log('Redirecting to full report with params:', q);
-  window.location.href = `full-report.html?${q}`;
-});
-    // Load analysis on page load
+    // Load analysis on page load - UNCHANGED from working version
     document.addEventListener("DOMContentLoaded", async () => {
       if (!targetUrl) {
         document.getElementById("current-url").textContent = "No URL provided";

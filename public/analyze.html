@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.4.0 - CRITICAL FIX: Robust API handling, graceful degradation, no more error messages -->
+  <!-- analyze.html - v3.5.0 - FIXED: Back to simple working approach, no premature fallbacks -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields, caching, improved conversion -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
   <!-- Last updated: October 29, 2025 -->
@@ -152,7 +152,7 @@
   <!-- Premium teaser section -->
   <div class="premium-teaser" id="premium-teaser" style="display:none">
     <p>🔒 Want the complete picture?</p>
-    <small>Your full report includes additional insights, competitor analysis, and a detailed action plan.</small>
+    <small>Your detailed report includes full 50-page website crawl, step-by-step action plan, and advanced AI visibility insights.</small>
   </div>
 
   <!-- Social proof -->
@@ -162,7 +162,7 @@
 
   <!-- Get Full Report Form -->
   <section class="form-section">
-    <h3>Get Your Complete Report</h3>
+    <h3>Get Your Detailed Report</h3>
     <div class="form-container">
       <form id="full-report-form" novalidate>
         <div class="form-grid">
@@ -172,7 +172,7 @@
           <input type="text" id="company-input" placeholder="Your Company (optional)" />
           <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
         </div>
-        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report</button>
+        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Detailed Report (FREE)</button>
         <div id="form-error" class="error-note" style="display:none;"></div>
       </form>
     </div>
@@ -516,7 +516,7 @@
         `SnipeRank Score: ${scoreText}`,
         `Pillars:`, ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
         ``, `Key Issues:`, ...highlights.map(h => `- ${h}`),
-        ``, `Get your full report at: ${window.location.origin}`
+        ``, `Get your detailed report at: ${window.location.origin}`
       ].join("\n");
       
       try { 
@@ -607,107 +607,41 @@
         img.src = src;
       });
       
-      // Check for cached data first - if exists, show immediately without progress
-      const cachedData = getCachedData(targetUrl);
-      let progressController = null;
-      
-      if (cachedData) {
-        console.log('Using cached data for instant loading');
-        renderScoreCard(cachedData.score, cachedData.pillars, cachedData.highlights, true);
-        if (cachedData.reportHtml) {
-          const host = document.getElementById('summary-results'); 
-          host.innerHTML = cachedData.reportHtml; 
-          transformAIInsights(host);
-        }
-        // Skip progress bar for cached content
-      } else {
-        // Only show progress for fresh requests
+      if (!cachedData) {
         progressController = startProgress();
       }
 
-      // Simplified API base detection - always try local first, fallback to Render
+      // Probe for local /api/score; fallback to Render base if needed
       let apiBase = '';
-      
-      // Quick local check - if it fails, use Render immediately
       try {
-        await fetch('/api/health', { method: 'HEAD', signal: AbortSignal.timeout(500) });
-        apiBase = ''; // Local API available
-        console.log('Using local API');
+        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
+        if (!probe.ok) throw 0;
       } catch { 
         apiBase = 'https://sniperank-app2.onrender.com'; 
-        console.log('Using Render API');
       }
 
-      // PARALLEL API CALLS - Always try to load something, even with errors
-      const requests = [];
-      
-      // Always try to fetch score data (unless cached)
-      if (!cachedData || !cachedData.score) {
-        requests.push(
-          fetchWithRetry(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, 2, 10000)
-            .then(response => response.json())
-            .then(scoreData => {
-              if (progressController) progressController.setProgress(50);
-              renderScoreCard(scoreData.score, scoreData.pillars, scoreData.highlights);
-              setCachedData(targetUrl, { 
-                score: scoreData.score, 
-                pillars: scoreData.pillars, 
-                highlights: scoreData.highlights 
-              });
-              return { type: 'score', data: scoreData };
-            })
-            .catch(e => {
-              console.error('Score API error:', e);
-              // Show default score card instead of failing
-              renderScoreCard(0, {access: 0, trust: 0, clarity: 0, alignment: 0}, ['Analysis temporarily unavailable']);
-              return { type: 'score', error: e };
-            })
-        );
-      }
-      
-      // Always try to fetch report (unless cached)  
-      if (!cachedData || !cachedData.reportHtml) {
-        requests.push(
-          fetchWithRetry(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, 2, 12000)
-            .then(response => response.text())
-            .then(reportHtml => {
-              if (progressController) progressController.setProgress(90);
-              const host = document.getElementById('summary-results'); 
-              host.innerHTML = reportHtml; 
-              transformAIInsights(host);
-              
-              // Update cache with report HTML
-              const existing = getCachedData(targetUrl) || {};
-              setCachedData(targetUrl, { ...existing, reportHtml });
-              return { type: 'report', data: reportHtml };
-            })
-            .catch(e => {
-              console.error('Report API error:', e);
-              // Show fallback content instead of error
-              document.getElementById('summary-results').innerHTML = `
-                <div style="text-align:center;padding:2rem">
-                  <h3>Analysis Processing</h3>
-                  <p style="color:#666;margin:1rem 0">We're analyzing your website for AI search optimization opportunities.</p>
-                  <p style="color:#999;font-size:.9rem">Your complete report with detailed insights will be available via email.</p>
-                </div>
-              `;
-              return { type: 'report', error: e };
-            })
-        );
+      try {
+        const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
+        const j = await r.json();
+        renderScoreCard(j.score, j.pillars, j.highlights);
+        sessionStorage.setItem('sniperank:data', JSON.stringify(j));
+      } catch (e) {
+        console.error('Score error:', e);
       }
 
-      // Wait for requests to complete
-      if (requests.length > 0) {
-        await Promise.allSettled(requests); // Use allSettled to handle all errors gracefully
-      }
-
-      // Complete progress animation
-      if (progressController) {
-        progressController.setProgress(100);
-        setTimeout(() => {
+      try {
+        const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);
+        const html = await res.text();
+        const host = document.getElementById('summary-results'); 
+        host.innerHTML = html; 
+        transformAIInsights(host);
+      } catch {
+        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading analysis report.</p>";
+      } finally {
+        if (progressController) {
           progressController.complete();
           stopProgress();
-        }, 300);
+        }
       }
 
       // Track page views for analytics

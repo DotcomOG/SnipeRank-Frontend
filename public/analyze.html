@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.2.0 - Speed + Conversion Optimized -->
+  <!-- analyze.html - v3.2.1 - Speed + Conversion Optimized (Logo & Content Fixes) -->
   <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields, caching, improved conversion -->
   <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
   <!-- Last updated: October 29, 2025 -->
@@ -142,7 +142,7 @@
   <!-- Premium teaser section -->
   <div class="premium-teaser" id="premium-teaser" style="display:none">
     <p>🔒 Want the complete picture?</p>
-    <small>Your full report includes 15+ additional insights, competitor analysis, and a detailed action plan.</small>
+    <small>Your full report includes additional insights, competitor analysis, and a detailed action plan.</small>
   </div>
 
   <!-- Social proof -->
@@ -152,7 +152,7 @@
 
   <!-- Get Full Report Form -->
   <section class="form-section">
-    <h3>Get Your Complete 25-Page Report</h3>
+    <h3>Get Your Complete Report</h3>
     <div class="form-container">
       <form id="full-report-form" novalidate>
         <div class="form-grid">
@@ -162,7 +162,7 @@
           <input type="text" id="company-input" placeholder="Your Company (optional)" />
           <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
         </div>
-        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report ($197 Value - FREE)</button>
+        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report</button>
         <div id="form-error" class="error-note" style="display:none;"></div>
       </form>
     </div>
@@ -222,21 +222,21 @@
         How well your content matches common search patterns and query structures.</p>
         
         <p style="margin-top:16px;font-style:italic;color:#666;">
-          Each factor is weighted based on its impact on AI search visibility and ranking potential. <strong>Your full report includes detailed scores for all 50+ factors.</strong>
+          Each factor is weighted based on its impact on AI search visibility and ranking potential.
         </p>
       </div>
     </div>
   </div>
 
   <script>
-    // v3.2.0 JS — Speed + Conversion Optimized with caching and improved API handling
+    // v3.2.1 JS — Speed + Conversion Optimized with caching, improved API handling, and logo fixes
 
     const LOGO_SOURCES = {
-      ChatGPT: '/img/chatgpt-logo.png',
+      ChatGPT: '/img/chatgpt.jpeg',
       Claude: '/img/claude.jpeg',
       Gemini: '/img/gemini.jpeg',
       Copilot: '/img/copilot.jpeg',
-      Perplexity: '/img/perplexity-logo.png',
+      Perplexity: '/img/perplexity.jpeg',
     };
 
     // Cache management for speed optimization
@@ -492,7 +492,7 @@
         `SnipeRank Score: ${scoreText}`,
         `Pillars:`, ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
         ``, `Key Issues:`, ...highlights.map(h => `- ${h}`),
-        ``, `Get your full 25-page report at: ${window.location.origin}`
+        ``, `Get your full report at: ${window.location.origin}`
       ].join("\n");
       
       try { 

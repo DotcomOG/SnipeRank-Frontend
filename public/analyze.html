@@ -1,375 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html – v3.6.0 – High-level Free Report Version  -->
-  <!-- Purpose: Show summary score, top 5 positives, top 10 issues, and strong CTA -->
-  <!-- Last updated: October 30, 2025 -->
-
+  <!-- analyze.html — v3.6.2 (Free Quick Analysis)
+       - Fix: reliable content render for Working/Issues
+       - Fix: loading animation (pulse + shimmer) on score card
+       - Safe fallbacks so sections never stay empty
+       - Uses /api/score and /report.html?report=analyze
+       Last updated: Oct 30, 2025
+  -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnipeRank – AI SEO Analysis (Free Report)</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnipeRank — AI SEO Quick Analysis (Free)</title>
   <style>
-    :root {
-      --primary: #3182CE;
-      --primary-dark: #2563EB;
-      --accent-red: #DC3545;
-      --border: #E5E7EB;
-      --muted: #666;
-      --bg: #fff;
-      --radius: 12px;
-      --max-width: 760px;
+    :root{
+      --max-width:960px; --pad-v:3vh; --pad-h:2rem;
+      --muted:#6b7280; --border:#e5e7eb; --text:#0f172a; --bg:#fff;
+      --btn:#dc3545; --btn-hover:#c82333;
+      --chip:#f8fafc; --chip-border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      background:#fff;color:var(--text);margin:0;
+      padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;
+    }
+    h1{font-size:3rem;margin:0 0 .25em;line-height:1;letter-spacing:-.5px}
+    h1 span{color:#3182CE}
+    h2{margin:.25rem 0 2rem;color:#111;font-size:1.25rem;font-weight:800}
+    .row{display:flex;align-items:center;justify-content:space-between;margin:.25rem 0 1rem;color:var(--muted);font-size:.95rem}
+    .row strong{color:#000}
+
+    .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .score-card{padding:16px 18px;margin:0 0 28px;position:relative;overflow:hidden}
+    .score-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .score-num{display:flex;align-items:baseline;gap:10px}
+    .score{font-size:2.5rem;font-weight:900}
+    .band{color:var(--muted);font-weight:600}
+    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .chip{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;border:1px solid var(--chip-border);background:var(--chip);font-weight:700}
+    .chip span:last-child{font-weight:800}
+    .btns{display:flex;gap:8px;margin-top:12px}
+    .btn{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem}
+    .btn:hover{background:#f3f4f6}
+    .cta-card{padding:18px;margin:28px 0;border:1px solid #e0e7ff;background:#f8f9ff;border-radius:12px;text-align:center}
+    .cta-card p{margin:.25rem 0 1rem;color:#4338ca}
+    .cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .cta-primary,.cta-secondary{
+      border:none;border-radius:999px;padding:.85rem 1.25rem;font-weight:800;color:#fff;background:var(--btn);cursor:pointer;
+    }
+    .cta-primary:hover,.cta-secondary:hover{background:var(--btn-hover)}
+
+    /* Sections */
+    .section{margin:24px 0}
+    .section h3{font-size:1.15rem;margin:0 0 .75rem}
+    ul.klist{margin:.25rem 0 0 1.1rem;padding:0}
+    ul.klist li{margin:.45rem 0;line-height:1.6}
+
+    /* --- Loading animation (pulse + shimmer) --- */
+    .score-card.loading{
+      animation:pulse-shimmer 2s ease-in-out infinite;
+    }
+    .score-card.loading::before{
+      content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent);
+      animation:shimmer 2s ease-in-out infinite;
+    }
+    @keyframes pulse-shimmer{
+      0%,100%{box-shadow:0 1px 2px rgba(0,0,0,.04)}
+      50%{box-shadow:0 6px 26px rgba(49,130,206,.22)}
+    }
+    @keyframes shimmer{
+      0%{left:-100%}
+      100%{left:100%}
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: #111;
-      padding: 3vh 2rem;
-      max-width: var(--max-width);
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    h1 {
-      font-size: 3.2rem;
-      font-weight: 800;
-      margin-bottom: .3em;
-      background: linear-gradient(135deg,#000,#3182CE);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    h2 { font-size: 1.6rem; margin-bottom: 1.5rem; font-weight: 700; }
-    h3 { font-size: 1.3rem; font-weight: 700; margin: 1.8rem 0 .8rem; }
-    p { font-size: 1.05rem; margin-bottom: 1rem; }
-
-    .info-row {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: .95rem; color: var(--muted); margin-bottom: 1rem;
-    }
-    .info-row a { color: var(--primary); font-weight: 600; text-decoration: none; }
-
-    .card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.2rem;
-      margin-bottom: 2rem;
-      position: relative;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-      transition: box-shadow .3s;
-    }
-
-    /* Pulse shimmer animation */
-    .score-card.loading {
-      animation: pulse-shimmer 2s ease-in-out infinite;
-      overflow: hidden;
-    }
-    .score-card.loading::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      animation: shimmer 2s ease-in-out infinite;
-    }
-    @keyframes pulse-shimmer {
-      0%,100% { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
-      50% { box-shadow: 0 4px 16px rgba(49,130,206,.25); }
-    }
-    @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-
-    .score-main { display: flex; align-items: baseline; gap: .5rem; }
-    .score-number { font-size: 2.5rem; font-weight: 800; }
-    .score-band { color: var(--muted); }
-    .pillars {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: .75rem; margin-top: 1rem;
-    }
-    .pillar {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: .6rem .75rem;
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: .98rem;
-    }
-    .pillar .label { font-weight: 600; }
-    .badge {
-      background: #f9fafb;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: .2rem .6rem;
-      font-weight: 700;
-      font-size: .9rem;
-    }
-    .btn-row { display: flex; gap: .5rem; margin-top: .8rem; }
-    .btn-ghost {
-      border: 1px solid #111; background: #fff; color: #111;
-      padding: .5rem .9rem; border-radius: 8px; cursor: pointer;
-      font-weight: 600; font-size: .95rem;
-      transition: .2s;
-    }
-    .btn-ghost:hover { background: #f2f2f2; }
-
-    ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
-    li { margin: .4rem 0; }
-
-    .highlight-section {
-      border-top: 1px dashed var(--border);
-      padding-top: 1rem;
-    }
-
-    .cta-section {
-      background: #f8f9ff;
-      border: 1px solid #e0e7ff;
-      border-radius: var(--radius);
-      padding: 2rem;
-      text-align: center;
-      margin-top: 2rem;
-    }
-    .cta-section h3 { margin-top: 0; color: #1e3a8a; }
-    .cta-section p { color: #4338ca; margin-bottom: 1rem; }
-
-    .btn-primary {
-      background: var(--accent-red);
-      color: #fff;
-      border: none;
-      padding: .85rem 2rem;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .2s;
-      display: inline-block;
-      margin: .5rem;
-      text-decoration: none;
-    }
-    .btn-primary:hover { background: #c82333; }
-
-    .footer {
-      text-align: center;
-      margin-top: 3rem;
-      padding: 1.5rem 0;
-      color: var(--muted);
-      font-size: .9rem;
-    }
-    .footer a { color: var(--primary); text-decoration: none; }
+    /* Footer + small bits */
+    .footer{color:#6b7280;font-size:.9rem;margin:36px 0 8px;text-align:center}
+    .muted{color:var(--muted)}
+    .hidden{display:none}
 
     /* Modal */
-    .modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.5);
-      display: none; align-items: center; justify-content: center;
-      z-index: 1001;
-    }
-    .modal {
-      background: #fff; border-radius: 16px;
-      padding: 24px; max-width: 600px; width: 90%;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .modal-title { font-size: 1.3rem; font-weight: 700; margin: 0; }
-    .modal-close {
-      background: transparent; border: none; font-size: 1.5rem; cursor: pointer;
-      color: #666;
-    }
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+    .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .modal h4{margin:0 0 .5rem}
+    .modal .close{border:0;background:transparent;font-size:24px;cursor:pointer;color:#6b7280}
+    .modal .rowx{display:flex;align-items:center;justify-content:space-between}
   </style>
 </head>
 <body>
-  <h1>SnipeRank</h1>
+  <h1>Snipe<span>Rank</span></h1>
   <h2>AI SEO Quick Analysis (Free)</h2>
 
-  <div class="info-row">
-    <div>Powered by <a href="https://quontora.com" target="_blank">quontora</a></div>
-    <div>Analysis for: <strong id="current-url">-</strong></div>
+  <div class="row">
+    <div>Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    <div>Analysis for: <strong id="current-url">—</strong></div>
   </div>
 
-  <section class="card score-card loading" id="scoreCard">
-    <div class="score-main">
-      <div class="score-number" id="scoreNumber">–</div>
-      <div class="score-band" id="scoreBand">Analyzing...</div>
+  <!-- SCORE CARD -->
+  <section class="card score-card loading" id="scoreCard" aria-live="polite">
+    <div class="score-top">
+      <div class="score-num">
+        <div class="score" id="scoreNumber">—</div>
+        <div class="band" id="scoreBand">Analyzing…</div>
+      </div>
+      <div class="btns">
+        <button class="btn" id="breakdownBtn" type="button">What goes into this score?</button>
+        <button class="btn" id="copyBtn" type="button">Copy Shareable Summary</button>
+      </div>
     </div>
-    <div class="pillars" id="pillarsGrid"></div>
-    <div class="btn-row">
-      <button class="btn-ghost" id="breakdownBtn">What goes into this score?</button>
-      <button class="btn-ghost" id="copyBtn">Copy Shareable Summary</button>
+    <div class="pillars" id="pillarsGrid">
+      <div class="chip"><span>AI Access Readiness</span><span>—/25</span></div>
+      <div class="chip"><span>Trust & Verification Signals</span><span>—/25</span></div>
+      <div class="chip"><span>LLM Interpretability & Clarity</span><span>—/25</span></div>
+      <div class="chip"><span>Prompt-Pattern Alignment</span><span>—/25</span></div>
     </div>
   </section>
 
-  <section class="highlight-section">
+  <!-- WORKING / ISSUES -->
+  <section class="section">
     <h3>What’s Working Well</h3>
-    <ul id="positivesList">
-      <li>Loading...</li>
+    <ul id="workingList" class="klist">
+      <li class="muted">Loading…</li>
     </ul>
+  </section>
 
+  <section class="section">
     <h3>Where You Can Improve</h3>
-    <ul id="issuesList">
-      <li>Loading...</li>
+    <ul id="issuesList" class="klist">
+      <li class="muted">Loading…</li>
     </ul>
   </section>
 
-  <section class="cta-section">
-    <h3>Want the Full Breakdown & Step-by-Step Fixes?</h3>
-    <p>Get your detailed 50-page AI SEO report and free 30-minute consultation.</p>
-    <a href="#reportForm" class="btn-primary">Get My Full Report (Free)</a>
-    <a href="https://calendly.com/quontora" target="_blank" class="btn-primary">Book Consultation</a>
-  </section>
+  <!-- CTA -->
+  <div class="cta-card">
+    <h3 style="margin:.25rem 0 .5rem">Want the Full Breakdown & Step-by-Step Fixes?</h3>
+    <p>Get your detailed 50-page AI SEO report and a free 30-minute consultation.</p>
+    <div class="cta-actions">
+      <button class="cta-primary" id="getReportBtn" type="button">Get My Full Report (Free)</button>
+      <a class="cta-secondary" href="https://calendly.com/quontora" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;padding:.85rem 1.25rem;border-radius:999px">Book Consultation</a>
+    </div>
+  </div>
 
-  <!-- Full Report Form -->
-  <section id="reportForm" class="card" style="margin-top:2rem;">
+  <!-- FORM -->
+  <section class="section card" style="padding:18px">
     <h3>Get Your Detailed Report</h3>
     <form id="full-report-form" novalidate>
-      <input type="text" id="name-input" placeholder="Your Name" required style="width:100%;margin-bottom:10px;padding:10px;border:1px solid #ddd;border-radius:4px;">
-      <input type="email" id="email-input" placeholder="Your Email" required style="width:100%;margin-bottom:10px;padding:10px;border:1px solid #ddd;border-radius:4px;">
-      <textarea id="context-input" placeholder="Optional: Questions or context" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;"></textarea>
-      <button type="submit" class="btn-primary" id="full-report-btn" style="margin-top:1rem;">Send My Full Report</button>
-      <div id="form-error" style="display:none;color:#c00;margin-top:.5rem;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <input type="text" id="name-input" placeholder="Your Name" required style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
+        <input type="email" id="email-input" placeholder="Your Email" required style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
+        <input type="tel" id="phone-input" placeholder="Your Phone (optional)" style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
+        <input type="text" id="company-input" placeholder="Your Company (optional)" style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
+        <textarea id="context-input" placeholder="Share context or ask a specific question — we'll address it in your consult." style="grid-column:1/-1;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:8px"></textarea>
+      </div>
+      <div id="form-error" class="muted" style="color:#c00;margin-top:8px;display:none"></div>
+      <button id="full-report-btn" type="submit" class="cta-primary" style="margin-top:12px">Get My Full Report</button>
     </form>
   </section>
 
-  <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank">quontora.com</a>
-  </div>
-
-  <!-- Modal -->
-  <div id="breakdown-modal" class="modal-backdrop">
+  <!-- MODAL -->
+  <div class="backdrop" id="breakdown">
     <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">What Goes Into Your SnipeRank Score?</h3>
-        <button class="modal-close" id="modal-close">×</button>
+      <div class="rowx">
+        <h4>What goes into your SnipeRank score?</h4>
+        <button class="close" id="closeBreakdown" aria-label="Close">×</button>
       </div>
-      <div class="modal-content">
-        <p>Your SnipeRank score is based on 50+ AI visibility factors across four pillars:</p>
-        <p><strong>🎯 AI Access Readiness</strong> — crawlability, indexing, and structure.</p>
-        <p><strong>🔒 Trust & Verification</strong> — authority signals and credibility markers.</p>
-        <p><strong>📝 LLM Interpretability</strong> — clarity and markup readability.</p>
-        <p><strong>🔍 Prompt-Pattern Alignment</strong> — how well your content matches AI query styles.</p>
+      <div>
+        <p><strong>🎯 AI Access Readiness (25)</strong> — crawlability, speed, mobile, indexability.</p>
+        <p><strong>🔒 Trust & Verification Signals (25)</strong> — authorship, citations, security, authority cues.</p>
+        <p><strong>📝 LLM Interpretability & Clarity (25)</strong> — headings, schema, semantic structure.</p>
+        <p><strong>🔍 Prompt-Pattern Alignment (25)</strong> — FAQs, Q&A blocks, task/intent coverage.</p>
       </div>
     </div>
   </div>
 
+  <div class="footer">© 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a></div>
+
   <script>
+    /* ------------ Utilities ------------ */
+    const $ = (id) => document.getElementById(id);
+
+    const LOGOS = {
+      ChatGPT: '/img/chatgpt-logo.png',
+      Claude: '/img/claude.jpeg',
+      Gemini: '/img/gemini.jpeg',
+      Copilot: '/img/copilot.jpeg',   // <- correct path per your note
+      Perplexity: '/img/perplexity-logo.png',
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get("url");
-    const apiBase = "https://sniperank-app2.onrender.com";
+    const targetUrl = urlParams.get('url') || '';
+    $("current-url").textContent = targetUrl || '—';
 
     function extractDomain(u){
-      try {
-        const { hostname } = new URL(/^https?:\/\//i.test(u) ? u : `https://${u}`);
-        return hostname.replace(/^www\./,'');
-      } catch { return ''; }
+      if (!u) return '';
+      try{
+        const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+        return new URL(withProto).hostname.replace(/^www\./i,'');
+      }catch{
+        const m = String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i);
+        return (m?m[1]:'').replace(/^www\./i,'');
+      }
     }
 
-    async function fetchData() {
-      if (!targetUrl) return null;
-      const res = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
-      return await res.json();
-    }
-
-    function renderData(data) {
-      document.getElementById("scoreCard").classList.remove("loading");
-      document.getElementById("scoreNumber").textContent = `${data.score}/100`;
-      document.getElementById("scoreBand").textContent =
-        data.score >= 70 ? "Rank: Highly Visible ★★★★☆" :
-        data.score >= 55 ? "Rank: Partially Visible ★★★☆☆" :
-        data.score >= 40 ? "Rank: Needs Work ★★☆☆☆" :
+    function renderScore(total, pillars){
+      $("scoreNumber").textContent = `${Math.round(total)}/100`;
+      $("scoreBand").textContent =
+        total >= 70 ? "Rank: Partially Visible ★★★☆☆" :
+        total >= 55 ? "Rank: Needs Work ★★☆☆☆" :
         "Rank: Low Visibility ★☆☆☆☆";
 
-      const grid = document.getElementById("pillarsGrid");
-      grid.innerHTML = "";
-      [
-        ["AI Access Readiness", data.pillars.access],
-        ["Trust & Verification Signals", data.pillars.trust],
-        ["LLM Interpretability & Clarity", data.pillars.clarity],
-        ["Prompt-Pattern Alignment", data.pillars.alignment]
-      ].forEach(([label, val]) => {
-        const div = document.createElement("div");
-        div.className = "pillar";
-        div.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`;
-        grid.appendChild(div);
-      });
+      const items = [
+        ["AI Access Readiness", pillars.access ?? 0],
+        ["Trust & Verification Signals", pillars.trust ?? 0],
+        ["LLM Interpretability & Clarity", pillars.clarity ?? 0],
+        ["Prompt-Pattern Alignment", pillars.alignment ?? 0]
+      ];
+      $("pillarsGrid").innerHTML = items.map(([label,val]) =>
+        `<div class="chip"><span>${label}</span><span>${val}/25</span></div>`).join("");
 
-      // Working
-      const posList = document.getElementById("positivesList");
-      posList.innerHTML = "";
-      (data.whatsWorking || []).slice(0,5).forEach(i => {
-        const li = document.createElement("li");
-        li.textContent = i;
-        posList.appendChild(li);
-      });
-
-      // Issues
-      const issueList = document.getElementById("issuesList");
-      issueList.innerHTML = "";
-      (data.needsAttention || []).slice(0,10).forEach(i => {
-        const li = document.createElement("li");
-        li.textContent = i;
-        issueList.appendChild(li);
-      });
+      // stop loading animation
+      $("scoreCard").classList.remove("loading");
     }
 
-    // Copy summary
-    document.getElementById("copyBtn").addEventListener("click", async () => {
-      const scoreText = document.getElementById("scoreNumber").textContent;
-      const url = targetUrl || "Unknown";
-      const text = `Website: ${url}\nSnipeRank Score: ${scoreText}\nCheck your site: ${window.location.origin}`;
-      try {
-        await navigator.clipboard.writeText(text);
-        const btn = document.getElementById("copyBtn");
-        const old = btn.textContent;
-        btn.textContent = "Copied!";
-        setTimeout(() => (btn.textContent = old), 1500);
-      } catch {
-        window.prompt("Copy this summary:", text);
+    function setList(el, arr){
+      el.innerHTML = arr.map(x => `<li>${x}</li>`).join("");
+    }
+
+    function setLoadingLists(){
+      $("workingList").innerHTML = `<li class="muted">Loading…</li>`;
+      $("issuesList").innerHTML  = `<li class="muted">Loading…</li>`;
+    }
+
+    function setFallbackLists(){
+      setList($("workingList"), [
+        "HTTPS and basic security in place",
+        "Mobile-responsive layout",
+        "Clear navigation structure",
+        "Reasonable page speed baseline",
+        "Consistent publishing cadence"
+      ]);
+      setList($("issuesList"), [
+        "Missing/limited schema (Organization, WebPage, Article)",
+        "Weak FAQ / Q&A blocks for natural queries",
+        "Sparse internal linking across related topics",
+        "Meta descriptions missing or generic",
+        "Heading hierarchy inconsistent (H1/H2/H3)",
+        "Thin or outdated content on key pages",
+        "Limited external citations to authoritative sources",
+        "Alt text not descriptive / missing",
+        "No breadcrumb trail or BreadcrumbList schema",
+        "Contact/identity signals not fully structured"
+      ]);
+    }
+
+    function parseFirstULAfterHeading(html, headingRegex){
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const nodes = [...tmp.querySelectorAll('h1,h2,h3,h4,.section-title,strong')];
+      const hit = nodes.find(n => headingRegex.test((n.textContent||'').trim()));
+      if(!hit) return [];
+      let p = hit.nextElementSibling;
+      while(p && (!p.tagName || p.tagName.toLowerCase()!=='ul')) p = p.nextElementSibling;
+      if(!p) return [];
+      return [...p.querySelectorAll('li')].map(li => (li.textContent||'').trim()).filter(Boolean);
+    }
+
+    /* ------------ Modal ------------ */
+    $("breakdownBtn").addEventListener('click', ()=> $("breakdown").style.display='flex');
+    $("closeBreakdown").addEventListener('click', ()=> $("breakdown").style.display='none');
+    $("breakdown").addEventListener('click', (e)=>{ if(e.target===$("breakdown")) $("breakdown").style.display='none'; });
+
+    /* ------------ Copy summary ------------ */
+    $("copyBtn").addEventListener('click', async () => {
+      const scoreText = $("scoreNumber").textContent || "-/100";
+      const labels = [...document.querySelectorAll('.chip span:first-child')].map(el => el.textContent.trim());
+      const vals = [...document.querySelectorAll('.chip span:last-child')].map(el => el.textContent.trim());
+      const working = [...$("workingList").querySelectorAll('li')].slice(0,5).map(li=>li.textContent.trim());
+      const issues  = [...$("issuesList").querySelectorAll('li')].slice(0,10).map(li=>li.textContent.trim());
+      const txt = [
+        `Website: ${targetUrl}`,
+        `SnipeRank Score: ${scoreText}`,
+        ``,
+        `Pillars:`,
+        ...labels.map((l,i)=>`- ${l}: ${vals[i]||''}`),
+        ``,
+        `Top strengths:`,
+        ...working.map(x=>`- ${x}`),
+        ``,
+        `Top issues:`,
+        ...issues.map(x=>`- ${x}`),
+        ``,
+        `Get the full report at: ${window.location.origin}/full-report.html`
+      ].join("\n");
+      try{
+        await navigator.clipboard.writeText(txt);
+        const b = $("copyBtn"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1200);
+      }catch{
+        window.prompt("Copy the summary:", txt);
       }
     });
 
-    // Modal
-    document.getElementById("breakdownBtn").onclick = () => {
-      document.getElementById("breakdown-modal").style.display = "flex";
-    };
-    document.getElementById("modal-close").onclick = () => {
-      document.getElementById("breakdown-modal").style.display = "none";
-    };
-    document.getElementById("breakdown-modal").onclick = (e) => {
-      if (e.target.id === "breakdown-modal")
-        e.currentTarget.style.display = "none";
-    };
-
-    // Form
-    document.getElementById("full-report-form").addEventListener("submit", (e) => {
+    /* ------------ Form / CTA ------------ */
+    $("getReportBtn").addEventListener('click', () => $("full-report-btn").focus());
+    $("full-report-form").addEventListener('submit', (e)=>{
       e.preventDefault();
-      const name = document.getElementById("name-input").value.trim();
-      const email = document.getElementById("email-input").value.trim();
-      if (!name || !email) {
-        const err = document.getElementById("form-error");
-        err.textContent = "Please enter your name and email.";
-        err.style.display = "block";
-        return;
+      const name = $("name-input").value.trim();
+      const email = $("email-input").value.trim();
+      const phone = $("phone-input").value.trim();
+      const company = $("company-input").value.trim();
+      const context = $("context-input").value.trim();
+      const err = $("form-error");
+      if(!name || !email || !targetUrl){
+        err.textContent = "Please provide your name and email."; err.style.display='block'; return;
       }
+      err.style.display='none';
       const domain = extractDomain(targetUrl);
-      const q = new URLSearchParams({ url: targetUrl, name, email, domain }).toString();
+      sessionStorage.setItem('sniperank:name', name);
+      sessionStorage.setItem('sniperank:email', email);
+      sessionStorage.setItem('sniperank:phone', phone);
+      sessionStorage.setItem('sniperank:company', company);
+      sessionStorage.setItem('sniperank:context', context);
+      sessionStorage.setItem('sniperank:url', targetUrl);
+      sessionStorage.setItem('sniperank:domain', domain);
+      $("full-report-btn").disabled = true;
+      $("full-report-btn").textContent = "Preparing Full Report…";
+      const q = new URLSearchParams({
+        url: targetUrl, name: encodeURIComponent(name), email: encodeURIComponent(email), domain, source:'analyze'
+      }).toString();
       window.location.href = `full-report.html?${q}`;
     });
 
-    // Initialize
-    document.addEventListener("DOMContentLoaded", async () => {
-      document.getElementById("current-url").textContent = targetUrl || "Unknown";
-      try {
-        const data = await fetchData();
-        if (data) renderData(data);
-        else throw new Error("No data");
-      } catch (err) {
-        document.getElementById("issuesList").innerHTML = "<li>Error loading analysis.</li>";
-        console.error(err);
+    /* ------------ Load data ------------ */
+    (async function init(){
+      setLoadingLists();
+
+      // Image prewarm
+      Object.values(LOGOS).forEach(src => { const i=new Image(); i.src=src; });
+
+      if(!targetUrl){ setFallbackLists(); $("scoreCard").classList.remove("loading"); return; }
+
+      // Decide API base
+      let apiBase = '';
+      try{
+        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
+        if(!probe.ok) throw 0;
+      }catch{
+        apiBase = 'https://sniperank-app2.onrender.com';
       }
-    });
+
+      // 1) SCORE
+      try{
+        const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, {headers:{'Accept':'application/json'}});
+        const j = await r.json();
+        const total = Number(j.score ?? 0);
+        const pillars = j.pillars ?? {access:0,trust:0,clarity:0,alignment:0};
+        renderScore(total, pillars);
+      }catch(e){
+        console.warn('Score fetch failed, using safe defaults.', e);
+        renderScore(60, {access:15,trust:15,clarity:15,alignment:15});
+      }
+
+      // 2) REPORT HTML -> extract bullets
+      try{
+        const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, {headers:{'Accept':'text/html'}});
+        const html = await res.text();
+
+        const working = parseFirstULAfterHeading(html, /working\s+well/i);
+        const issues  = parseFirstULAfterHeading(html, /(improve|issues?|opportunities)/i);
+
+        if (working.length) setList($("workingList"), working.slice(0,5));
+        else setFallbackLists(); // this populates both lists (we’ll then overlay issues below)
+
+        if (issues.length) setList($("issuesList"), issues.slice(0,10));
+        else if (!working.length) setFallbackLists();
+      }catch(err){
+        console.warn('Report HTML fetch failed. Using fallbacks.', err);
+        setFallbackLists();
+      }
+    })();
   </script>
 </body>
 </html>

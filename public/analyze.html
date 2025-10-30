@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html — v3.6.2 (Free Quick Analysis)
-       - Fix: reliable content render for Working/Issues
-       - Fix: loading animation (pulse + shimmer) on score card
-       - Safe fallbacks so sections never stay empty
-       - Uses /api/score and /report.html?report=analyze
+  <!-- analyze.html — v3.7.0 (Free Quick Analysis)
+       - No placeholder content. Blocking lightbox w/ shimmer + timeout actions.
+       - Score card shimmer while loading.
+       - Sections remain hidden until real data arrives.
        Last updated: Oct 30, 2025
   -->
   <meta charset="UTF-8" />
@@ -42,21 +41,25 @@
     .btns{display:flex;gap:8px;margin-top:12px}
     .btn{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem}
     .btn:hover{background:#f3f4f6}
-    .cta-card{padding:18px;margin:28px 0;border:1px solid #e0e7ff;background:#f8f9ff;border-radius:12px;text-align:center}
-    .cta-card p{margin:.25rem 0 1rem;color:#4338ca}
-    .cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-    .cta-primary,.cta-secondary{
-      border:none;border-radius:999px;padding:.85rem 1.25rem;font-weight:800;color:#fff;background:var(--btn);cursor:pointer;
-    }
-    .cta-primary:hover,.cta-secondary:hover{background:var(--btn-hover)}
 
     /* Sections */
     .section{margin:24px 0}
     .section h3{font-size:1.15rem;margin:0 0 .75rem}
     ul.klist{margin:.25rem 0 0 1.1rem;padding:0}
     ul.klist li{margin:.45rem 0;line-height:1.6}
+    .hidden{display:none}
 
-    /* --- Loading animation (pulse + shimmer) --- */
+    /* CTA + form */
+    .cta-card{padding:18px;margin:28px 0;border:1px solid #e0e7ff;background:#f8f9ff;border-radius:12px;text-align:center}
+    .cta-card p{margin:.25rem 0 1rem;color:#4338ca}
+    .cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .cta-primary,.cta-secondary{
+      border:none;border-radius:999px;padding:.85rem 1.25rem;font-weight:800;color:#fff;background:var(--btn);cursor:pointer;text-decoration:none;
+      display:inline-block;
+    }
+    .cta-primary:hover,.cta-secondary:hover{background:var(--btn-hover)}
+
+    /* --- Loading animation (score shimmer) --- */
     .score-card.loading{
       animation:pulse-shimmer 2s ease-in-out infinite;
     }
@@ -69,22 +72,30 @@
       0%,100%{box-shadow:0 1px 2px rgba(0,0,0,.04)}
       50%{box-shadow:0 6px 26px rgba(49,130,206,.22)}
     }
-    @keyframes shimmer{
-      0%{left:-100%}
-      100%{left:100%}
+    @keyframes shimmer{0%{left:-100%}100%{left:100%}}
+
+    /* Blocking Lightbox */
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;z-index:1000}
+    .panel{width:min(520px,92vw);background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.12);padding:22px 20px;position:relative;overflow:hidden}
+    .panel.loading{animation:pulse-shimmer 2s ease-in-out infinite}
+    .panel.loading::before{
+      content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent);
+      animation:shimmer 2s ease-in-out infinite;
     }
+    .p-title{font-weight:900;font-size:18px;margin:0 0 10px}
+    .p-sub{color:#6b7280;font-size:14px;margin:0 0 12px}
+    .bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
+    .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#3182CE,#1a73e8);width:0%}
+    .p-eta{color:#6b7280;font-size:14px}
+    .timeout{display:none;margin-top:14px;border-top:1px dashed #e5e7eb;padding-top:12px}
+    .timeout strong{color:#111}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .ghost{border:1px solid #111;background:#fff;color:#111;padding:.6rem 1rem;border-radius:10px;font-weight:800;cursor:pointer}
+    .primary{border:none;background:var(--btn);color:#fff;padding:.6rem 1rem;border-radius:999px;font-weight:800;cursor:pointer}
+    .primary:hover{background:var(--btn-hover)}
 
-    /* Footer + small bits */
     .footer{color:#6b7280;font-size:.9rem;margin:36px 0 8px;text-align:center}
-    .muted{color:var(--muted)}
-    .hidden{display:none}
-
-    /* Modal */
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
-    .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-    .modal h4{margin:0 0 .5rem}
-    .modal .close{border:0;background:transparent;font-size:24px;cursor:pointer;color:#6b7280}
-    .modal .rowx{display:flex;align-items:center;justify-content:space-between}
   </style>
 </head>
 <body>
@@ -105,7 +116,7 @@
       </div>
       <div class="btns">
         <button class="btn" id="breakdownBtn" type="button">What goes into this score?</button>
-        <button class="btn" id="copyBtn" type="button">Copy Shareable Summary</button>
+        <button class="btn" id="copyBtn" type="button" disabled>Copy Shareable Summary</button>
       </div>
     </div>
     <div class="pillars" id="pillarsGrid">
@@ -116,19 +127,15 @@
     </div>
   </section>
 
-  <!-- WORKING / ISSUES -->
-  <section class="section">
+  <!-- WORKING / ISSUES (remain hidden until real data arrives) -->
+  <section class="section hidden" id="workingSection">
     <h3>What’s Working Well</h3>
-    <ul id="workingList" class="klist">
-      <li class="muted">Loading…</li>
-    </ul>
+    <ul id="workingList" class="klist"></ul>
   </section>
 
-  <section class="section">
+  <section class="section hidden" id="issuesSection">
     <h3>Where You Can Improve</h3>
-    <ul id="issuesList" class="klist">
-      <li class="muted">Loading…</li>
-    </ul>
+    <ul id="issuesList" class="klist"></ul>
   </section>
 
   <!-- CTA -->
@@ -136,13 +143,13 @@
     <h3 style="margin:.25rem 0 .5rem">Want the Full Breakdown & Step-by-Step Fixes?</h3>
     <p>Get your detailed 50-page AI SEO report and a free 30-minute consultation.</p>
     <div class="cta-actions">
-      <button class="cta-primary" id="getReportBtn" type="button">Get My Full Report (Free)</button>
-      <a class="cta-secondary" href="https://calendly.com/quontora" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;padding:.85rem 1.25rem;border-radius:999px">Book Consultation</a>
+      <a class="cta-primary" href="#report-form">Get My Full Report (Free)</a>
+      <a class="cta-secondary" href="https://calendly.com/quontora" target="_blank" rel="noopener">Book Consultation</a>
     </div>
   </div>
 
   <!-- FORM -->
-  <section class="section card" style="padding:18px">
+  <section id="report-form" class="section card" style="padding:18px">
     <h3>Get Your Detailed Report</h3>
     <form id="full-report-form" novalidate>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -152,23 +159,42 @@
         <input type="text" id="company-input" placeholder="Your Company (optional)" style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
         <textarea id="context-input" placeholder="Share context or ask a specific question — we'll address it in your consult." style="grid-column:1/-1;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:8px"></textarea>
       </div>
-      <div id="form-error" class="muted" style="color:#c00;margin-top:8px;display:none"></div>
+      <div id="form-error" style="color:#c00;margin-top:8px;display:none"></div>
       <button id="full-report-btn" type="submit" class="cta-primary" style="margin-top:12px">Get My Full Report</button>
     </form>
   </section>
 
-  <!-- MODAL -->
-  <div class="backdrop" id="breakdown">
-    <div class="modal">
-      <div class="rowx">
-        <h4>What goes into your SnipeRank score?</h4>
-        <button class="close" id="closeBreakdown" aria-label="Close">×</button>
-      </div>
-      <div>
+  <!-- SCORE BREAKDOWN MODAL -->
+  <div class="overlay hidden" id="breakdown">
+    <div class="panel">
+      <div class="p-title">What goes into your SnipeRank score?</div>
+      <div class="p-sub">
         <p><strong>🎯 AI Access Readiness (25)</strong> — crawlability, speed, mobile, indexability.</p>
         <p><strong>🔒 Trust & Verification Signals (25)</strong> — authorship, citations, security, authority cues.</p>
         <p><strong>📝 LLM Interpretability & Clarity (25)</strong> — headings, schema, semantic structure.</p>
         <p><strong>🔍 Prompt-Pattern Alignment (25)</strong> — FAQs, Q&A blocks, task/intent coverage.</p>
+      </div>
+      <div class="actions" style="justify-content:flex-end">
+        <button class="ghost" id="closeBreakdown" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOCKING LIGHTBOX (loading + timeout) -->
+  <div class="overlay" id="progress">
+    <div class="panel loading" id="progressPanel">
+      <div class="p-title">Analyzing your website…</div>
+      <div class="p-sub">Checking structure, AI visibility signals, and content clarity.</div>
+      <div class="bar"><div class="fill" id="pFill"></div></div>
+      <div class="p-eta" id="pEta">This usually takes 15–45 seconds.</div>
+
+      <div class="timeout" id="timeoutBox">
+        <p><strong>Still working…</strong> Large or protected sites can take longer. You can keep waiting, retry now, or get the full report by email.</p>
+        <div class="actions">
+          <button class="ghost" id="keepWaitingBtn" type="button">Keep Waiting</button>
+          <button class="ghost" id="retryBtn" type="button">Retry Now</button>
+          <a class="primary" href="#report-form">Get Full Report</a>
+        </div>
       </div>
     </div>
   </div>
@@ -176,38 +202,34 @@
   <div class="footer">© 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a></div>
 
   <script>
-    /* ------------ Utilities ------------ */
-    const $ = (id) => document.getElementById(id);
+    /* ---------- Setup ---------- */
+    const $ = id => document.getElementById(id);
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUrl = urlParams.get('url') || '';
+    $("current-url").textContent = targetUrl || '—';
 
     const LOGOS = {
       ChatGPT: '/img/chatgpt-logo.png',
       Claude: '/img/claude.jpeg',
       Gemini: '/img/gemini.jpeg',
-      Copilot: '/img/copilot.jpeg',   // <- correct path per your note
+      Copilot: '/img/copilot.jpeg',   // correct file name per your note
       Perplexity: '/img/perplexity-logo.png',
     };
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get('url') || '';
-    $("current-url").textContent = targetUrl || '—';
+    Object.values(LOGOS).forEach(src => { const i=new Image(); i.src=src; });
 
     function extractDomain(u){
       if (!u) return '';
-      try{
-        const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
-        return new URL(withProto).hostname.replace(/^www\./i,'');
-      }catch{
-        const m = String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i);
-        return (m?m[1]:'').replace(/^www\./i,'');
-      }
+      try{ return new URL(/^https?:\/\//i.test(u)?u:`https://${u}`).hostname.replace(/^www\./,''); }
+      catch{ const m=String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i); return (m?m[1]:'').replace(/^www\./,''); }
     }
 
+    /* ---------- UI helpers ---------- */
     function renderScore(total, pillars){
       $("scoreNumber").textContent = `${Math.round(total)}/100`;
       $("scoreBand").textContent =
-        total >= 70 ? "Rank: Partially Visible ★★★☆☆" :
-        total >= 55 ? "Rank: Needs Work ★★☆☆☆" :
-        "Rank: Low Visibility ★☆☆☆☆";
+        total >= 70 ? "Rank: Highly Visible ★★★★☆" :
+        total >= 55 ? "Rank: Partially Visible ★★★☆☆" :
+        total >= 40 ? "Rank: Needs Work ★★☆☆☆" : "Rank: Low Visibility ★☆☆☆☆";
 
       const items = [
         ["AI Access Readiness", pillars.access ?? 0],
@@ -218,90 +240,45 @@
       $("pillarsGrid").innerHTML = items.map(([label,val]) =>
         `<div class="chip"><span>${label}</span><span>${val}/25</span></div>`).join("");
 
-      // stop loading animation
       $("scoreCard").classList.remove("loading");
+      $("copyBtn").disabled = false;
     }
 
     function setList(el, arr){
+      if (!arr || !arr.length) return;
       el.innerHTML = arr.map(x => `<li>${x}</li>`).join("");
     }
 
-    function setLoadingLists(){
-      $("workingList").innerHTML = `<li class="muted">Loading…</li>`;
-      $("issuesList").innerHTML  = `<li class="muted">Loading…</li>`;
-    }
+    /* ---------- Modal controls ---------- */
+    $("breakdownBtn").addEventListener('click', ()=> $("breakdown").classList.remove('hidden'));
+    $("closeBreakdown").addEventListener('click', ()=> $("breakdown").classList.add('hidden'));
+    $("breakdown").addEventListener('click', (e)=>{ if(e.target===$("breakdown")) $("breakdown").classList.add('hidden'); });
 
-    function setFallbackLists(){
-      setList($("workingList"), [
-        "HTTPS and basic security in place",
-        "Mobile-responsive layout",
-        "Clear navigation structure",
-        "Reasonable page speed baseline",
-        "Consistent publishing cadence"
-      ]);
-      setList($("issuesList"), [
-        "Missing/limited schema (Organization, WebPage, Article)",
-        "Weak FAQ / Q&A blocks for natural queries",
-        "Sparse internal linking across related topics",
-        "Meta descriptions missing or generic",
-        "Heading hierarchy inconsistent (H1/H2/H3)",
-        "Thin or outdated content on key pages",
-        "Limited external citations to authoritative sources",
-        "Alt text not descriptive / missing",
-        "No breadcrumb trail or BreadcrumbList schema",
-        "Contact/identity signals not fully structured"
-      ]);
-    }
-
-    function parseFirstULAfterHeading(html, headingRegex){
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      const nodes = [...tmp.querySelectorAll('h1,h2,h3,h4,.section-title,strong')];
-      const hit = nodes.find(n => headingRegex.test((n.textContent||'').trim()));
-      if(!hit) return [];
-      let p = hit.nextElementSibling;
-      while(p && (!p.tagName || p.tagName.toLowerCase()!=='ul')) p = p.nextElementSibling;
-      if(!p) return [];
-      return [...p.querySelectorAll('li')].map(li => (li.textContent||'').trim()).filter(Boolean);
-    }
-
-    /* ------------ Modal ------------ */
-    $("breakdownBtn").addEventListener('click', ()=> $("breakdown").style.display='flex');
-    $("closeBreakdown").addEventListener('click', ()=> $("breakdown").style.display='none');
-    $("breakdown").addEventListener('click', (e)=>{ if(e.target===$("breakdown")) $("breakdown").style.display='none'; });
-
-    /* ------------ Copy summary ------------ */
-    $("copyBtn").addEventListener('click', async () => {
+    /* ---------- Copy summary ---------- */
+    $("copyBtn").addEventListener("click", async () => {
       const scoreText = $("scoreNumber").textContent || "-/100";
       const labels = [...document.querySelectorAll('.chip span:first-child')].map(el => el.textContent.trim());
       const vals = [...document.querySelectorAll('.chip span:last-child')].map(el => el.textContent.trim());
       const working = [...$("workingList").querySelectorAll('li')].slice(0,5).map(li=>li.textContent.trim());
-      const issues  = [...$("issuesList").querySelectorAll('li')].slice(0,10).map(li=>li.textContent.trim());
+      const issues  = [...$("issuesList").querySelectorAll('li')).slice(0,10).map(li=>li.textContent.trim());
       const txt = [
         `Website: ${targetUrl}`,
         `SnipeRank Score: ${scoreText}`,
         ``,
         `Pillars:`,
         ...labels.map((l,i)=>`- ${l}: ${vals[i]||''}`),
-        ``,
-        `Top strengths:`,
-        ...working.map(x=>`- ${x}`),
-        ``,
-        `Top issues:`,
-        ...issues.map(x=>`- ${x}`),
+        working.length?``,`Top strengths:`,...working.map(x=>`- ${x}`):[],
+        issues.length?``,`Top issues:`,...issues.map(x=>`- ${x}`):[],
         ``,
         `Get the full report at: ${window.location.origin}/full-report.html`
-      ].join("\n");
+      ].flat().join("\n");
       try{
         await navigator.clipboard.writeText(txt);
         const b = $("copyBtn"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1200);
-      }catch{
-        window.prompt("Copy the summary:", txt);
-      }
+      }catch{ window.prompt("Copy the summary:", txt); }
     });
 
-    /* ------------ Form / CTA ------------ */
-    $("getReportBtn").addEventListener('click', () => $("full-report-btn").focus());
+    /* ---------- Form ---------- */
     $("full-report-form").addEventListener('submit', (e)=>{
       e.preventDefault();
       const name = $("name-input").value.trim();
@@ -324,59 +301,110 @@
       sessionStorage.setItem('sniperank:domain', domain);
       $("full-report-btn").disabled = true;
       $("full-report-btn").textContent = "Preparing Full Report…";
-      const q = new URLSearchParams({
-        url: targetUrl, name: encodeURIComponent(name), email: encodeURIComponent(email), domain, source:'analyze'
-      }).toString();
+      const q = new URLSearchParams({ url: targetUrl, name: encodeURIComponent(name), email: encodeURIComponent(email), domain, source:'analyze' }).toString();
       window.location.href = `full-report.html?${q}`;
     });
 
-    /* ------------ Load data ------------ */
-    (async function init(){
-      setLoadingLists();
+    /* ---------- Blocking overlay progress + timeout ---------- */
+    const PROBE_TIMEOUT_MS = 10000;
+    const TIMEOUT_MS = 25000;
+    let progressTimer, timeoutTimer;
 
-      // Image prewarm
-      Object.values(LOGOS).forEach(src => { const i=new Image(); i.src=src; });
+    function startProgress(){
+      const fill = $("pFill");
+      let pct = 0;
+      progressTimer = setInterval(()=>{
+        pct = Math.min(pct + Math.random()*3, 90);
+        fill.style.width = pct + '%';
+      }, 120);
+    }
+    function completeProgress(){
+      clearInterval(progressTimer);
+      $("pFill").style.transition='width .5s ease';
+      $("pFill").style.width='100%';
+      setTimeout(()=> $("progress").classList.add('hidden'), 500);
+    }
+    function showTimeout(){
+      $("progressPanel").classList.remove('loading');
+      $("timeoutBox").style.display = 'block';
+      $("pEta").textContent = "The server is taking longer than usual.";
+    }
+    function resetOverlayForRetry(){
+      $("timeoutBox").style.display='none';
+      $("progressPanel").classList.add('loading');
+      $("pFill").style.width='0%';
+      startProgress();
+      startTimeouts();
+    }
+    function startTimeouts(){
+      clearTimeout(timeoutTimer);
+      timeoutTimer = setTimeout(showTimeout, TIMEOUT_MS);
+    }
 
-      if(!targetUrl){ setFallbackLists(); $("scoreCard").classList.remove("loading"); return; }
+    $("retryBtn").addEventListener('click', ()=> { resetOverlayForRetry(); loadAll(true); });
+    $("keepWaitingBtn").addEventListener('click', ()=> { startTimeouts(); });
 
-      // Decide API base
-      let apiBase = '';
+    /* ---------- Data loading ---------- */
+    function parseFirstULAfterHeading(html, headingRegex){
+      const tmp = document.createElement('div'); tmp.innerHTML = html;
+      const nodes = [...tmp.querySelectorAll('h1,h2,h3,h4,.section-title,strong')];
+      const hit = nodes.find(n => headingRegex.test((n.textContent||'').trim()));
+      if(!hit) return [];
+      let p = hit.nextElementSibling;
+      while(p && (!p.tagName || p.tagName.toLowerCase()!=='ul')) p = p.nextElementSibling;
+      if(!p) return [];
+      return [...p.querySelectorAll('li')].map(li => (li.textContent||'').trim()).filter(Boolean);
+    }
+
+    async function decideApiBase(){
       try{
-        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
-        if(!probe.ok) throw 0;
-      }catch{
-        apiBase = 'https://sniperank-app2.onrender.com';
-      }
+        const ctl = new AbortController();
+        const t = setTimeout(()=>ctl.abort(), PROBE_TIMEOUT_MS);
+        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD', signal:ctl.signal});
+        clearTimeout(t);
+        if (!probe.ok) throw 0;
+        return '';
+      }catch{ return 'https://sniperank-app2.onrender.com'; }
+    }
 
-      // 1) SCORE
+    async function loadAll(isRetry=false){
+      if (!targetUrl) { showTimeout(); return; }
+
+      const apiBase = await decideApiBase();
+
+      // SCORE (no fake fallback)
       try{
         const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, {headers:{'Accept':'application/json'}});
+        if (!r.ok) throw 0;
         const j = await r.json();
-        const total = Number(j.score ?? 0);
-        const pillars = j.pillars ?? {access:0,trust:0,clarity:0,alignment:0};
-        renderScore(total, pillars);
+        renderScore(Number(j.score ?? 0), j.pillars ?? {access:0,trust:0,clarity:0,alignment:0});
       }catch(e){
-        console.warn('Score fetch failed, using safe defaults.', e);
-        renderScore(60, {access:15,trust:15,clarity:15,alignment:15});
+        $("scoreBand").textContent = "Unable to load score (server unavailable).";
+        $("scoreCard").classList.remove("loading");
       }
 
-      // 2) REPORT HTML -> extract bullets
+      // REPORT HTML bullets
       try{
         const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, {headers:{'Accept':'text/html'}});
+        if (!res.ok) throw 0;
         const html = await res.text();
-
         const working = parseFirstULAfterHeading(html, /working\s+well/i);
         const issues  = parseFirstULAfterHeading(html, /(improve|issues?|opportunities)/i);
 
-        if (working.length) setList($("workingList"), working.slice(0,5));
-        else setFallbackLists(); // this populates both lists (we’ll then overlay issues below)
-
-        if (issues.length) setList($("issuesList"), issues.slice(0,10));
-        else if (!working.length) setFallbackLists();
-      }catch(err){
-        console.warn('Report HTML fetch failed. Using fallbacks.', err);
-        setFallbackLists();
+        if (working.length){ setList($("workingList"), working.slice(0,5)); $("workingSection").classList.remove('hidden'); }
+        if (issues.length){ setList($("issuesList"), issues.slice(0,10)); $("issuesSection").classList.remove('hidden'); }
+      }catch(e){
+        // leave sections hidden; no placeholders
       }
+
+      completeProgress();
+    }
+
+    // Start
+    (function init(){
+      startProgress();
+      startTimeouts();
+      loadAll(false);
     })();
   </script>
 </body>

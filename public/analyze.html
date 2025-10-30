@@ -1,656 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html - v3.5.0 - FIXED: Back to simple working approach, no premature fallbacks -->
-  <!-- Features: 25-page analysis, progress bar, score breakdown modal, proper form fields, caching, improved conversion -->
-  <!-- Backend compatibility: /api/score (GET) and /report.html?report=analyze (GET) only -->
-  <!-- Last updated: October 29, 2025 -->
+  <!-- analyze.html – v3.6.0 – High-level Free Report Version -->
+  <!-- Purpose: Show summary score, top 5 positives, top 10 issues, and strong CTA -->
+  <!-- Last updated: October 30, 2025 -->
 
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SnipeRank - AI SEO Analysis</title>
-  
-  <!-- Preload critical resources -->
-  <link rel="preload" href="/img/claude.jpeg" as="image">
-  <link rel="preload" href="/img/chatgpt-logo.png" as="image">
-  <link rel="preload" href="/img/gemini.jpeg" as="image">
-  <link rel="preload" href="/img/copilot.jpeg" as="image">
-  <link rel="preload" href="/img/perplexity-logo.png" as="image">
-  
-  <!-- DNS prefetch for API calls -->
-  <link rel="dns-prefetch" href="//sniperank-app2.onrender.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnipeRank – AI SEO Analysis (Free Report)</title>
+
   <style>
-    :root{
-      --max-width:760px; --pad-v:3vh; --pad-h:2rem;
-      --muted:#666; --border:#e5e5e5;
-      --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
-      --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
-      --btn-red:#dc3545; --btn-red-hover:#c82333;
+    :root {
+      --primary: #3182CE;
+      --primary-dark: #2563EB;
+      --accent-red: #DC3545;
+      --border: #E5E7EB;
+      --muted: #666;
+      --bg: #fff;
+      --radius: 12px;
+      --max-width: 760px;
     }
-    *{box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
-    h1{font-size:4rem;font-weight:700;margin:0 0 .25em;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    h2{font-size:1.6rem;font-weight:700;margin:0 0 1rem}
-    p{font-size:1.075rem;line-height:1.65;margin:0 0 1rem}
 
-    .info-row{width:100%;display:flex;gap:1rem;align-items:center;justify-content:space-between;margin:.25rem 0 1rem}
-    .powered-by,.for-url{color:var(--muted);font-size:.95rem}
-    .powered-by a{color:#3182CE;text-decoration:none;font-weight:600}
-    .for-url strong{color:#000}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: #111;
+      padding: 3vh 2rem;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      line-height: 1.6;
+    }
 
-    .card{width:100%;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff}
-    .score-card{padding:1rem;margin-bottom:2.25rem}
-    .score-top{display:flex;align-items:center;gap:.75rem;justify-content:space-between;flex-wrap:wrap}
-    .score-main{display:flex;align-items:baseline;gap:.5rem}
-    .score-number{font-size:2.25rem;font-weight:800}
-    .score-band{color:var(--muted);font-size:.95rem}
-    .btn-row{display:flex;gap:.5rem;align-items:center}
-    .btn-ghost{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem;transition:.2s}
-    .btn-ghost:hover{background:#f2f2f2}
-    .btn-primary{background:var(--btn-red);color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;display:inline-block;text-decoration:none;text-align:center}
-    .btn-primary:hover{background:var(--btn-red-hover)}
-    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
-    .pillar{border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;font-size:.98rem;background:#fff}
-    .pillar .label{font-weight:600}
-    .badge{font-weight:700;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:.85rem;background:#fafafa}
-    .highlights{margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--border)}
-    .highlights h4{margin:0 0 .55rem;font-size:1.2rem;font-weight:800}
-    .highlights ul{margin:0;padding-left:1rem}
-    .highlights li{margin:.45rem 0;line-height:1.5}
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin-bottom: .3em;
+      background: linear-gradient(135deg,#000,#3182CE);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 { font-size: 1.6rem; margin-bottom: 1.5rem; font-weight: 700; }
+    h3 { font-size: 1.3rem; font-weight: 700; margin: 1.8rem 0 .8rem; }
+    p { font-size: 1.05rem; margin-bottom: 1rem; }
 
-    #summary-results .section-title{font-size:1.25rem!important;font-weight:700!important;margin:2rem 0 .6rem!important}
-    #summary-results p{line-height:1.68!important;margin:0 0 .9rem!important;font-size:1.05rem!important;white-space:pre-line}
-    #summary-results ul{margin:0 0 1.1rem 1.1rem!important;padding-left:.2rem!important;list-style:disc!important}
-    #summary-results li{line-height:1.7!important;margin:.6rem 0!important;font-size:1.05rem!important}
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .95rem; color: var(--muted); margin-bottom: 1rem;
+    }
+    .info-row a { color: var(--primary); font-weight: 600; text-decoration: none; }
 
-    .llm-insights{margin:.4rem 0 1.2rem}
-    .llm-row{display:grid;grid-template-columns:auto 1fr;gap:.8rem 1rem;align-items:start;padding:.8rem 0;border-bottom:1px dashed var(--border)}
-    .llm-row:last-child{border-bottom:0}
-    .llm-logo{display:flex;align-items:center;justify-content:center;min-width:42px;height:32px}
-    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
-    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      transition: box-shadow .3s;
+    }
 
-    .form-section{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);margin-top:3rem;width:100%}
-    .form-section h3{margin:0 0 2rem;font-size:1.8rem;font-weight:700}
-    .form-container{max-width:100%;margin:0 auto}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:0 auto 1rem}
-    .form-full{grid-column:1/-1}
-    .form-section input, .form-section textarea{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:4px;font-size:16px;font-family:inherit}
-    .form-section textarea{min-height:100px;resize:vertical}
-    .form-section input:focus, .form-section textarea:focus{outline:none;border-color:#3182CE}
-    .form-btn{margin-top:1rem;max-width:300px}
+    /* Pulse shimmer animation */
+    .score-card.loading {
+      animation: pulse-shimmer 2s ease-in-out infinite;
+      overflow: hidden;
+    }
+    .score-card.loading::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s ease-in-out infinite;
+    }
+    @keyframes pulse-shimmer {
+      0%,100% { box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+      50% { box-shadow: 0 4px 16px rgba(49,130,206,.25); }
+    }
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
 
-    .consultation-section{text-align:center;padding:3rem 2rem;margin-top:3rem}
-    .consultation-section h3{margin:0 0 1rem;font-size:1.8rem;font-weight:700}
-    .consultation-section p{margin:0 0 2rem;color:var(--muted)}
-    .consultation-info{color:var(--muted);font-size:.95rem;margin-top:1rem}
-    .consultation-info strong{color:#000}
+    .score-main { display: flex; align-items: baseline; gap: .5rem; }
+    .score-number { font-size: 2.5rem; font-weight: 800; }
+    .score-band { color: var(--muted); }
+    .pillars {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .75rem; margin-top: 1rem;
+    }
+    .pillar {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .6rem .75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .98rem;
+    }
+    .pillar .label { font-weight: 600; }
+    .badge {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .2rem .6rem;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .btn-row { display: flex; gap: .5rem; margin-top: .8rem; }
+    .btn-ghost {
+      border: 1px solid #111; background: #fff; color: #111;
+      padding: .5rem .9rem; border-radius: 8px; cursor: pointer;
+      font-weight: 600; font-size: .95rem;
+      transition: .2s;
+    }
+    .btn-ghost:hover { background: #f2f2f2; }
 
-    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
-    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
-    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .progress-title{font-weight:700;font-size:18px}
-    .progress-pct{color:#666;font-size:16px;font-weight:600}
-    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
-    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
-    .progress-eta{color:#666;font-size:14px;line-height:1.4}
+    ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin: .4rem 0; }
 
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1001}
-    .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-    .modal-title{font-size:20px;font-weight:700;margin:0}
-    .modal-close{background:transparent;border:0;font-size:24px;cursor:pointer;padding:4px;color:#666}
-    .modal-close:hover{color:#000}
-    .modal-content{line-height:1.6}
-    .modal-content p{margin:12px 0;color:#333}
-    .modal-content strong{color:#111}
+    .highlight-section {
+      border-top: 1px dashed var(--border);
+      padding-top: 1rem;
+    }
 
-    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
-    .footer a{color:#3182CE;text-decoration:none}
-    .error-note{color:#c00;text-align:center;margin-top:.5rem;font-size:.95rem}
+    .cta-section {
+      background: #f8f9ff;
+      border: 1px solid #e0e7ff;
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .cta-section h3 { margin-top: 0; color: #1e3a8a; }
+    .cta-section p { color: #4338ca; margin-bottom: 1rem; }
 
-    /* New conversion optimization styles */
-    .premium-teaser{background:#f8f9ff;border:1px solid #e0e7ff;border-radius:8px;padding:1rem;margin:1rem 0;text-align:center}
-    .premium-teaser p{margin:0 0 .5rem;color:#4338ca;font-weight:600}
-    .premium-teaser small{color:#6366f1;font-size:.9rem}
-    .social-proof{text-align:center;margin:1rem 0;color:var(--muted);font-size:.9rem}
-    .cache-indicator{position:absolute;top:10px;right:10px;background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+    .btn-primary {
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      padding: .85rem 2rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      display: inline-block;
+      margin: .5rem;
+      text-decoration: none;
+    }
+    .btn-primary:hover { background: #c82333; }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1.5rem 0;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    .footer a { color: var(--primary); text-decoration: none; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1001;
+    }
+    .modal {
+      background: #fff; border-radius: 16px;
+      padding: 24px; max-width: 600px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .modal-title { font-size: 1.3rem; font-weight: 700; margin: 0; }
+    .modal-close {
+      background: transparent; border: none; font-size: 1.5rem; cursor: pointer;
+      color: #666;
+    }
   </style>
 </head>
 <body>
   <h1>SnipeRank</h1>
-  <h2>AI SEO Analysis</h2>
+  <h2>AI SEO Quick Analysis (Free)</h2>
 
   <div class="info-row">
-    <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
-    <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
+    <div>Powered by <a href="https://quontora.com" target="_blank">quontora</a></div>
+    <div>Analysis for: <strong id="current-url">-</strong></div>
   </div>
 
-  <section class="card score-card" id="scoreCard" aria-live="polite" style="position:relative">
-    <div id="cache-indicator" class="cache-indicator" style="display:none">CACHED</div>
-    <div class="score-top">
-      <div class="score-main">
-        <div class="score-number" id="scoreNumber">-</div>
-        <div class="score-band" id="scoreBand">Calculating...</div>
-      </div>
-      <div class="btn-row">
-        <button class="btn-ghost" id="breakdownBtn" type="button">What goes into this score?</button>
-        <button class="btn-ghost" id="copyBtn" type="button">Copy Shareable Summary</button>
-      </div>
+  <section class="card score-card loading" id="scoreCard">
+    <div class="score-main">
+      <div class="score-number" id="scoreNumber">–</div>
+      <div class="score-band" id="scoreBand">Analyzing...</div>
     </div>
     <div class="pillars" id="pillarsGrid"></div>
-    <div class="highlights" id="highlightsBlock" hidden>
-      <h4>Key Issues Found</h4>
-      <ul id="highlightsList"></ul>
+    <div class="btn-row">
+      <button class="btn-ghost" id="breakdownBtn">What goes into this score?</button>
+      <button class="btn-ghost" id="copyBtn">Copy Shareable Summary</button>
     </div>
   </section>
 
-  <section id="summary-results">
-    <p style="text-align:center;color:gray;">Loading comprehensive analysis...</p>
+  <section class="highlight-section">
+    <h3>What’s Working Well</h3>
+    <ul id="positivesList">
+      <li>Loading...</li>
+    </ul>
+
+    <h3>Where You Can Improve</h3>
+    <ul id="issuesList">
+      <li>Loading...</li>
+    </ul>
   </section>
 
-  <!-- Premium teaser section -->
-  <div class="premium-teaser" id="premium-teaser" style="display:none">
-    <p>🔒 Want the complete picture?</p>
-    <small>Your detailed report includes full 50-page website crawl, step-by-step action plan, and advanced AI visibility insights.</small>
-  </div>
+  <section class="cta-section">
+    <h3>Want the Full Breakdown & Step-by-Step Fixes?</h3>
+    <p>Get your detailed 50-page AI SEO report and free 30-minute consultation.</p>
+    <a href="#reportForm" class="btn-primary">Get My Full Report (Free)</a>
+    <a href="https://calendly.com/quontora" target="_blank" class="btn-primary">Book Consultation</a>
+  </section>
 
-  <!-- Social proof -->
-  <div class="social-proof">
-    ✨ Trusted by 500+ businesses to improve their AI search visibility
-  </div>
-
-  <!-- Get Full Report Form -->
-  <section class="form-section">
+  <!-- Full Report Form -->
+  <section id="reportForm" class="card" style="margin-top:2rem;">
     <h3>Get Your Detailed Report</h3>
-    <div class="form-container">
-      <form id="full-report-form" novalidate>
-        <div class="form-grid">
-          <input type="text" id="name-input" placeholder="Your Name" required />
-          <input type="email" id="email-input" placeholder="Your Email" required />
-          <input type="tel" id="phone-input" placeholder="Your Phone (optional)" />
-          <input type="text" id="company-input" placeholder="Your Company (optional)" />
-          <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
-        </div>
-        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Detailed Report (FREE)</button>
-        <div id="form-error" class="error-note" style="display:none;"></div>
-      </form>
-    </div>
-  </section>
-
-  <!-- Consultation Section -->
-  <section class="consultation-section">
-    <h3>Ready to Improve Your AI Visibility?</h3>
-    <p>After reviewing your analysis, book a free 30-minute consultation to discuss your specific opportunities and next steps.</p>
-    <a href="https://calendly.com/quontora" class="btn-primary" target="_blank" rel="noopener">Schedule Free Consultation</a>
-    <div class="consultation-info">
-      <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
-    </div>
+    <form id="full-report-form" novalidate>
+      <input type="text" id="name-input" placeholder="Your Name" required style="width:100%;margin-bottom:10px;padding:10px;border:1px solid #ddd;border-radius:4px;">
+      <input type="email" id="email-input" placeholder="Your Email" required style="width:100%;margin-bottom:10px;padding:10px;border:1px solid #ddd;border-radius:4px;">
+      <textarea id="context-input" placeholder="Optional: Questions or context" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;"></textarea>
+      <button type="submit" class="btn-primary" id="full-report-btn" style="margin-top:1rem;">Send My Full Report</button>
+      <div id="form-error" style="display:none;color:#c00;margin-top:.5rem;"></div>
+    </form>
   </section>
 
   <div class="footer">
-    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated October 29.
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank">quontora.com</a>
   </div>
 
-  <!-- Progress Overlay -->
-  <div id="progress-overlay" class="overlay">
-    <div class="progress-panel">
-      <div class="progress-header">
-        <div class="progress-title">Analyzing your website...</div>
-        <div class="progress-pct" id="progress-pct">0%</div>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="progress-eta" id="progress-eta">
-        Performing comprehensive website analysis.<br>
-        This typically takes <strong>15-45 seconds</strong>.
-      </div>
-    </div>
-  </div>
-
-  <!-- Score Breakdown Modal -->
+  <!-- Modal -->
   <div id="breakdown-modal" class="modal-backdrop">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title">What goes into your SnipeRank score?</h3>
+        <h3 class="modal-title">What Goes Into Your SnipeRank Score?</h3>
         <button class="modal-close" id="modal-close">×</button>
       </div>
       <div class="modal-content">
-        <p>Your SnipeRank score is calculated based on <strong>50+ SEO factors</strong> optimized for AI search engines. Our analysis evaluates how well your website performs across four critical pillars:</p>
-        
-        <p><strong>🎯 AI Access Readiness (25 points)</strong><br>
-        How easily AI systems can discover, crawl, and understand your site structure.</p>
-        
-        <p><strong>🔒 Trust & Verification Signals (25 points)</strong><br>
-        Authority indicators, security implementation, and credibility markers that AI engines prioritize.</p>
-        
-        <p><strong>📝 LLM Interpretability & Clarity (25 points)</strong><br>
-        Content organization, semantic markup, and clarity for AI language models.</p>
-        
-        <p><strong>🔍 Prompt-Pattern Alignment (25 points)</strong><br>
-        How well your content matches common search patterns and query structures.</p>
-        
-        <p style="margin-top:16px;font-style:italic;color:#666;">
-          Each factor is weighted based on its impact on AI search visibility and ranking potential.
-        </p>
+        <p>Your SnipeRank score is based on 50+ AI visibility factors across four pillars:</p>
+        <p><strong>🎯 AI Access Readiness</strong> — crawlability, indexing, and structure.</p>
+        <p><strong>🔒 Trust & Verification</strong> — authority signals and credibility markers.</p>
+        <p><strong>📝 LLM Interpretability</strong> — clarity and markup readability.</p>
+        <p><strong>🔍 Prompt-Pattern Alignment</strong> — how well your content matches AI query styles.</p>
       </div>
     </div>
   </div>
 
   <script>
-    // v3.4.0 JS — CRITICAL FIX: Resilient API calls, graceful degradation, no error messages
-
-    const LOGO_SOURCES = {
-      ChatGPT: '/img/chatgpt-logo.png',
-      Claude: '/img/claude.jpeg',
-      Gemini: '/img/gemini.jpeg',
-      Copilot: '/img/copilot.jpeg',
-      Perplexity: '/img/perplexity-logo.png',
-    };
-
-    // Cache management for speed optimization
-    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-    
-    function getCacheKey(url) {
-      return `sniperank_cache_${btoa(url).slice(0,20)}`;
-    }
-    
-    function getCachedData(url) {
-      try {
-        const cached = localStorage.getItem(getCacheKey(url));
-        if (!cached) return null;
-        const data = JSON.parse(cached);
-        if (Date.now() - data.timestamp > CACHE_DURATION) {
-          localStorage.removeItem(getCacheKey(url));
-          return null;
-        }
-        return data;
-      } catch {
-        return null;
-      }
-    }
-    
-    function setCachedData(url, data) {
-      try {
-        const cacheData = {
-          ...data,
-          timestamp: Date.now()
-        };
-        localStorage.setItem(getCacheKey(url), JSON.stringify(cacheData));
-      } catch {
-        // Storage full or disabled, continue without caching
-      }
-    }
-
-    // More resilient API fetch with aggressive retries
-    async function fetchWithRetry(url, maxRetries = 2, timeout = 10000) {
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), timeout);
-          
-          const response = await fetch(url, { 
-            signal: controller.signal,
-            headers: {
-              'Accept': 'application/json, text/html',
-              'Cache-Control': 'no-cache'
-            }
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          
-          return response;
-        } catch (error) {
-          console.warn(`API attempt ${i + 1}/${maxRetries + 1} failed:`, error.message);
-          
-          if (i === maxRetries) {
-            throw error;
-          }
-          
-          // Progressive backoff but not too long
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-        }
-      }
-    }
-
-    function logoDivFor(engine){
-      const wrap = document.createElement('div'); 
-      wrap.className = 'llm-logo';
-      const p = LOGO_SOURCES[engine];
-      if (!p) {
-        wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
-        return wrap;
-      }
-      const img = document.createElement('img'); 
-      img.alt = `${engine} logo`; 
-      img.src = p;
-      img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
-      img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
-      return wrap;
-    }
-    
-    function transformAIInsights(root){
-      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')].find(n => /ai\s*engine\s*insights?/i.test((n.textContent || '').trim()));
-      if (!title) return;
-      let ul = title.nextElementSibling;
-      while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
-      if (!ul) return;
-      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent || '').trim());
-      if (!bullets.length) return;
-      const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
-      const box = document.createElement('div'); 
-      box.className = 'llm-insights';
-      engines.forEach((e, i) => {
-        const t = bullets[i]; 
-        if (!t) return; 
-        const row = document.createElement('div'); 
-        row.className = 'llm-row'; 
-        row.appendChild(logoDivFor(e)); 
-        const p = document.createElement('p'); 
-        p.textContent = t; 
-        row.appendChild(p); 
-        box.appendChild(row);
-      });
-      ul.replaceWith(box);
-    }
-    
-    function renderScoreCard(total, pillars, highlights, isCached = false){
-      document.getElementById("scoreNumber").textContent = `${total}/100`;
-      document.getElementById("scoreBand").textContent =
-        total >= 70 ? "Rank: Highly Visible ★★★★☆" : 
-        total >= 55 ? "Rank: Partially Visible ★★★☆☆" : 
-        total >= 40 ? "Rank: Needs Work ★★☆☆☆" : 
-        "Rank: Low Visibility ★☆☆☆☆";
-      
-      // Show cache indicator if data is from cache
-      if (isCached) {
-        document.getElementById('cache-indicator').style.display = 'block';
-      }
-      
-      const grid = document.getElementById("pillarsGrid"); 
-      grid.innerHTML = "";
-      [
-        ["AI Access Readiness", pillars.access],
-        ["Trust & Verification Signals", pillars.trust],
-        ["LLM Interpretability & Clarity", pillars.clarity],
-        ["Prompt-Pattern Alignment", pillars.alignment]
-      ].forEach(([label, val]) => {
-        const d = document.createElement("div"); 
-        d.className = "pillar"; 
-        d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`; 
-        grid.appendChild(d);
-      });
-      
-      if (highlights && highlights.length) {
-        const ul = document.getElementById("highlightsList"); 
-        ul.innerHTML = ""; 
-        highlights.slice(0, 3).forEach(h => { // Limit to 3 highlights for conversion
-          const li = document.createElement("li"); 
-          li.textContent = h; 
-          ul.appendChild(li);
-        }); 
-        document.getElementById("highlightsBlock").hidden = false;
-        
-        // Show premium teaser if there are more insights available
-        if (highlights.length > 3 || total < 70) {
-          document.getElementById("premium-teaser").style.display = 'block';
-        }
-      }
-    }
-
-    // Extract target URL from query params
     const urlParams = new URLSearchParams(window.location.search);
     const targetUrl = urlParams.get("url");
+    const apiBase = "https://sniperank-app2.onrender.com";
 
-    // Robust domain extractor
     function extractDomain(u){
-      if (!u) return '';
       try {
-        const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
-        const { hostname } = new URL(withProto);
-        return hostname.replace(/^www\./i,'');
-      } catch {
-        const m = String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i);
-        return (m ? m[1] : '').replace(/^www\./i,'');
-      }
+        const { hostname } = new URL(/^https?:\/\//i.test(u) ? u : `https://${u}`);
+        return hostname.replace(/^www\./,'');
+      } catch { return ''; }
     }
 
-    // Enhanced progress simulation with dynamic adaptation to actual loading speed
-    function startProgress() {
-      document.getElementById('progress-overlay').style.display = 'flex';
-      const startTime = Date.now();
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-      const progressEta = document.getElementById('progress-eta');
-      
-      const messages = [
-        'Analyzing website structure and metadata...',
-        'Checking AI search engine visibility...',
-        'Evaluating content quality and clarity...',
-        'Processing trust and authority signals...',
-        'Finalizing comprehensive analysis...'
-      ];
-      
-      let messageIndex = 0;
-      let completed = false;
-      let targetProgress = 0;
-      
-      const interval = setInterval(() => {
-        if (completed) return;
-        
-        const elapsed = Date.now() - startTime;
-        
-        // Adaptive speed - faster if no actual loading happening
-        const baseSpeed = targetProgress > 0 ? 8000 : 15000; // Speed up if we have real progress
-        const ratio = Math.min(elapsed / baseSpeed, 1);
-        const progress = Math.min(ratio * 90, targetProgress || 90); // Don't go past real progress
-        
-        progressFill.style.width = progress + '%';
-        progressPct.textContent = Math.floor(progress) + '%';
-        
-        // Update message based on progress
-        const newMessageIndex = Math.floor((progress / 100) * messages.length);
-        if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
-          messageIndex = newMessageIndex;
-          progressEta.innerHTML = messages[messageIndex] + '<br>Almost done!';
-        }
-        
-        if (progress >= 90 && !targetProgress) clearInterval(interval);
-      }, 100);
-      
-      return {
-        interval,
-        setProgress: (pct) => { targetProgress = Math.max(targetProgress, pct); },
-        complete: () => { 
-          completed = true; 
-          clearInterval(interval);
-        }
-      };
+    async function fetchData() {
+      if (!targetUrl) return null;
+      const res = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
+      return await res.json();
     }
 
-    function stopProgress() {
-      const progressFill = document.getElementById('progress-fill');
-      const progressPct = document.getElementById('progress-pct');
-      progressFill.style.transition = 'width 0.5s ease';
-      progressFill.style.width = '100%';
-      progressPct.textContent = '100%';
-      setTimeout(() => {
-        document.getElementById('progress-overlay').style.display = 'none';
-      }, 600);
+    function renderData(data) {
+      document.getElementById("scoreCard").classList.remove("loading");
+      document.getElementById("scoreNumber").textContent = `${data.score}/100`;
+      document.getElementById("scoreBand").textContent =
+        data.score >= 70 ? "Rank: Highly Visible ★★★★☆" :
+        data.score >= 55 ? "Rank: Partially Visible ★★★☆☆" :
+        data.score >= 40 ? "Rank: Needs Work ★★☆☆☆" :
+        "Rank: Low Visibility ★☆☆☆☆";
+
+      const grid = document.getElementById("pillarsGrid");
+      grid.innerHTML = "";
+      [
+        ["AI Access Readiness", data.pillars.access],
+        ["Trust & Verification Signals", data.pillars.trust],
+        ["LLM Interpretability & Clarity", data.pillars.clarity],
+        ["Prompt-Pattern Alignment", data.pillars.alignment]
+      ].forEach(([label, val]) => {
+        const div = document.createElement("div");
+        div.className = "pillar";
+        div.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`;
+        grid.appendChild(div);
+      });
+
+      // Working
+      const posList = document.getElementById("positivesList");
+      posList.innerHTML = "";
+      (data.whatsWorking || []).slice(0,5).forEach(i => {
+        const li = document.createElement("li");
+        li.textContent = i;
+        posList.appendChild(li);
+      });
+
+      // Issues
+      const issueList = document.getElementById("issuesList");
+      issueList.innerHTML = "";
+      (data.needsAttention || []).slice(0,10).forEach(i => {
+        const li = document.createElement("li");
+        li.textContent = i;
+        issueList.appendChild(li);
+      });
     }
 
-    // Modal controls
-    document.getElementById('breakdownBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('breakdown-modal').style.display = 'flex';
-      
-      // Track modal opens for conversion optimization
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'modal_open', { modal_type: 'score_breakdown' });
-      }
-    });
-    
-    document.getElementById('modal-close').addEventListener('click', () => {
-      document.getElementById('breakdown-modal').style.display = 'none';
-    });
-    
-    document.getElementById('breakdown-modal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('breakdown-modal')) {
-        document.getElementById('breakdown-modal').style.display = 'none';
-      }
-    });
-
-    // Enhanced copy button with conversion tracking
+    // Copy summary
     document.getElementById("copyBtn").addEventListener("click", async () => {
-      const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
-      const labels = [...document.querySelectorAll('.pillar .label')].map(el => el.textContent.trim());
-      const vals = [...document.querySelectorAll('.pillar .badge')].map(el => el.textContent.trim());
-      const highlights = [...document.querySelectorAll('#highlightsList li')].map(li => li.textContent.trim());
-      const txt = [
-        `Website: ${targetUrl}`,
-        `SnipeRank Score: ${scoreText}`,
-        `Pillars:`, ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
-        ``, `Key Issues:`, ...highlights.map(h => `- ${h}`),
-        ``, `Get your detailed report at: ${window.location.origin}`
-      ].join("\n");
-      
-      try { 
-        await navigator.clipboard.writeText(txt);
-        const b = document.getElementById("copyBtn"); 
-        const old = b.textContent; 
-        b.textContent = "Copied!"; 
-        setTimeout(() => b.textContent = old, 1500);
-        
-        // Track copy events for conversion analysis
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'summary_copied', { score: scoreText });
-        }
-      } catch { 
-        window.prompt("Copy the summary:", txt); 
+      const scoreText = document.getElementById("scoreNumber").textContent;
+      const url = targetUrl || "Unknown";
+      const text = `Website: ${url}\nSnipeRank Score: ${scoreText}\nCheck your site: ${window.location.origin}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById("copyBtn");
+        const old = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = old), 1500);
+      } catch {
+        window.prompt("Copy this summary:", text);
       }
     });
 
-    // Enhanced form submission with conversion optimization
-    document.getElementById('full-report-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name-input').value.trim();
-      const email = document.getElementById('email-input').value.trim();
-      const phone = document.getElementById('phone-input').value.trim();
-      const company = document.getElementById('company-input').value.trim();
-      const context = document.getElementById('context-input').value.trim();
-      const errorEl = document.getElementById('form-error');
-      const btn = document.getElementById('full-report-btn');
+    // Modal
+    document.getElementById("breakdownBtn").onclick = () => {
+      document.getElementById("breakdown-modal").style.display = "flex";
+    };
+    document.getElementById("modal-close").onclick = () => {
+      document.getElementById("breakdown-modal").style.display = "none";
+    };
+    document.getElementById("breakdown-modal").onclick = (e) => {
+      if (e.target.id === "breakdown-modal")
+        e.currentTarget.style.display = "none";
+    };
 
-      errorEl.style.display = 'none';
-      if (!name || !email || !targetUrl) {
-        errorEl.textContent = 'Please provide your name and email to access your full report.';
-        errorEl.style.display = 'block';
+    // Form
+    document.getElementById("full-report-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name-input").value.trim();
+      const email = document.getElementById("email-input").value.trim();
+      if (!name || !email) {
+        const err = document.getElementById("form-error");
+        err.textContent = "Please enter your name and email.";
+        err.style.display = "block";
         return;
       }
-
       const domain = extractDomain(targetUrl);
-
-      // Enhanced session storage with conversion tracking
-      sessionStorage.setItem('sniperank:name', name);
-      sessionStorage.setItem('sniperank:email', email);
-      sessionStorage.setItem('sniperank:phone', phone);
-      sessionStorage.setItem('sniperank:company', company);
-      sessionStorage.setItem('sniperank:context', context);
-      sessionStorage.setItem('sniperank:url', targetUrl);
-      sessionStorage.setItem('sniperank:domain', domain);
-      sessionStorage.setItem('sniperank:conversion_time', Date.now());
-
-      // Track form submissions
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'form_submit', { 
-          form_type: 'full_report_request',
-          domain: domain 
-        });
-      }
-
-      // Prevent double-clicks
-      btn.disabled = true; 
-      btn.textContent = 'Preparing Your Full Report...';
-
-      // Enhanced redirect with conversion parameters
-      const q = new URLSearchParams({
-        url: targetUrl,
-        name: encodeURIComponent(name),
-        email: encodeURIComponent(email),
-        domain,
-        source: 'analyze',
-        converted: 'true'
-      }).toString();
-
-      console.log('Redirecting to full report with enhanced params:', q);
+      const q = new URLSearchParams({ url: targetUrl, name, email, domain }).toString();
       window.location.href = `full-report.html?${q}`;
     });
-    
-    // Load analysis with parallel requests and optimized caching
+
+    // Initialize
     document.addEventListener("DOMContentLoaded", async () => {
-      if (!targetUrl) {
-        document.getElementById("current-url").textContent = "No URL provided";
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>No URL provided. Please go back to the homepage.</p>";
-        return;
-      }
-      
-      document.getElementById("current-url").textContent = targetUrl;
-      
-      // Preload logo images for faster rendering
-      Object.values(LOGO_SOURCES).forEach(src => {
-        const img = new Image();
-        img.src = src;
-      });
-      
-      if (!cachedData) {
-        progressController = startProgress();
-      }
-
-      // Probe for local /api/score; fallback to Render base if needed
-      let apiBase = '';
+      document.getElementById("current-url").textContent = targetUrl || "Unknown";
       try {
-        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD'});
-        if (!probe.ok) throw 0;
-      } catch { 
-        apiBase = 'https://sniperank-app2.onrender.com'; 
-      }
-
-      try {
-        const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`);
-        const j = await r.json();
-        renderScoreCard(j.score, j.pillars, j.highlights);
-        sessionStorage.setItem('sniperank:data', JSON.stringify(j));
-      } catch (e) {
-        console.error('Score error:', e);
-      }
-
-      try {
-        const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);
-        const html = await res.text();
-        const host = document.getElementById('summary-results'); 
-        host.innerHTML = html; 
-        transformAIInsights(host);
-      } catch {
-        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading analysis report.</p>";
-      } finally {
-        if (progressController) {
-          progressController.complete();
-          stopProgress();
-        }
-      }
-
-      // Track page views for analytics
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'page_view', {
-          page_title: 'SnipeRank Analysis',
-          custom_map: { dimension1: extractDomain(targetUrl) },
-          load_time: Date.now() - performance.timing.navigationStart
-        });
+        const data = await fetchData();
+        if (data) renderData(data);
+        else throw new Error("No data");
+      } catch (err) {
+        document.getElementById("issuesList").innerHTML = "<li>Error loading analysis.</li>";
+        console.error(err);
       }
     });
   </script>

@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- analyze.html — v3.7.0 (Free Quick Analysis)
-       - No placeholder content. Blocking lightbox w/ shimmer + timeout actions.
-       - Score card shimmer while loading.
-       - Sections remain hidden until real data arrives.
-       Last updated: Oct 30, 2025
+  <!-- analyze.html — v4.0.0 (Free Quick Analysis)
+       - Purpose: High-level AI SEO scan to motivate full report / consult
+       - Includes: Score card, shimmer loading, blocking overlay, retry + fallback
+       - Compatible endpoint: /api/score?url=...
+       - Backend fallback: https://sniperank-app2.onrender.com
+       - Last updated: Oct 30, 2025
   -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SnipeRank — AI SEO Quick Analysis (Free)</title>
+
   <style>
     :root{
       --max-width:960px; --pad-v:3vh; --pad-h:2rem;
@@ -76,6 +78,7 @@
 
     /* Blocking Lightbox */
     .overlay{position:fixed;inset:0;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;z-index:1000}
+    .hidden{display:none!important}
     .panel{width:min(520px,92vw);background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.12);padding:22px 20px;position:relative;overflow:hidden}
     .panel.loading{animation:pulse-shimmer 2s ease-in-out infinite}
     .panel.loading::before{
@@ -116,7 +119,7 @@
       </div>
       <div class="btns">
         <button class="btn" id="breakdownBtn" type="button">What goes into this score?</button>
-        <button class="btn" id="copyBtn" type="button" disabled>Copy Shareable Summary</button>
+        <button class="btn" id="copyBtn" type="button" disabled>Copy Summary</button>
       </div>
     </div>
     <div class="pillars" id="pillarsGrid">
@@ -127,7 +130,7 @@
     </div>
   </section>
 
-  <!-- WORKING / ISSUES (remain hidden until real data arrives) -->
+  <!-- WORKING / ISSUES -->
   <section class="section hidden" id="workingSection">
     <h3>What’s Working Well</h3>
     <ul id="workingList" class="klist"></ul>
@@ -141,7 +144,7 @@
   <!-- CTA -->
   <div class="cta-card">
     <h3 style="margin:.25rem 0 .5rem">Want the Full Breakdown & Step-by-Step Fixes?</h3>
-    <p>Get your detailed 50-page AI SEO report and a free 30-minute consultation.</p>
+    <p>Get your detailed AI SEO report and a free 30-minute consultation.</p>
     <div class="cta-actions">
       <a class="cta-primary" href="#report-form">Get My Full Report (Free)</a>
       <a class="cta-secondary" href="https://calendly.com/quontora" target="_blank" rel="noopener">Book Consultation</a>
@@ -153,11 +156,11 @@
     <h3>Get Your Detailed Report</h3>
     <form id="full-report-form" novalidate>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <input type="text" id="name-input" placeholder="Your Name" required style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
-        <input type="email" id="email-input" placeholder="Your Email" required style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
-        <input type="tel" id="phone-input" placeholder="Your Phone (optional)" style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
-        <input type="text" id="company-input" placeholder="Your Company (optional)" style="padding:10px;border:1px solid var(--border);border-radius:8px"/>
-        <textarea id="context-input" placeholder="Share context or ask a specific question — we'll address it in your consult." style="grid-column:1/-1;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:8px"></textarea>
+        <input type="text" id="name-input" placeholder="Your Name" required />
+        <input type="email" id="email-input" placeholder="Your Email" required />
+        <input type="tel" id="phone-input" placeholder="Your Phone (optional)" />
+        <input type="text" id="company-input" placeholder="Your Company (optional)" />
+        <textarea id="context-input" placeholder="Share context or questions for your consult." style="grid-column:1/-1;min-height:90px"></textarea>
       </div>
       <div id="form-error" style="color:#c00;margin-top:8px;display:none"></div>
       <button id="full-report-btn" type="submit" class="cta-primary" style="margin-top:12px">Get My Full Report</button>
@@ -169,10 +172,10 @@
     <div class="panel">
       <div class="p-title">What goes into your SnipeRank score?</div>
       <div class="p-sub">
-        <p><strong>🎯 AI Access Readiness (25)</strong> — crawlability, speed, mobile, indexability.</p>
-        <p><strong>🔒 Trust & Verification Signals (25)</strong> — authorship, citations, security, authority cues.</p>
-        <p><strong>📝 LLM Interpretability & Clarity (25)</strong> — headings, schema, semantic structure.</p>
-        <p><strong>🔍 Prompt-Pattern Alignment (25)</strong> — FAQs, Q&A blocks, task/intent coverage.</p>
+        <p><strong>🎯 AI Access Readiness</strong> — Crawlability, load, and structure for AI crawlers.</p>
+        <p><strong>🔒 Trust & Verification</strong> — Authorship, HTTPS, and reputation signals.</p>
+        <p><strong>📝 LLM Clarity</strong> — Schema, headings, and semantic patterns.</p>
+        <p><strong>🔍 Prompt-Pattern Alignment</strong> — Q&A and topical coverage for AI search.</p>
       </div>
       <div class="actions" style="justify-content:flex-end">
         <button class="ghost" id="closeBreakdown" type="button">Close</button>
@@ -180,16 +183,15 @@
     </div>
   </div>
 
-  <!-- BLOCKING LIGHTBOX (loading + timeout) -->
+  <!-- BLOCKING LIGHTBOX -->
   <div class="overlay" id="progress">
     <div class="panel loading" id="progressPanel">
       <div class="p-title">Analyzing your website…</div>
-      <div class="p-sub">Checking structure, AI visibility signals, and content clarity.</div>
+      <div class="p-sub">Checking structure, visibility, and AI search readiness.</div>
       <div class="bar"><div class="fill" id="pFill"></div></div>
       <div class="p-eta" id="pEta">This usually takes 15–45 seconds.</div>
-
       <div class="timeout" id="timeoutBox">
-        <p><strong>Still working…</strong> Large or protected sites can take longer. You can keep waiting, retry now, or get the full report by email.</p>
+        <p><strong>Still working…</strong> You can keep waiting, retry, or get the full report by email.</p>
         <div class="actions">
           <button class="ghost" id="keepWaitingBtn" type="button">Keep Waiting</button>
           <button class="ghost" id="retryBtn" type="button">Retry Now</button>
@@ -202,210 +204,55 @@
   <div class="footer">© 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a></div>
 
   <script>
-    /* ---------- Setup ---------- */
-    const $ = id => document.getElementById(id);
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUrl = urlParams.get('url') || '';
-    $("current-url").textContent = targetUrl || '—';
-
-    const LOGOS = {
-      ChatGPT: '/img/chatgpt-logo.png',
-      Claude: '/img/claude.jpeg',
-      Gemini: '/img/gemini.jpeg',
-      Copilot: '/img/copilot.jpeg',   // correct file name per your note
-      Perplexity: '/img/perplexity-logo.png',
-    };
-    Object.values(LOGOS).forEach(src => { const i=new Image(); i.src=src; });
-
-    function extractDomain(u){
-      if (!u) return '';
-      try{ return new URL(/^https?:\/\//i.test(u)?u:`https://${u}`).hostname.replace(/^www\./,''); }
-      catch{ const m=String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i); return (m?m[1]:'').replace(/^www\./,''); }
-    }
-
-    /* ---------- UI helpers ---------- */
-    function renderScore(total, pillars){
-      $("scoreNumber").textContent = `${Math.round(total)}/100`;
-      $("scoreBand").textContent =
-        total >= 70 ? "Rank: Highly Visible ★★★★☆" :
-        total >= 55 ? "Rank: Partially Visible ★★★☆☆" :
-        total >= 40 ? "Rank: Needs Work ★★☆☆☆" : "Rank: Low Visibility ★☆☆☆☆";
-
-      const items = [
-        ["AI Access Readiness", pillars.access ?? 0],
-        ["Trust & Verification Signals", pillars.trust ?? 0],
-        ["LLM Interpretability & Clarity", pillars.clarity ?? 0],
-        ["Prompt-Pattern Alignment", pillars.alignment ?? 0]
-      ];
-      $("pillarsGrid").innerHTML = items.map(([label,val]) =>
-        `<div class="chip"><span>${label}</span><span>${val}/25</span></div>`).join("");
-
-      $("scoreCard").classList.remove("loading");
-      $("copyBtn").disabled = false;
-    }
-
-    function setList(el, arr){
-      if (!arr || !arr.length) return;
-      el.innerHTML = arr.map(x => `<li>${x}</li>`).join("");
-    }
-
-    /* ---------- Modal controls ---------- */
-    $("breakdownBtn").addEventListener('click', ()=> $("breakdown").classList.remove('hidden'));
-    $("closeBreakdown").addEventListener('click', ()=> $("breakdown").classList.add('hidden'));
-    $("breakdown").addEventListener('click', (e)=>{ if(e.target===$("breakdown")) $("breakdown").classList.add('hidden'); });
-
-    /* ---------- Copy summary ---------- */
-    $("copyBtn").addEventListener("click", async () => {
-      const scoreText = $("scoreNumber").textContent || "-/100";
-      const labels = [...document.querySelectorAll('.chip span:first-child')].map(el => el.textContent.trim());
-      const vals = [...document.querySelectorAll('.chip span:last-child')].map(el => el.textContent.trim());
-      const working = [...$("workingList").querySelectorAll('li')].slice(0,5).map(li=>li.textContent.trim());
-      const issues  = [...$("issuesList").querySelectorAll('li')).slice(0,10).map(li=>li.textContent.trim());
-      const txt = [
-        `Website: ${targetUrl}`,
-        `SnipeRank Score: ${scoreText}`,
-        ``,
-        `Pillars:`,
-        ...labels.map((l,i)=>`- ${l}: ${vals[i]||''}`),
-        working.length?``,`Top strengths:`,...working.map(x=>`- ${x}`):[],
-        issues.length?``,`Top issues:`,...issues.map(x=>`- ${x}`):[],
-        ``,
-        `Get the full report at: ${window.location.origin}/full-report.html`
-      ].flat().join("\n");
-      try{
-        await navigator.clipboard.writeText(txt);
-        const b = $("copyBtn"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1200);
-      }catch{ window.prompt("Copy the summary:", txt); }
-    });
-
-    /* ---------- Form ---------- */
-    $("full-report-form").addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const name = $("name-input").value.trim();
-      const email = $("email-input").value.trim();
-      const phone = $("phone-input").value.trim();
-      const company = $("company-input").value.trim();
-      const context = $("context-input").value.trim();
-      const err = $("form-error");
-      if(!name || !email || !targetUrl){
-        err.textContent = "Please provide your name and email."; err.style.display='block'; return;
-      }
-      err.style.display='none';
-      const domain = extractDomain(targetUrl);
-      sessionStorage.setItem('sniperank:name', name);
-      sessionStorage.setItem('sniperank:email', email);
-      sessionStorage.setItem('sniperank:phone', phone);
-      sessionStorage.setItem('sniperank:company', company);
-      sessionStorage.setItem('sniperank:context', context);
-      sessionStorage.setItem('sniperank:url', targetUrl);
-      sessionStorage.setItem('sniperank:domain', domain);
-      $("full-report-btn").disabled = true;
-      $("full-report-btn").textContent = "Preparing Full Report…";
-      const q = new URLSearchParams({ url: targetUrl, name: encodeURIComponent(name), email: encodeURIComponent(email), domain, source:'analyze' }).toString();
-      window.location.href = `full-report.html?${q}`;
-    });
-
-    /* ---------- Blocking overlay progress + timeout ---------- */
-    const PROBE_TIMEOUT_MS = 10000;
-    const TIMEOUT_MS = 25000;
+    const $=id=>document.getElementById(id);
+    const params=new URLSearchParams(window.location.search);
+    const targetUrl=params.get('url')||'';
+    $("current-url").textContent=targetUrl||'—';
+    const PROBE_TIMEOUT=10000, TIMEOUT_MS=25000;
     let progressTimer, timeoutTimer;
 
-    function startProgress(){
-      const fill = $("pFill");
-      let pct = 0;
-      progressTimer = setInterval(()=>{
-        pct = Math.min(pct + Math.random()*3, 90);
-        fill.style.width = pct + '%';
-      }, 120);
+    function extractDomain(u){
+      try{return new URL(/^https?:\/\//i.test(u)?u:`https://${u}`).hostname.replace(/^www\./,'')}catch{return''}
     }
-    function completeProgress(){
-      clearInterval(progressTimer);
-      $("pFill").style.transition='width .5s ease';
-      $("pFill").style.width='100%';
-      setTimeout(()=> $("progress").classList.add('hidden'), 500);
-    }
-    function showTimeout(){
-      $("progressPanel").classList.remove('loading');
-      $("timeoutBox").style.display = 'block';
-      $("pEta").textContent = "The server is taking longer than usual.";
-    }
-    function resetOverlayForRetry(){
-      $("timeoutBox").style.display='none';
-      $("progressPanel").classList.add('loading');
-      $("pFill").style.width='0%';
-      startProgress();
-      startTimeouts();
-    }
-    function startTimeouts(){
-      clearTimeout(timeoutTimer);
-      timeoutTimer = setTimeout(showTimeout, TIMEOUT_MS);
-    }
+    function startProgress(){let p=0;progressTimer=setInterval(()=>{$("pFill").style.width=(p=Math.min(p+Math.random()*3,90))+'%'},120);}
+    function completeProgress(){clearInterval(progressTimer);$("pFill").style.width='100%';setTimeout(()=>$("progress").classList.add('hidden'),500);}
+    function showTimeout(){$("progressPanel").classList.remove('loading');$("timeoutBox").style.display='block';}
+    function resetOverlay(){ $("timeoutBox").style.display='none';$("progressPanel").classList.add('loading');$("pFill").style.width='0%';startProgress();startTimeouts();}
+    function startTimeouts(){clearTimeout(timeoutTimer);timeoutTimer=setTimeout(showTimeout,TIMEOUT_MS);}
+    $("retryBtn").onclick=()=>{resetOverlay();loadAll(true);};
+    $("keepWaitingBtn").onclick=()=>startTimeouts();
+    $("breakdownBtn").onclick=()=>$("breakdown").classList.remove('hidden');
+    $("closeBreakdown").onclick=()=>$("breakdown").classList.add('hidden');
+    $("breakdown").onclick=e=>{if(e.target===$("breakdown"))$("breakdown").classList.add('hidden');};
 
-    $("retryBtn").addEventListener('click', ()=> { resetOverlayForRetry(); loadAll(true); });
-    $("keepWaitingBtn").addEventListener('click', ()=> { startTimeouts(); });
+    $("copyBtn").onclick=async()=>{
+      const score=$("scoreNumber").textContent,txt=`Website: ${targetUrl}\nSnipeRank Score: ${score}\nGet full report: ${window.location.origin}/full-report.html`;
+      try{await navigator.clipboard.writeText(txt);const b=$("copyBtn");const t=b.textContent;b.textContent="Copied!";setTimeout(()=>b.textContent=t,1200);}catch{window.prompt("Copy summary:",txt);}
+    };
 
-    /* ---------- Data loading ---------- */
-    function parseFirstULAfterHeading(html, headingRegex){
-      const tmp = document.createElement('div'); tmp.innerHTML = html;
-      const nodes = [...tmp.querySelectorAll('h1,h2,h3,h4,.section-title,strong')];
-      const hit = nodes.find(n => headingRegex.test((n.textContent||'').trim()));
-      if(!hit) return [];
-      let p = hit.nextElementSibling;
-      while(p && (!p.tagName || p.tagName.toLowerCase()!=='ul')) p = p.nextElementSibling;
-      if(!p) return [];
-      return [...p.querySelectorAll('li')].map(li => (li.textContent||'').trim()).filter(Boolean);
-    }
+    $("full-report-form").onsubmit=e=>{
+      e.preventDefault();
+      const name=$("name-input").value.trim(),email=$("email-input").value.trim();
+      if(!name||!email){$("form-error").textContent="Please provide your name and email.";$("form-error").style.display='block';return;}
+      const domain=extractDomain(targetUrl);
+      sessionStorage.setItem('sniperank:name',name);
+      sessionStorage.setItem('sniperank:email',email);
+      sessionStorage.setItem('sniperank:url',targetUrl);
+      window.location.href=`full-report.html?url=${encodeURIComponent(targetUrl)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&domain=${domain}`;
+    };
 
-    async function decideApiBase(){
-      try{
-        const ctl = new AbortController();
-        const t = setTimeout(()=>ctl.abort(), PROBE_TIMEOUT_MS);
-        const probe = await fetch('/api/score?url=' + encodeURIComponent('https://example.com'), {method:'HEAD', signal:ctl.signal});
-        clearTimeout(t);
-        if (!probe.ok) throw 0;
-        return '';
-      }catch{ return 'https://sniperank-app2.onrender.com'; }
-    }
-
-    async function loadAll(isRetry=false){
-      if (!targetUrl) { showTimeout(); return; }
-
-      const apiBase = await decideApiBase();
-
-      // SCORE (no fake fallback)
-      try{
-        const r = await fetch(`${apiBase}/api/score?url=${encodeURIComponent(targetUrl)}`, {headers:{'Accept':'application/json'}});
-        if (!r.ok) throw 0;
-        const j = await r.json();
-        renderScore(Number(j.score ?? 0), j.pillars ?? {access:0,trust:0,clarity:0,alignment:0});
-      }catch(e){
-        $("scoreBand").textContent = "Unable to load score (server unavailable).";
-        $("scoreCard").classList.remove("loading");
-      }
-
-      // REPORT HTML bullets
-      try{
-        const res = await fetch(`${apiBase}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`, {headers:{'Accept':'text/html'}});
-        if (!res.ok) throw 0;
-        const html = await res.text();
-        const working = parseFirstULAfterHeading(html, /working\s+well/i);
-        const issues  = parseFirstULAfterHeading(html, /(improve|issues?|opportunities)/i);
-
-        if (working.length){ setList($("workingList"), working.slice(0,5)); $("workingSection").classList.remove('hidden'); }
-        if (issues.length){ setList($("issuesList"), issues.slice(0,10)); $("issuesSection").classList.remove('hidden'); }
-      }catch(e){
-        // leave sections hidden; no placeholders
-      }
-
+    function renderScore(score,p){$("scoreNumber").textContent=score+"/100";$("scoreBand").textContent=score>=70?"Highly Visible ★★★★☆":score>=55?"Partially Visible ★★★☆☆":score>=40?"Needs Work ★★☆☆☆":"Low Visibility ★☆☆☆☆";$("pillarsGrid").innerHTML=[["AI Access Readiness",p.access],["Trust & Verification",p.trust],["LLM Clarity",p.clarity],["Prompt Alignment",p.alignment]].map(([l,v])=>`<div class='chip'><span>${l}</span><span>${v}/25</span></div>`).join('');$("scoreCard").classList.remove('loading');$("copyBtn").disabled=false;}
+    function setList(el,arr){el.innerHTML=arr.map(x=>`<li>${x}</li>`).join('');}
+    async function decideApi(){try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),PROBE_TIMEOUT);const r=await fetch('/api/score?url=https://example.com',{method:'HEAD',signal:ctl.signal});clearTimeout(t);if(!r.ok)throw 0;return '';}catch{return'https://sniperank-app2.onrender.com';}}
+    async function loadAll(){
+      if(!targetUrl){showTimeout();return;}
+      const api=await decideApi();
+      try{const r=await fetch(`${api}/api/score?url=${encodeURIComponent(targetUrl)}`);const j=await r.json();renderScore(j.score,j.pillars||{});}catch{ $("scoreBand").textContent="Error loading score."; $("scoreCard").classList.remove("loading");}
+      try{const r=await fetch(`${api}/report.html?report=analyze&url=${encodeURIComponent(targetUrl)}`);const h=await r.text();const tmp=document.createElement('div');tmp.innerHTML=h;const w=[...tmp.querySelectorAll('h2,h3')].find(x=>/working/i.test(x.textContent));const i=[...tmp.querySelectorAll('h2,h3')].find(x=>/improve|issues?/i.test(x.textContent));if(w){const ul=w.nextElementSibling;if(ul) {setList($("workingList"),[...ul.querySelectorAll('li')].slice(0,5).map(li=>li.textContent));$("workingSection").classList.remove('hidden');}}if(i){const ul=i.nextElementSibling;if(ul){setList($("issuesList"),[...ul.querySelectorAll('li')].slice(0,10).map(li=>li.textContent));$("issuesSection").classList.remove('hidden');}}}catch{}
       completeProgress();
     }
 
-    // Start
-    (function init(){
-      startProgress();
-      startTimeouts();
-      loadAll(false);
-    })();
+    (function init(){startProgress();startTimeouts();loadAll();})();
   </script>
 </body>
 </html>

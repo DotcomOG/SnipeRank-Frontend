@@ -1,4 +1,4 @@
-/*
+/* 
   api/full.js - v3.2.0 — WITH REAL SEO INTELLIGENCE
   Purpose: Comprehensive AI SEO analysis with actual performance data
   NEW: Google PageSpeed Insights API integration

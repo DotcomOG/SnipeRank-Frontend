@@ -29,7 +29,7 @@ const BLOCKED_HOSTNAMES = [
  * @param {string} urlString - URL to validate
  * @returns {Object} { isValid: boolean, error?: string, url?: URL }
  */
-export function validateUrl(urlString) {
+function validateUrl(urlString) {
   // Basic validation
   if (!urlString || typeof urlString !== 'string') {
     return { isValid: false, error: 'URL is required' };
@@ -91,7 +91,7 @@ export function validateUrl(urlString) {
  * @param {number} maxLength - Maximum allowed length
  * @returns {string} Sanitized input
  */
-export function sanitizeInput(input, maxLength = 1000) {
+function sanitizeInput(input, maxLength = 1000) {
   if (!input || typeof input !== 'string') {
     return '';
   }
@@ -110,7 +110,7 @@ export function sanitizeInput(input, maxLength = 1000) {
  * @param {string} email - Email to validate
  * @returns {boolean} True if valid email format
  */
-export function validateEmail(email) {
+function validateEmail(email) {
   if (!email || typeof email !== 'string') {
     return false;
   }
@@ -208,9 +208,17 @@ class RateLimiter {
 }
 
 // Export singleton instance
-export const rateLimiter = new RateLimiter();
+const rateLimiter = new RateLimiter();
 
 // Cleanup old rate limit entries every 5 minutes
 setInterval(() => {
   rateLimiter.cleanup();
 }, 5 * 60 * 1000);
+
+module.exports = {
+  validateUrl,
+  sanitizeInput,
+  validateEmail,
+  RateLimiter,
+  rateLimiter
+};

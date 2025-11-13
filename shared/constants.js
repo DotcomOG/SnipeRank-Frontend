@@ -4,7 +4,7 @@
  */
 
 // Scoring constants
-export const SCORING = {
+const SCORING = {
   // Maximum number of issues that can contribute to score penalty
   MAX_ISSUE_WEIGHT: 30,
 
@@ -24,11 +24,17 @@ export const SCORING = {
   MIN_SCORE: 0,
 
   // Maximum score
-  MAX_SCORE: 100
+  MAX_SCORE: 100,
+
+  // Base score before adjustments
+  BASE_SCORE: 40,
+
+  // Bonus per strength (max 30)
+  STRENGTH_BONUS: 3
 };
 
 // Content limits
-export const CONTENT_LIMITS = {
+const CONTENT_LIMITS = {
   // Maximum characters to send to AI for analysis
   MAX_AI_CONTENT_LENGTH: 12000,
 
@@ -49,12 +55,15 @@ export const CONTENT_LIMITS = {
 };
 
 // API timeouts (in milliseconds)
-export const TIMEOUTS = {
+const TIMEOUTS = {
   // PageSpeed API timeout
   PAGESPEED_TIMEOUT: 30000, // 30 seconds
 
   // Website fetch timeout
   WEBSITE_FETCH_TIMEOUT: 15000, // 15 seconds
+
+  // Quick fetch timeout
+  QUICK_FETCH_TIMEOUT: 10000, // 10 seconds
 
   // OpenAI API timeout
   OPENAI_TIMEOUT: 60000, // 60 seconds
@@ -64,7 +73,7 @@ export const TIMEOUTS = {
 };
 
 // HTTP status codes
-export const HTTP_STATUS = {
+const HTTP_STATUS = {
   OK: 200,
   BAD_REQUEST: 400,
   INTERNAL_ERROR: 500,
@@ -72,13 +81,13 @@ export const HTTP_STATUS = {
 };
 
 // AI Models
-export const AI_MODELS = {
+const AI_MODELS = {
   QUICK_ANALYSIS: 'gpt-3.5-turbo',
   FULL_ANALYSIS: 'gpt-4-turbo'
 };
 
 // Score bands for display
-export const SCORE_BANDS = {
+const SCORE_BANDS = {
   EXCELLENT: { min: 80, max: 100, label: 'Excellent' },
   GOOD: { min: 60, max: 79, label: 'Good' },
   FAIR: { min: 40, max: 59, label: 'Fair' },
@@ -90,7 +99,7 @@ export const SCORE_BANDS = {
  * @param {number} score - Score value (0-100)
  * @returns {string} Band label
  */
-export function getScoreBand(score) {
+function getScoreBand(score) {
   for (const [, band] of Object.entries(SCORE_BANDS)) {
     if (score >= band.min && score <= band.max) {
       return band.label;
@@ -98,3 +107,13 @@ export function getScoreBand(score) {
   }
   return SCORE_BANDS.POOR.label;
 }
+
+module.exports = {
+  SCORING,
+  CONTENT_LIMITS,
+  TIMEOUTS,
+  HTTP_STATUS,
+  AI_MODELS,
+  SCORE_BANDS,
+  getScoreBand
+};

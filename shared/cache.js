@@ -3,7 +3,7 @@
  * For production, consider using Redis or similar distributed cache
  */
 
-import { TIMEOUTS } from './constants.js';
+const { TIMEOUTS } = require('./constants');
 
 class Cache {
   constructor() {
@@ -203,7 +203,7 @@ class Cache {
 }
 
 // Export singleton instance
-export const cache = new Cache();
+const cache = new Cache();
 
 // Run cleanup every hour
 setInterval(() => {
@@ -213,4 +213,7 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000);
 
-export default cache;
+module.exports = {
+  Cache,
+  cache
+};

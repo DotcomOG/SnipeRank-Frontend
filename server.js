@@ -1,4 +1,4 @@
-// TEST-MARKER: snipe-server v3.1.1 — replace now (verify in Render logs)
+// TEST-MARKER: snipe-server v3.2.0 — optimized with caching, validation, and constants
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
@@ -6,21 +6,33 @@ const cheerio = require("cheerio");
 let OpenAI = null;
 try { OpenAI = require("openai"); } catch (_) {}
 
+// Import shared utilities
+const { SCORING, CONTENT_LIMITS, TIMEOUTS, HTTP_STATUS, AI_MODELS } = require("./shared/constants");
+const { validateUrl, rateLimiter } = require("./shared/validation");
+const { cache } = require("./shared/cache");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+/**
+ * Compute score based on strengths and issues
+ * Uses centralized constants for scoring parameters
+ */
 function computeScore(strengths, issues) {
-  const base = 40;
-  const bonus = Math.min((strengths?.length || 0) * 3, 30);
-  const penalty = Math.min((issues?.length || 0) * 1.5, 30);
-  return Math.max(20, Math.min(100, Math.round(base + bonus - penalty)));
+  const bonus = Math.min((strengths?.length || 0) * SCORING.STRENGTH_BONUS, SCORING.MAX_ISSUE_WEIGHT);
+  const penalty = Math.min((issues?.length || 0) * SCORING.ISSUE_WEIGHT_MULTIPLIER, SCORING.MAX_ISSUE_WEIGHT);
+  return Math.max(20, Math.min(SCORING.MAX_SCORE, Math.round(SCORING.BASE_SCORE + bonus - penalty)));
 }
+
+/**
+ * Generate fallback payload when analysis fails
+ */
 function fallbackPayload(url, reason = "fallback", snippet = "") {
   return {
     success: false,
-    score: 50,
+    score: SCORING.DEFAULT_FALLBACK_SCORE,
     whatsWorking: [
       "Your website is accessible and loads successfully for crawlers.",
       "HTTPS appears active, which is a baseline trust signal for AI engines."
@@ -41,10 +53,13 @@ function fallbackPayload(url, reason = "fallback", snippet = "") {
   };
 }
 
+/**
+ * Analyze website with basic SEO checks
+ */
 async function analyzeWebsite(url) {
   try {
     const response = await axios.get(url, {
-      timeout: 10000,
+      timeout: TIMEOUTS.QUICK_FETCH_TIMEOUT,
       headers: { "User-Agent": "SnipeRank SEO Analyzer Bot" }
     });
     const $ = cheerio.load(response.data);
@@ -102,7 +117,7 @@ async function analyzeWebsite(url) {
       { title: "Content Structure Recognition", description: "Your pages use semantic HTML elements that help AI understand content hierarchy." },
       { title: "Loading Speed Baseline", description: "Your core web vitals fall within acceptable ranges for AI ranking systems." }
     ];
-    while (analysis.working.length < 5) {
+    while (analysis.working.length < CONTENT_LIMITS.MIN_DISPLAY_ITEMS) {
       analysis.working.push(genericWorking[analysis.working.length % genericWorking.length]);
     }
 
@@ -115,7 +130,7 @@ async function analyzeWebsite(url) {
       { title: "Core Web Vitals Optimization", description: "Page speed improvements could significantly impact AI rankings." },
       { title: "Competitive Content Gaps", description: "Competitors are capturing AI attention with content formats you're not addressing." }
     ];
-    while (analysis.needsAttention.length < 10) {
+    while (analysis.needsAttention.length < CONTENT_LIMITS.QUICK_ANALYSIS_MAX_OPPORTUNITIES) {
       analysis.needsAttention.push(genericIssues[analysis.needsAttention.length % genericIssues.length]);
     }
 
@@ -146,79 +161,191 @@ function extractDomain(u) {
   } catch { return ""; }
 }
 
-// Routes
-app.get("/", (_req, res) => res.send("SnipeRank Backend is running!"));
-
-app.get("/api/friendly", async (req, res) => {
+// Middleware: URL validation
+function validateUrlMiddleware(req, res, next) {
   const targetUrl = req.query.url;
-  if (!targetUrl) return res.status(400).json({ error: "Missing URL parameter" });
-  try { new URL(targetUrl); } catch { return res.status(400).json({ error: "Invalid URL format" }); }
-  const analysis = await analyzeWebsite(targetUrl);
-  const score10 = Math.max(0, Math.min(10, Math.round(5 + analysis.working.length * 0.5 - analysis.needsAttention.length * 0.3)));
-  res.json({ score: score10, powers: analysis.working.map(i => `${i.title}: ${i.description}`), opportunities: analysis.needsAttention.map(i => `${i.title}: ${i.description}`), insights: analysis.insights.map(i => i.description), meta: { analyzedAt: new Date().toISOString(), url: targetUrl } });
-});
 
-app.get("/api/full", async (req, res) => {
-  const url = req.query.url;
-  if (!url) return res.status(400).json({ error: "Missing URL parameter" });
-  try { new URL(url); } catch { return res.status(400).json({ error: "Invalid URL format" }); }
+  if (!targetUrl) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: "Missing URL parameter" });
+  }
 
-  if (!OpenAI || !process.env.OPENAI_API_KEY) {
-    return res.status(200).json(fallbackPayload(url, !OpenAI ? "no_openai_lib" : "no_api_key"));
+  const validation = validateUrl(targetUrl);
+  if (!validation.isValid) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: validation.error });
+  }
+
+  // Attach validated URL to request
+  req.validatedUrl = validation.url.href;
+  next();
+}
+
+// Middleware: Rate limiting
+function rateLimitMiddleware(req, res, next) {
+  const identifier = req.ip || req.connection.remoteAddress || 'unknown';
+  const limit = rateLimiter.checkLimit(identifier, 10, 60000); // 10 requests per minute
+
+  if (!limit.allowed) {
+    const resetIn = Math.ceil((limit.resetTime - Date.now()) / 1000);
+    return res.status(429).json({
+      error: "Rate limit exceeded",
+      resetIn: resetIn,
+      message: `Too many requests. Please try again in ${resetIn} seconds.`
+    });
+  }
+
+  // Add rate limit headers
+  res.setHeader('X-RateLimit-Remaining', limit.remaining);
+  next();
+}
+
+// Routes
+app.get("/", (_req, res) => res.send("SnipeRank Backend is running! v3.2.0 - Optimized"));
+
+app.get("/api/friendly", validateUrlMiddleware, rateLimitMiddleware, async (req, res) => {
+  const targetUrl = req.validatedUrl;
+
+  // Check cache first
+  const cacheKey = cache.generateKey(targetUrl, 'friendly');
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return res.json({ ...cached, fromCache: true });
   }
 
   try {
-    const resp = await axios.get(url, { headers: { "User-Agent": "SnipeRankBot/1.0" }, timeout: 15000 });
+    const analysis = await analyzeWebsite(targetUrl);
+    const score10 = Math.max(0, Math.min(10, Math.round(5 + analysis.working.length * 0.5 - analysis.needsAttention.length * 0.3)));
+
+    const response = {
+      score: score10,
+      powers: analysis.working.map(i => `${i.title}: ${i.description}`),
+      opportunities: analysis.needsAttention.map(i => `${i.title}: ${i.description}`),
+      insights: analysis.insights.map(i => i.description),
+      meta: { analyzedAt: new Date().toISOString(), url: targetUrl }
+    };
+
+    // Cache the result
+    cache.set(cacheKey, response);
+
+    res.json(response);
+  } catch (error) {
+    res.status(HTTP_STATUS.INTERNAL_ERROR).json({ error: "Analysis failed", details: error.message });
+  }
+});
+
+app.get("/api/full", validateUrlMiddleware, rateLimitMiddleware, async (req, res) => {
+  const url = req.validatedUrl;
+
+  // Check cache first
+  const cacheKey = cache.generateKey(url, 'full');
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return res.json({ ...cached, fromCache: true });
+  }
+
+  if (!OpenAI || !process.env.OPENAI_API_KEY) {
+    const fallback = fallbackPayload(url, !OpenAI ? "no_openai_lib" : "no_api_key");
+    cache.set(cacheKey, fallback, TIMEOUTS.CACHE_DURATION / 24); // Cache failures for 1 hour
+    return res.status(HTTP_STATUS.OK).json(fallback);
+  }
+
+  try {
+    const resp = await axios.get(url, {
+      headers: { "User-Agent": "SnipeRankBot/1.0" },
+      timeout: TIMEOUTS.WEBSITE_FETCH_TIMEOUT
+    });
     const $ = cheerio.load(resp.data);
     const text = $("body").text().replace(/\s+/g, " ").trim();
     const title = $("title").text().trim();
     const desc = $('meta[name="description"]').attr("content")?.trim() || "";
     const heads = $("h1, h2, h3").map((i, el) => $(el).text().replace(/\s+/g, " ").trim()).get().join(" | ").slice(0, 2000);
 
-    const content = `URL: ${url}\nTitle: ${title}\nDescription: ${desc}\nHeadings: ${heads}\nBody: ${text.slice(0, 12000)}`;
+    const content = `URL: ${url}\nTitle: ${title}\nDescription: ${desc}\nHeadings: ${heads}\nBody: ${text.slice(0, CONTENT_LIMITS.MAX_AI_CONTENT_LENGTH)}`;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const prompt = `You are an expert AI SEO specialist focused on AI engines. Analyze the content below and return ONLY valid JSON with keys: whatsWorking (10 items), needsAttention (25 items), engineInsights (5 items). No prose outside JSON. Content: """${content}"""`;
+    const prompt = `You are an expert AI SEO specialist focused on AI engines. Analyze the content below and return ONLY valid JSON with keys: whatsWorking (${CONTENT_LIMITS.FULL_ANALYSIS_MAX_STRENGTHS} items), needsAttention (${CONTENT_LIMITS.FULL_ANALYSIS_MAX_OPPORTUNITIES} items), engineInsights (5 items). No prose outside JSON. Content: """${content}"""`;
 
-    const completion = await openai.chat.completions.create({ model: "gpt-4-turbo", temperature: 0.3, max_tokens: 3600, messages: [ { role: "system", content: "You are a precise AI SEO analyst. Output valid JSON only." }, { role: "user", content: prompt } ] });
+    const completion = await openai.chat.completions.create({
+      model: AI_MODELS.FULL_ANALYSIS,
+      temperature: 0.3,
+      max_tokens: 3600,
+      messages: [
+        { role: "system", content: "You are a precise AI SEO analyst. Output valid JSON only." },
+        { role: "user", content: prompt }
+      ]
+    });
 
     const raw = completion?.choices?.[0]?.message?.content?.trim() || "";
     const json = (() => { const fenced = raw.match(/```json\s*([\s\S]*?)\s*```/i); if (fenced) return fenced[1].trim(); const s = raw.indexOf("{"), e = raw.lastIndexOf("}"); return s !== -1 && e !== -1 && e > s ? raw.slice(s, e + 1).trim() : ""; })();
 
-    if (!json) return res.status(200).json(fallbackPayload(url, "parse_missing_json", raw.slice(0,600)));
+    if (!json) {
+      const fallback = fallbackPayload(url, "parse_missing_json", raw.slice(0,600));
+      cache.set(cacheKey, fallback, TIMEOUTS.CACHE_DURATION / 24);
+      return res.status(HTTP_STATUS.OK).json(fallback);
+    }
+
     let parsed;
-    try { parsed = JSON.parse(json); } catch { return res.status(200).json(fallbackPayload(url, "parse_invalid_json", raw.slice(0,600))); }
+    try {
+      parsed = JSON.parse(json);
+    } catch {
+      const fallback = fallbackPayload(url, "parse_invalid_json", raw.slice(0,600));
+      cache.set(cacheKey, fallback, TIMEOUTS.CACHE_DURATION / 24);
+      return res.status(HTTP_STATUS.OK).json(fallback);
+    }
 
     if (!Array.isArray(parsed.whatsWorking) || !Array.isArray(parsed.needsAttention) || !Array.isArray(parsed.engineInsights)) {
-      return res.status(200).json(fallbackPayload(url, "invalid_shape", json.slice(0,600)));
+      const fallback = fallbackPayload(url, "invalid_shape", json.slice(0,600));
+      cache.set(cacheKey, fallback, TIMEOUTS.CACHE_DURATION / 24);
+      return res.status(HTTP_STATUS.OK).json(fallback);
     }
 
     const score = computeScore(parsed.whatsWorking, parsed.needsAttention);
-    return res.status(200).json({ success: true, score, whatsWorking: parsed.whatsWorking.slice(0,10), needsAttention: parsed.needsAttention.slice(0,25), engineInsights: parsed.engineInsights.slice(0,5), meta: { analyzedAt: new Date().toISOString(), model: "gpt-4-turbo", url } });
+    const response = {
+      success: true,
+      score,
+      whatsWorking: parsed.whatsWorking.slice(0, CONTENT_LIMITS.FULL_ANALYSIS_MAX_STRENGTHS),
+      needsAttention: parsed.needsAttention.slice(0, CONTENT_LIMITS.FULL_ANALYSIS_MAX_OPPORTUNITIES),
+      engineInsights: parsed.engineInsights.slice(0, 5),
+      meta: { analyzedAt: new Date().toISOString(), model: AI_MODELS.FULL_ANALYSIS, url }
+    };
+
+    // Cache successful response
+    cache.set(cacheKey, response);
+
+    return res.status(HTTP_STATUS.OK).json(response);
   } catch (err) {
-    return res.status(200).json(fallbackPayload(url, err?.response?.status || err?.code || "error"));
+    const fallback = fallbackPayload(url, err?.response?.status || err?.code || "error");
+    cache.set(cacheKey, fallback, TIMEOUTS.CACHE_DURATION / 24);
+    return res.status(HTTP_STATUS.OK).json(fallback);
   }
 });
 
-app.head("/api/full", (_req, res) => res.status(200).end());
-app.get("/api/full/status", (_req, res) => res.json({ ok: true, openai: !!(OpenAI && process.env.OPENAI_API_KEY) }));
+app.head("/api/full", (_req, res) => res.status(HTTP_STATUS.OK).end());
+app.get("/api/full/status", (_req, res) => res.json({ ok: true, openai: !!(OpenAI && process.env.OPENAI_API_KEY), cache: cache.getStats() }));
 
-app.get("/report.html", async (req, res) => {
-  const targetUrl = req.query.url;
-  if (!targetUrl) return res.status(400).send("<p style='color:red'>Missing URL parameter.</p>");
-  try { new URL(targetUrl); } catch { return res.status(400).send("<p style='color:red'>Invalid URL format.</p>"); }
-  const analysis = await analyzeWebsite(targetUrl);
-  const workingHtml = analysis.working.map(i => `<li><strong>${i.title}:</strong> ${i.description}</li>`).join("");
-  const needsHtml = analysis.needsAttention.map(i => `<li><strong>${i.title}:</strong> ${i.description}</li>`).join("");
-  const insightsHtml = analysis.insights.map(i => `<li>${i.description}</li>`).join("");
-  const html = `<div class="section-title">✅ What's Working</div><ul>${workingHtml}</ul><div class="section-title">🚨 Needs Attention</div><ul>${needsHtml}</ul><div class="section-title">📡 AI Engine Insights</div><ul>${insightsHtml}</ul>`;
-  res.setHeader("Content-Type", "text/html");
-  res.send(html);
+app.get("/report.html", validateUrlMiddleware, async (req, res) => {
+  const targetUrl = req.validatedUrl;
+
+  try {
+    const analysis = await analyzeWebsite(targetUrl);
+    const workingHtml = analysis.working.map(i => `<li><strong>${i.title}:</strong> ${i.description}</li>`).join("");
+    const needsHtml = analysis.needsAttention.map(i => `<li><strong>${i.title}:</strong> ${i.description}</li>`).join("");
+    const insightsHtml = analysis.insights.map(i => `<li>${i.description}</li>`).join("");
+    const html = `<div class="section-title">✅ What's Working</div><ul>${workingHtml}</ul><div class="section-title">🚨 Needs Attention</div><ul>${needsHtml}</ul><div class="section-title">📡 AI Engine Insights</div><ul>${insightsHtml}</ul>`;
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
+  } catch (error) {
+    res.status(HTTP_STATUS.INTERNAL_ERROR).send("<p style='color:red'>Analysis failed.</p>");
+  }
 });
 
 app.post("/api/send-link", (_req, res) => res.json({ ok: true }));
 
+// Serve static files
+app.use(express.static('public'));
+
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
   console.log("API endpoint available at: http://localhost:" + PORT + "/api/friendly");
+  console.log("Optimizations enabled: Caching, Rate Limiting, URL Validation");
+  console.log("Cache stats available at: /api/full/status");
 });

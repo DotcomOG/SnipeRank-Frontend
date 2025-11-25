@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   SnipeRank Analyze Page
-  Version: 3.2.1-AIV
+  Version: 3.2.2-AIV
   Date: November 25, 2025
   Features: 
   - Animated loading dots interface
@@ -14,6 +14,7 @@
   - Button to open full AIV report
 
   Changelog:
+  v3.2.2-AIV - Switched to /api/score endpoint with flexible response handling, improved error UX
   v3.2.1-AIV - Updated copy to AI Visibility (AIV), added full-report button, auto-run from ?url=
   v3.2.0 - Added PageSpeed API integration + animated loading dots
   v3.1.0 - Fixed AI Engine Insights alignment issues
@@ -23,7 +24,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SnipeRank - AI Visibility (AIV) Analysis v3.2.1</title>
+  <title>SnipeRank - AI Visibility (AIV) Analysis v3.2.2</title>
   <style>
     * {
       margin: 0;
@@ -206,7 +207,6 @@
       color: #2d3748;
       font-size: 16px;
       margin-bottom: 6px;
-      display: block;
     }
 
     .engine-text {
@@ -263,45 +263,11 @@
       font-size: 20px;
       color: #4a5568;
       font-weight: 600;
-      display: inline-block;
       margin-right: 8px;
-    }
-
-    .loading-dots {
-      display: inline-block;
-      font-size: 24px;
-      font-weight: bold;
-      letter-spacing: 4px;
     }
 
     .loading-dots span {
       color: #3182ce;
-      animation: blink 1.4s infinite both;
-      display: inline-block;
-      margin: 0 2px;
-    }
-
-    .loading-dots span:nth-child(1) {
-      animation-delay: 0s;
-    }
-
-    .loading-dots span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .loading-dots span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes blink {
-      0%, 60%, 100% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      30% {
-        opacity: 1;
-        transform: scale(1.2);
-      }
     }
 
     .progress-status {
@@ -333,11 +299,6 @@
       margin-bottom: 12px;
       font-size: 14px;
       color: #4a5568;
-      transition: all 0.3s ease;
-    }
-
-    .progress-step:last-child {
-      margin-bottom: 0;
     }
 
     .step-indicator {
@@ -350,8 +311,11 @@
       justify-content: center;
       font-size: 11px;
       font-weight: bold;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
+    }
+
+    .step-indicator.current {
+      background: #3182ce;
+      color: white;
     }
 
     .step-indicator.completed {
@@ -359,46 +323,13 @@
       color: white;
     }
 
-    .step-indicator.current {
-      background: #3182ce;
-      color: white;
-      animation: bounce 1.5s infinite;
-    }
-
     .step-indicator.pending {
       background: #e2e8f0;
       color: #a0aec0;
     }
 
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-3px);
-      }
-      60% {
-        transform: translateY(-2px);
-      }
-    }
-
-    .step-text.current {
-      color: #3182ce;
-      font-weight: 600;
-    }
-
-    .step-text.completed {
-      color: #48bb78;
-    }
-
     .main-content {
       opacity: 1;
-      transition: opacity 0.3s ease;
-    }
-
-    .main-content.loading {
-      opacity: 0.3;
-      pointer-events: none;
     }
 
     .analyze-form {
@@ -439,115 +370,58 @@
       background: #a0aec0;
       cursor: not-allowed;
     }
-
-    @media (max-width: 640px) {
-      .container {
-        padding: 15px;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .engine-insight {
-        gap: 12px;
-        padding: 12px;
-      }
-      
-      .engine-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 11px;
-      }
-      
-      .loading-container {
-        padding: 36px 24px;
-      }
-      
-      .loading-title {
-        font-size: 24px;
-      }
-      
-      .loading-text {
-        font-size: 18px;
-      }
-      
-      .loading-dots {
-        font-size: 20px;
-      }
-
-      .btn-row {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .btn-ghost {
-        font-size: 12px;
-        padding: 6px 12px;
-        white-space: nowrap;
-      }
-    }
   </style>
 </head>
 <body>
-  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-container">
       <h2 class="loading-title">Analyzing Your Website</h2>
       <p class="loading-subtitle">
         SnipeRank is performing an AI Visibility (AIV) analysis of your site to see how clearly AI systems can find, interpret, and reuse your content.
       </p>
-      
+
       <div class="loading-dots-container">
         <span class="loading-text">Analyzing</span>
-        <div class="loading-dots">
-          <span>●</span>
-          <span>●</span>
-          <span>●</span>
-        </div>
+        <span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>
       </div>
-      
+
       <div class="progress-status" id="progressStatus">
         Initializing analysis...
       </div>
-      
-      <div class="loading-percentage" id="loadingPercentage">
-        0%
-      </div>
-      
+
+      <div class="loading-percentage" id="loadingPercentage">0%</div>
+
       <div class="progress-steps">
         <div class="progress-step">
-          <div class="step-indicator current" id="step1">1</div>
+          <span class="step-indicator current" id="step1">1</span>
           <span class="step-text current">Fetching website content</span>
         </div>
         <div class="progress-step">
-          <div class="step-indicator pending" id="step2">2</div>
+          <span class="step-indicator pending" id="step2">2</span>
           <span class="step-text">Analyzing performance metrics</span>
         </div>
         <div class="progress-step">
-          <div class="step-indicator pending" id="step3">3</div>
+          <span class="step-indicator pending" id="step3">3</span>
           <span class="step-text">Running AI Visibility (AIV) checks</span>
         </div>
         <div class="progress-step">
-          <div class="step-indicator pending" id="step4">4</div>
+          <span class="step-indicator pending" id="step4">4</span>
           <span class="step-text">Generating AIV recommendations</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div class="container">
       <h1>SnipeRank</h1>
       <h2>AI Visibility (AIV) Analysis</h2>
 
       <div class="info-row">
-        <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+        <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank">quontora</a></div>
         <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
       </div>
 
-      <!-- Analysis Form (shown initially) -->
       <div class="analyze-form" id="analyzeForm">
         <form id="urlForm">
           <input type="url" id="urlInput" class="url-input" placeholder="Enter website URL (e.g., https://example.com)" required>
@@ -556,9 +430,8 @@
         </form>
       </div>
 
-      <!-- Results Section (hidden initially) -->
-      <div id="resultsSection" style="display: none;">
-        <section class="card score-card" id="scoreCard">
+      <div id="resultsSection" style="display:none;">
+        <section class="card score-card">
           <div class="score-number" id="scoreNumber">-</div>
           <div class="score-band" id="scoreBand">Calculating...</div>
           <div class="btn-row">
@@ -568,262 +441,177 @@
           </div>
         </section>
 
-        <!-- Analysis Results -->
         <section id="analysisResults">
           <p style="text-align:center;color:gray;">Loading analysis results...</p>
         </section>
 
-        <!-- AI Engine Insights Section -->
         <section class="engine-insights-section">
           <div class="section-header">
             <div class="section-icon">🤖</div>
             <h3 class="section-title">AI Engine Insights</h3>
           </div>
-          <div class="engine-insights" id="engineInsights">
-            <!-- Will be populated by JavaScript -->
-          </div>
+          <div class="engine-insights" id="engineInsights"></div>
         </section>
       </div>
     </div>
   </div>
 
   <script>
-    // Global variables
     let currentAnalysisUrl = '';
-    
-    // Form submission handler
-    document.getElementById('urlForm').addEventListener('submit', function(e) {
+
+    function pickScore(data) {
+      const keys = ['aivScore', 'aiVisibilityScore', 'ai_visibility_score', 'visibilityScore', 'score'];
+      for (let k of keys) {
+        if (data[k] !== undefined && !isNaN(Number(data[k]))) return Number(data[k]);
+      }
+      return null;
+    }
+
+    function pickArray(...vals) {
+      for (let v of vals) if (Array.isArray(v) && v.length) return v;
+      return [];
+    }
+
+    document.getElementById('urlForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const url = document.getElementById('urlInput').value.trim();
-      if (url) {
-        analyzeWebsite(url);
-      }
+      if (!url) return;
+      analyzeWebsite(url);
     });
 
-    // Main analysis function
     async function analyzeWebsite(url) {
       currentAnalysisUrl = url;
-      
-      // Show loading overlay
       showLoading();
-      
-      // Update current URL display
       document.getElementById('current-url').textContent = url;
-      
+
       try {
-        // Call your SnipeRank API
-        const response = await fetch(`/api/full?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          // Hide loading and show results
-          hideLoading();
-          displayResults(data);
-        } else {
-          throw new Error(data.error || 'Analysis failed');
+        const res = await fetch(`/api/score?url=${encodeURIComponent(url)}`);
+        const txt = await res.text();
+        let data = JSON.parse(txt);
+
+        if (!res.ok || data.success === false) {
+          throw new Error(data.error || data.message || 'Analysis failed');
         }
-      } catch (error) {
-        console.error('Analysis error:', error);
+
         hideLoading();
-        alert('Analysis failed. Please try again.');
+        displayResults(data);
+      } catch (err) {
+        hideLoading();
+        showErrorState(err.message);
       }
     }
 
-    // Display analysis results
+    function showErrorState(msg) {
+      document.getElementById('analyzeForm').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'block';
+
+      document.getElementById('scoreNumber').textContent = '—';
+      document.getElementById('scoreBand').textContent = 'AIV analysis unavailable';
+
+      document.getElementById('analysisResults').innerHTML = `
+        <div style="background:#fff5f5;border:1px solid #fed7d7;padding:16px;border-radius:12px;margin-bottom:16px;">
+          <strong style="color:#c53030;">Analysis unavailable</strong>
+          <div style="color:#742a2a;font-size:14px;">${msg}</div>
+        </div>
+      `;
+
+      document.getElementById('engineInsights').innerHTML = '';
+    }
+
     function displayResults(data) {
-      // Hide form, show results
       document.getElementById('analyzeForm').style.display = 'none';
       document.getElementById('resultsSection').style.display = 'block';
-      
-      // Update score (AIV Score 0–100)
-      document.getElementById('scoreNumber').textContent = data.score || 'N/A';
-      document.getElementById('scoreBand').textContent = getScoreBand(data.score);
-      
-      // Display analysis results
-      if (data.whatsWorking || data.needsAttention) {
-        displayAnalysisContent(data);
-      }
-      
-      // Display AI engine insights
-      if (data.engineInsights) {
-        displayEngineInsights(data.engineInsights);
-      }
+
+      const score = pickScore(data);
+      document.getElementById('scoreNumber').textContent = score ?? 'N/A';
+      document.getElementById('scoreBand').textContent = getScoreBand(score);
+
+      const whatsWorking = pickArray(data.whatsWorking, data.strengths);
+      const needsAttention = pickArray(data.needsAttention, data.issues, data.recommendations);
+
+      displayAnalysisContent({ whatsWorking, needsAttention });
+
+      const insights = pickArray(data.engineInsights, data.llmInsights, data.aiEngineInsights);
+      if (insights.length) displayEngineInsights(insights);
     }
 
-    // Display AI Engine Insights with proper alignment
-    function displayEngineInsights(insights) {
+    function displayAnalysisContent({ whatsWorking, needsAttention }) {
+      let html = '';
+      if (whatsWorking.length) {
+        html += '<h3>What’s Working</h3><ul>';
+        whatsWorking.forEach(i => html += `<li>${i}</li>`);
+        html += '</ul>';
+      }
+      if (needsAttention.length) {
+        html += '<h3>Needs Attention</h3><ul>';
+        needsAttention.forEach(i => html += `<li>${i}</li>`);
+        html += '</ul>';
+      }
+      document.getElementById('analysisResults').innerHTML = html || '<p>No data returned.</p>';
+    }
+
+    function displayEngineInsights(ins) {
       const container = document.getElementById('engineInsights');
       container.innerHTML = '';
-      
-      // Map insights to engine data
+
       const engines = [
-        { name: 'ChatGPT', class: 'chatgpt', text: insights[0] || 'No insights available' },
-        { name: 'Claude', class: 'claude', text: insights[1] || 'No insights available' },
-        { name: 'Gemini', class: 'gemini', text: insights[2] || 'No insights available' },
-        { name: 'Perplexity', class: 'perplexity', text: insights[3] || 'No insights available' },
-        { name: 'Copilot', class: 'copilot', text: insights[4] || 'No insights available' }
+        { name: 'ChatGPT', class: 'chatgpt', text: ins[0] },
+        { name: 'Claude', class: 'claude', text: ins[1] },
+        { name: 'Gemini', class: 'gemini', text: ins[2] },
+        { name: 'Perplexity', class: 'perplexity', text: ins[3] },
+        { name: 'Copilot', class: 'copilot', text: ins[4] }
       ];
-      
-      engines.forEach(engine => {
-        const insightDiv = document.createElement('div');
-        insightDiv.className = 'engine-insight';
-        
-        insightDiv.innerHTML = `
-          <div class="engine-icon ${engine.class}">
-            ${getEngineIcon(engine.name)}
-          </div>
-          <div class="engine-content">
-            <span class="engine-name">${engine.name}</span>
-            <div class="engine-text">${engine.text}</div>
+
+      engines.forEach(e => {
+        container.innerHTML += `
+          <div class="engine-insight">
+            <div class="engine-icon ${e.class}">${e.name.slice(0,2).toUpperCase()}</div>
+            <div class="engine-content">
+              <div class="engine-name">${e.name}</div>
+              <div class="engine-text">${e.text || 'No insights available'}</div>
+            </div>
           </div>
         `;
-        
-        container.appendChild(insightDiv);
       });
     }
 
-    // Get engine icon abbreviation
-    function getEngineIcon(engine) {
-      const icons = {
-        'ChatGPT': 'GPT',
-        'Claude': 'CL',
-        'Gemini': 'GM',
-        'Perplexity': 'PX',
-        'Copilot': 'CP'
-      };
-      return icons[engine] || engine.substring(0, 2).toUpperCase();
-    }
-
-    // Display other analysis content
-    function displayAnalysisContent(data) {
-      const resultsContainer = document.getElementById('analysisResults');
-      let html = '';
-      
-      if (data.whatsWorking?.length) {
-        html += '<h3>What\'s Working</h3><ul>';
-        data.whatsWorking.forEach(item => {
-          html += `<li>${item}</li>`;
-        });
-        html += '</ul>';
-      }
-      
-      if (data.needsAttention?.length) {
-        html += '<h3>Needs Attention</h3><ul>';
-        data.needsAttention.forEach(item => {
-          html += `<li>${item}</li>`;
-        });
-        html += '</ul>';
-      }
-      
-      resultsContainer.innerHTML = html;
-    }
-
-    // Get score band description
     function getScoreBand(score) {
+      if (score === null || isNaN(score)) return 'AI Visibility unavailable';
       if (score >= 80) return 'Excellent AI Visibility';
       if (score >= 60) return 'Good AI Visibility';
       if (score >= 40) return 'Developing AI Visibility';
-      return 'Low AI Visibility – needs focused fixes';
+      return 'Low AI Visibility';
     }
 
-    // Loading animation functions
-    let progress = 0;
-    let progressInterval;
-    
     function showLoading() {
       document.getElementById('loadingOverlay').style.display = 'flex';
-      document.getElementById('mainContent').classList.add('loading');
-      progress = 0;
-      startProgressAnimation();
     }
-    
+
     function hideLoading() {
       document.getElementById('loadingOverlay').style.display = 'none';
-      document.getElementById('mainContent').classList.remove('loading');
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-    }
-    
-    function startProgressAnimation() {
-      const progressSteps = [
-        { percent: 20, status: "Fetching website content...", step: 1 },
-        { percent: 45, status: "Analyzing performance metrics...", step: 2 },
-        { percent: 70, status: "Running AI Visibility (AIV) checks...", step: 3 },
-        { percent: 90, status: "Generating AIV recommendations...", step: 4 }
-      ];
-      
-      progressInterval = setInterval(() => {
-        progress += Math.random() * 4 + 1;
-        progress = Math.min(progress, 90); // Don't go to 100% until actually done
-        
-        const currentStep = progressSteps.find(step => progress <= step.percent) || progressSteps[progressSteps.length - 1];
-        
-        document.getElementById('loadingPercentage').textContent = Math.round(progress) + '%';
-        document.getElementById('progressStatus').textContent = currentStep.status;
-        
-        updateStepIndicators(currentStep.step);
-        
-        if (progress >= 90) {
-          clearInterval(progressInterval);
-        }
-      }, 300 + Math.random() * 400);
-    }
-    
-    function updateStepIndicators(activeStep) {
-      for (let i = 1; i <= 4; i++) {
-        const stepElement = document.getElementById(`step${i}`);
-        const stepText = stepElement.nextElementSibling;
-        
-        stepElement.className = 'step-indicator';
-        stepText.className = 'step-text';
-        
-        if (i < activeStep) {
-          stepElement.classList.add('completed');
-          stepElement.textContent = '✓';
-          stepText.classList.add('completed');
-        } else if (i === activeStep) {
-          stepElement.classList.add('current');
-          stepElement.textContent = i;
-          stepText.classList.add('current');
-        } else {
-          stepElement.classList.add('pending');
-          stepElement.textContent = i;
-        }
-      }
     }
 
-    // Button handlers
-    document.getElementById('breakdownBtn').addEventListener('click', function() {
-      alert('Your AIV Score blends: AI access & crawlability, content clarity & structure, trust & authority signals, and how well your pages answer real AI-style questions.');
-    });
+    document.getElementById('breakdownBtn').onclick = () =>
+      alert('AIV Score blends: accessibility, clarity, structure, trust, and AI question-answer match.');
 
-    document.getElementById('copyLLMBtn').addEventListener('click', function() {
-      const summary = `SnipeRank AI Visibility (AIV) Analysis for ${currentAnalysisUrl}\nAIV Score: ${document.getElementById('scoreNumber').textContent}/100\nGenerated by SnipeRank AI Visibility (AIV) Analysis`;
-      navigator.clipboard.writeText(summary).then(() => {
-        alert('Summary copied to clipboard!');
-      });
-    });
+    document.getElementById('copyLLMBtn').onclick = () => {
+      navigator.clipboard.writeText(
+        `SnipeRank AIV Analysis for ${currentAnalysisUrl}\nScore: ${document.getElementById('scoreNumber').textContent}/100`
+      );
+      alert('Copied!');
+    };
 
-    document.getElementById('fullReportBtn').addEventListener('click', function() {
-      if (!currentAnalysisUrl) {
-        alert('Run an AI Visibility (AIV) analysis first, then open the full report.');
-        return;
-      }
-      const target = 'full-report.html?url=' + encodeURIComponent(currentAnalysisUrl);
-      window.location.href = target;
-    });
+    document.getElementById('fullReportBtn').onclick = () => {
+      if (!currentAnalysisUrl) return alert('Run analysis first.');
+      window.location.href = 'full-report.html?url=' + encodeURIComponent(currentAnalysisUrl);
+    };
 
-    // Auto-run if called with ?url= from index.html
-    (function () {
+    (function autoRun() {
       const params = new URLSearchParams(window.location.search);
-      const urlParam = params.get('url');
-      if (urlParam) {
-        const input = document.getElementById('urlInput');
-        if (input) {
-          input.value = urlParam;
-        }
-        analyzeWebsite(urlParam);
+      const url = params.get('url');
+      if (url) {
+        document.getElementById('urlInput').value = url;
+        analyzeWebsite(url);
       }
     })();
   </script>

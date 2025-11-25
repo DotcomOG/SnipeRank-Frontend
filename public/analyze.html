@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <!--
   SnipeRank Analyze Page
-  Version: 3.2.0
-  Date: October 29, 2025
+  Version: 3.2.1-AIV
+  Date: November 25, 2025
   Features: 
   - Animated loading dots interface
   - PageSpeed Insights API integration
   - AI Engine Insights with proper alignment
   - Real performance metrics and scoring
   - Mobile responsive design
-  
+  - AI Visibility (AIV) focused scoring and copy
+  - Auto-run when called with ?url=
+  - Button to open full AIV report
+
   Changelog:
+  v3.2.1-AIV - Updated copy to AI Visibility (AIV), added full-report button, auto-run from ?url=
   v3.2.0 - Added PageSpeed API integration + animated loading dots
   v3.1.0 - Fixed AI Engine Insights alignment issues
   v3.0.0 - Major redesign with comprehensive AI analysis
@@ -19,7 +23,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SnipeRank - AI SEO Analysis v3.2.0</title>
+  <title>SnipeRank - AI Visibility (AIV) Analysis v3.2.1</title>
   <style>
     * {
       margin: 0;
@@ -99,6 +103,7 @@
       gap: 12px;
       justify-content: center;
       margin-bottom: 2rem;
+      flex-wrap: wrap;
     }
 
     .btn-ghost {
@@ -109,6 +114,7 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
+      white-space: nowrap;
     }
 
     .btn-ghost:hover {
@@ -385,7 +391,6 @@
       color: #48bb78;
     }
 
-    /* Hidden main content during loading */
     .main-content {
       opacity: 1;
       transition: opacity 0.3s ease;
@@ -396,7 +401,6 @@
       pointer-events: none;
     }
 
-    /* Form styles */
     .analyze-form {
       background: white;
       padding: 24px;
@@ -436,7 +440,6 @@
       cursor: not-allowed;
     }
 
-    /* Mobile responsive */
     @media (max-width: 640px) {
       .container {
         padding: 15px;
@@ -492,7 +495,7 @@
     <div class="loading-container">
       <h2 class="loading-title">Analyzing Your Website</h2>
       <p class="loading-subtitle">
-        SnipeRank is performing a comprehensive AI SEO analysis of your site
+        SnipeRank is performing an AI Visibility (AIV) analysis of your site to see how clearly AI systems can find, interpret, and reuse your content.
       </p>
       
       <div class="loading-dots-container">
@@ -523,11 +526,11 @@
         </div>
         <div class="progress-step">
           <div class="step-indicator pending" id="step3">3</div>
-          <span class="step-text">Running AI analysis</span>
+          <span class="step-text">Running AI Visibility (AIV) checks</span>
         </div>
         <div class="progress-step">
           <div class="step-indicator pending" id="step4">4</div>
-          <span class="step-text">Generating recommendations</span>
+          <span class="step-text">Generating AIV recommendations</span>
         </div>
       </div>
     </div>
@@ -537,7 +540,7 @@
   <div class="main-content" id="mainContent">
     <div class="container">
       <h1>SnipeRank</h1>
-      <h2>AI Visibility Analysis</h2>
+      <h2>AI Visibility (AIV) Analysis</h2>
 
       <div class="info-row">
         <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
@@ -559,8 +562,9 @@
           <div class="score-number" id="scoreNumber">-</div>
           <div class="score-band" id="scoreBand">Calculating...</div>
           <div class="btn-row">
-            <button class="btn-ghost" id="breakdownBtn" type="button">What goes into this score?</button>
+            <button class="btn-ghost" id="breakdownBtn" type="button">What goes into this AIV Score?</button>
             <button class="btn-ghost" id="copyLLMBtn" type="button">Copy Summary</button>
+            <button class="btn-ghost" id="fullReportBtn" type="button">Open Full AIV Report</button>
           </div>
         </section>
 
@@ -631,7 +635,7 @@
       document.getElementById('analyzeForm').style.display = 'none';
       document.getElementById('resultsSection').style.display = 'block';
       
-      // Update score
+      // Update score (AIV Score 0–100)
       document.getElementById('scoreNumber').textContent = data.score || 'N/A';
       document.getElementById('scoreBand').textContent = getScoreBand(data.score);
       
@@ -716,10 +720,10 @@
 
     // Get score band description
     function getScoreBand(score) {
-      if (score >= 80) return 'Excellent';
-      if (score >= 60) return 'Good';
-      if (score >= 40) return 'Fair';
-      return 'Needs Improvement';
+      if (score >= 80) return 'Excellent AI Visibility';
+      if (score >= 60) return 'Good AI Visibility';
+      if (score >= 40) return 'Developing AI Visibility';
+      return 'Low AI Visibility – needs focused fixes';
     }
 
     // Loading animation functions
@@ -745,8 +749,8 @@
       const progressSteps = [
         { percent: 20, status: "Fetching website content...", step: 1 },
         { percent: 45, status: "Analyzing performance metrics...", step: 2 },
-        { percent: 70, status: "Running AI analysis...", step: 3 },
-        { percent: 90, status: "Generating recommendations...", step: 4 }
+        { percent: 70, status: "Running AI Visibility (AIV) checks...", step: 3 },
+        { percent: 90, status: "Generating AIV recommendations...", step: 4 }
       ];
       
       progressInterval = setInterval(() => {
@@ -791,15 +795,37 @@
 
     // Button handlers
     document.getElementById('breakdownBtn').addEventListener('click', function() {
-      alert('Score breakdown: Performance (40%), Content (30%), Technical SEO (20%), AI Optimization (10%)');
+      alert('Your AIV Score blends: AI access & crawlability, content clarity & structure, trust & authority signals, and how well your pages answer real AI-style questions.');
     });
 
     document.getElementById('copyLLMBtn').addEventListener('click', function() {
-      const summary = `SnipeRank Analysis for ${currentAnalysisUrl}\nScore: ${document.getElementById('scoreNumber').textContent}/100\nGenerated by SnipeRank AI SEO Analysis`;
+      const summary = `SnipeRank AI Visibility (AIV) Analysis for ${currentAnalysisUrl}\nAIV Score: ${document.getElementById('scoreNumber').textContent}/100\nGenerated by SnipeRank AI Visibility (AIV) Analysis`;
       navigator.clipboard.writeText(summary).then(() => {
         alert('Summary copied to clipboard!');
       });
     });
+
+    document.getElementById('fullReportBtn').addEventListener('click', function() {
+      if (!currentAnalysisUrl) {
+        alert('Run an AI Visibility (AIV) analysis first, then open the full report.');
+        return;
+      }
+      const target = 'full-report.html?url=' + encodeURIComponent(currentAnalysisUrl);
+      window.location.href = target;
+    });
+
+    // Auto-run if called with ?url= from index.html
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get('url');
+      if (urlParam) {
+        const input = document.getElementById('urlInput');
+        if (input) {
+          input.value = urlParam;
+        }
+        analyzeWebsite(urlParam);
+      }
+    })();
   </script>
 </body>
 </html>

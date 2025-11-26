@@ -1,379 +1,480 @@
 <!DOCTYPE html>
 <html lang="en">
-/* analyze.html - v2.20 - Comment Placement Correction & API Alignment
- * Purpose: Displays the full AI SEO analysis report using the /api/full?mode=full endpoint.
- * Features: Fetches score, core metrics, executive summary, and expert action plan.
- * Dependencies: Requires the /api/full endpoint (using full.js v2.20 or later) for its JSON data structure.
- * Last updated: November 26, 2025
- */
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SnipeRank Analysis Report</title>
-    <style>
-        :root {
-            --max-width: 1200px;
-            --content-width: 760px;
-            --pad-v: 3vh;
-            --pad-h: 2rem;
-            --primary: #3182CE;
-            --primary-dark: #2563EB;
-            --accent: #E53E3E;
-            --accent-green: #10B981;
-            --accent-purple: #8B5CF6;
-            --accent-orange: #F59E0B;
-            --accent-red: #EF4444;
-            --text-dark: #000;
-            --text-medium: #4a5568;
-            --text-light: #718096;
-            --border: #e2e8f0;
-            --bg-light: #f7fafc;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Helvetica, sans-serif;
-            background: #fff;
-            color: #000;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-        
-        /* General Layout */
-        .content {
-            max-width: var(--content-width);
-            margin: 0 auto;
-            padding: 0 var(--pad-h) 5rem;
-        }
+  <!-- analyze.html - v3.1.9 - RESTORED original score card design with fixed API integration -->
+  <!-- Free preview report: Shows 5 strengths, 10 issues, LLM insights + score card -->
+  <!-- Lead generation page - Full 25-page report available via form submission -->
+  <!-- Backend compatibility: /api/full (GET) only -->
+  <!-- Last updated: November 26, 2025 -->
 
-        /* Header */
-        header {
-            padding: var(--pad-v) var(--pad-h) 0;
-            max-width: var(--content-width);
-            margin: 0 auto;
-        }
-        
-        h1.logo {
-            font-size: 3rem;
-            font-weight: 700;
-            margin: 0 0 0.25em 0;
-            line-height: 1;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #000 0%, #3182CE 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-        }
-        
-        h2.tagline {
-            font-size: 1.2rem;
-            font-weight: 400;
-            margin: 0 0 2rem 0;
-            color: #000;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnipeRank - AI SEO Analysis</title>
+  <style>
+    :root{
+      --max-width:760px; --pad-v:3vh; --pad-h:2rem;
+      --muted:#666; --border:#e5e5e5;
+      --sr-radius:16px; --sr-border:#e6e6e9; --sr-shadow:0 10px 30px rgba(0,0,0,.12);
+      --sr-text:#111; --sr-muted:#5b5b66; --sr-bg:#fff; --sr-pill-bg:#fafafb; --sr-gap:16px;
+      --btn-red:#dc3545; --btn-red-hover:#c82333;
+    }
+    *{box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#fff;color:#000;margin:0;padding:var(--pad-v) var(--pad-h);max-width:var(--max-width);margin-inline:auto;display:flex;flex-direction:column;align-items:flex-start}
+    h1{font-size:4rem;font-weight:700;margin:0 0 .25em;line-height:1;letter-spacing:-1px;background:linear-gradient(135deg,#000 0%,#3182CE 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    h2{font-size:1.6rem;font-weight:700;margin:0 0 1rem}
+    p{font-size:1.075rem;line-height:1.65;margin:0 0 1rem}
 
-        /* Score Display */
-        .score-display {
-            text-align: center;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-        }
+    .info-row{width:100%;display:flex;gap:1rem;align-items:center;justify-content:space-between;margin:.25rem 0 1rem}
+    .powered-by,.for-url{color:var(--muted);font-size:.95rem}
+    .powered-by a{color:#3182CE;text-decoration:none;font-weight:600}
+    .for-url strong{color:#000}
 
-        .score-box {
-            display: inline-block;
-            width: 150px;
-            height: 150px;
-            line-height: 150px;
-            border-radius: 50%;
-            font-size: 3rem;
-            font-weight: 700;
-            color: white;
-            background: var(--accent); /* Default low score color */
-            margin: 1rem auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: background 0.5s ease-in-out;
-        }
-        
-        .score-box.green {
-            background: var(--accent-green);
-        }
-        
-        .score-box.yellow {
-            background: var(--accent-orange);
-        }
-        
-        .score-box.red {
-            background: var(--accent-red);
-        }
+    .card{width:100%;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff}
+    .score-card{padding:1rem;margin-bottom:2.25rem}
+    .score-top{display:flex;align-items:center;gap:.75rem;justify-content:space-between;flex-wrap:wrap}
+    .score-main{display:flex;align-items:baseline;gap:.5rem}
+    .score-number{font-size:2.25rem;font-weight:800}
+    .score-band{color:var(--muted);font-size:.95rem}
+    .btn-row{display:flex;gap:.5rem;align-items:center}
+    .btn-ghost{border:1px solid #111;background:#fff;color:#111;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:.95rem;transition:.2s}
+    .btn-ghost:hover{background:#f2f2f2}
+    .btn-primary{background:var(--btn-red);color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;display:inline-block;text-decoration:none;text-align:center}
+    .btn-primary:hover{background:var(--btn-red-hover)}
+    .pillars{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+    .pillar{border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;font-size:.98rem;background:#fff}
+    .pillar .label{font-weight:600}
+    .badge{font-weight:700;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:.85rem;background:#fafafa}
+    .highlights{margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--border)}
+    .highlights h4{margin:0 0 .55rem;font-size:1.2rem;font-weight:800}
+    .highlights ul{margin:0;padding-left:1rem}
+    .highlights li{margin:.45rem 0;line-height:1.5}
 
-        #url-display {
-            font-size: 1.1rem;
-            color: var(--primary);
-            font-weight: 500;
-            margin-top: 1rem;
-        }
+    #summary-results .section-title{font-size:1.25rem!important;font-weight:700!important;margin:2rem 0 .6rem!important}
+    #summary-results p{line-height:1.68!important;margin:0 0 .9rem!important;font-size:1.05rem!important;white-space:pre-line}
+    #summary-results ul{margin:0 0 1.1rem 1.1rem!important;padding-left:.2rem!important;list-style:disc!important}
+    #summary-results li{line-height:1.7!important;margin:.6rem 0!important;font-size:1.05rem!important}
 
-        /* Report Sections */
-        .section-box {
-            background: var(--bg-light);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
+    .llm-insights{margin:.4rem 0 1.2rem}
+    .llm-row{display:flex;flex-direction:column;gap:.6rem;padding:.8rem 0;border-bottom:1px dashed var(--border)}
+    .llm-row:last-child{border-bottom:0}
+    .llm-logo{display:flex;align-items:center;justify-content:flex-start;height:32px}
+    .llm-logo img{height:28px;width:auto;display:block;object-fit:contain;max-width:110px}
+    .llm-fallback{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 .75rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;font-weight:600;color:#333;background:#f8f9fa}
+    .llm-row p{margin:0;line-height:1.6}
 
-        .section-box h3 {
-            font-size: 1.5rem;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-            border-bottom: 1px dashed var(--border);
-            padding-bottom: 0.5rem;
-        }
+    .form-section{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);margin-top:3rem;width:100%}
+    .form-section h3{margin:0 0 2rem;font-size:1.8rem;font-weight:700}
+    .form-container{max-width:100%;margin:0 auto}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:0 auto 1rem}
+    .form-full{grid-column:1/-1}
+    .form-section input, .form-section textarea{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:4px;font-size:16px;font-family:inherit}
+    .form-section textarea{min-height:100px;resize:vertical}
+    .form-section input:focus, .form-section textarea:focus{outline:none;border-color:#3182CE}
+    .form-btn{margin-top:1rem;max-width:300px}
 
-        /* Action List */
-        #actions {
-            list-style: decimal;
-            padding-left: 1.5rem;
-        }
+    .consultation-section{text-align:center;padding:3rem 2rem;margin-top:3rem}
+    .consultation-section h3{margin:0 0 1rem;font-size:1.8rem;font-weight:700}
+    .consultation-section p{margin:0 0 2rem;color:var(--muted)}
+    .consultation-info{color:var(--muted);font-size:.95rem;margin-top:1rem}
+    .consultation-info strong{color:#000}
 
-        #actions li {
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--text-medium);
-        }
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);display:none;align-items:center;justify-content:center;z-index:1000}
+    .progress-panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.12)}
+    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .progress-title{font-weight:700;font-size:18px}
+    .progress-pct{color:#666;font-size:16px;font-weight:600}
+    .progress-bar{height:12px;border-radius:8px;background:#eee;overflow:hidden;margin:12px 0}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#3182CE,#1a73e8);border-radius:8px;width:0%;transition:width .3s ease}
+    .progress-eta{color:#666;font-size:14px;line-height:1.4}
 
-        /* Metrics Grid */
-        #metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-        }
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1001}
+    .modal{width:min(600px,90vw);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .modal-title{font-size:20px;font-weight:700;margin:0}
+    .modal-close{background:transparent;border:0;font-size:24px;cursor:pointer;padding:4px;color:#666}
+    .modal-close:hover{color:#000}
+    .modal-content{line-height:1.6}
+    .modal-content p{margin:12px 0;color:#333}
+    .modal-content strong{color:#111}
 
-        .metric-item {
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: white;
-        }
+    .footer{width:100%;text-align:center;padding:2rem 0 1rem;margin-top:3rem;color:#666;font-size:.9rem}
+    .footer a{color:#3182CE;text-decoration:none}
+    .error-note{color:#c00;text-align:center;margin-top:.5rem;font-size:.95rem}
 
-        .metric-item strong {
-            display: block;
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .metric-item span {
-            font-size: 0.85rem;
-            color: var(--text-medium);
-        }
-
-        /* Error and Loading */
-        #loading {
-            text-align: center;
-            font-size: 1.2rem;
-            color: var(--primary);
-            margin-top: 3rem;
-        }
-        
-        #error-display {
-            color: var(--accent-red);
-            text-align: center;
-            margin-top: 3rem;
-            font-weight: 600;
-        }
-        
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 1rem var(--pad-h);
-            margin-top: 3rem;
-            border-top: 1px solid var(--border);
-            background: var(--bg-light);
-        }
-        
-        .footer-content {
-            max-width: var(--max-width);
-            margin: 0 auto;
-            text-align: center;
-            color: var(--text-light);
-            font-size: 0.7rem;
-        }
-        
-        .footer-content p {
-            margin: 0.15rem 0;
-        }
-        
-        /* Mobile adjustments */
-        @media (max-width: 768px) {
-            header {
-                padding: 1.5rem 1rem 0;
-            }
-            .content {
-                padding: 0 1rem 3rem;
-            }
-            h1.logo {
-                font-size: 2.5rem;
-            }
-            .score-box {
-                width: 120px;
-                height: 120px;
-                line-height: 120px;
-                font-size: 2.5rem;
-            }
-        }
-    </style>
+    /* Loading state */
+    .loading-message {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 2rem 0;
+    }
+  </style>
 </head>
 <body>
-    /* analyze.html - v2.20 - Comment Placement Correction & API Alignment
-     * Purpose: Displays the full AI SEO analysis report using the /api/full?mode=full endpoint.
-     * Features: Fetches score, core metrics, executive summary, and expert action plan.
-     * Dependencies: Requires the /api/full endpoint (using full.js v2.20 or later) for its JSON data structure.
-     * Last updated: November 26, 2025
-     */
-    <header>
-        <h1 class="logo">SnipeRank</h1>
-        <h2 class="tagline">Your AI Readiness Report</h2>
-    </header>
+  <h1>SnipeRank</h1>
+  <h2>AI SEO Analysis</h2>
 
-    <div class="content">
-        <div class="score-display">
-            <div id="score-box" class="score-box">--</div>
-            <p id="url-display"></p>
-        </div>
-        
-        <div id="loading">Running full AI analysis...</div>
-        
-        <div id="error-display" style="display:none;"></div>
+  <div class="info-row">
+    <div class="powered-by">Powered by <a href="https://quontora.com" target="_blank" rel="noopener">quontora</a></div>
+    <div class="for-url">Analysis for: <strong id="current-url">-</strong></div>
+  </div>
 
-        <div id="report-content" style="display:none;">
-            
-            <div class="section-box">
-                <h3>Executive Summary</h3>
-                <p id="summary"></p>
-            </div>
-            
-            <div class="section-box">
-                <h3>Core Metrics</h3>
-                <div id="metrics-grid">
-                    </div>
-            </div>
-
-            <div class="section-box">
-                <h3>Expert Action Plan</h3>
-                <p>This plan focuses on high-impact changes required to elevate your site's AI visibility and performance:</p>
-                <ol id="actions">
-                    </ol>
-            </div>
-        </div>
+  <section class="card score-card" id="scoreCard" aria-live="polite">
+    <div class="score-top">
+      <div class="score-main">
+        <div class="score-number" id="scoreNumber">-</div>
+        <div class="score-band" id="scoreBand">Calculating...</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" id="breakdownBtn" type="button">What goes into this score?</button>
+        <button class="btn-ghost" id="copyBtn" type="button">Copy Shareable Summary</button>
+      </div>
     </div>
-    
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 SnipeRank. All rights reserved. Last updated November 26, 2025 — v2.20.</p>
-            <p>A product of <a href="https://quontora.com" target="_blank" style="color: var(--primary); text-decoration: none;">Quontora</a></p>
+    <div class="pillars" id="pillarsGrid"></div>
+    <div class="highlights" id="highlightsBlock" hidden>
+      <h4>Highlights</h4>
+      <ul id="highlightsList"></ul>
+    </div>
+  </section>
+
+  <section id="summary-results">
+    <div class="loading-message">Loading analysis...</div>
+  </section>
+
+  <!-- Get Full Report Form -->
+  <section class="form-section">
+    <h3>Get Your Full Report</h3>
+    <div class="form-container">
+      <form id="full-report-form" novalidate>
+        <div class="form-grid">
+          <input type="text" id="name-input" placeholder="Your Name" required />
+          <input type="email" id="email-input" placeholder="Your Email" required />
+          <input type="tel" id="phone-input" placeholder="Your Phone (optional)" />
+          <input type="text" id="company-input" placeholder="Your Company (optional)" />
+          <textarea class="form-full" id="context-input" placeholder="Share context or ask a specific question — we'll address at your free consult."></textarea>
         </div>
-    </footer>
+        <button type="submit" class="btn-primary form-btn" id="full-report-btn">Get My Full Report</button>
+        <div id="form-error" class="error-note" style="display:none;"></div>
+      </form>
+    </div>
+  </section>
 
-    <script>
-        const API_BASE_URL = '/api/full'; // Assumes the API is deployed on Vercel at /api/full
+  <!-- Consultation Section -->
+  <section class="consultation-section">
+    <h3>Ready to Improve Your AI Visibility?</h3>
+    <p>After reviewing your analysis, book a free 30-minute consultation to discuss your specific opportunities and next steps.</p>
+    <a href="https://calendly.com/quontora" class="btn-primary" target="_blank" rel="noopener">Schedule Free Consultation</a>
+    <div class="consultation-info">
+      <strong>What we'll cover:</strong> Your AI SEO opportunities, implementation timeline, and how to get found by ChatGPT, Gemini, and other AI platforms.
+    </div>
+  </section>
+
+  <div class="footer">
+    © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Last updated November 26.
+  </div>
+
+  <!-- Score Breakdown Modal -->
+  <div id="breakdown-modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">What goes into your SnipeRank score?</h3>
+        <button class="modal-close" id="modal-close">×</button>
+      </div>
+      <div class="modal-content">
+        <p>Your SnipeRank score is calculated based on <strong>50+ SEO factors</strong> optimized for AI search engines. Our analysis evaluates how well your website performs across four critical pillars:</p>
         
-        // Helper function to set score color based on value
-        function getScoreColorClass(score) {
-            if (score >= 80) return 'green';
-            if (score >= 50) return 'yellow';
-            return 'red';
+        <p><strong>🎯 AI Access Readiness (25 points)</strong><br>
+        How easily AI systems can discover, crawl, and understand your site structure.</p>
+        
+        <p><strong>🔒 Trust & Verification Signals (25 points)</strong><br>
+        Authority indicators, security implementation, and credibility markers that AI engines prioritize.</p>
+        
+        <p><strong>📝 LLM Interpretability & Clarity (25 points)</strong><br>
+        Content organization, semantic markup, and clarity for AI language models.</p>
+        
+        <p><strong>🔍 Prompt-Pattern Alignment (25 points)</strong><br>
+        How well your content matches common search patterns and query structures.</p>
+        
+        <p style="margin-top:16px;font-style:italic;color:#666;">
+          Each factor is weighted based on its impact on AI search visibility and ranking potential.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // v3.1.9 JS — RESTORED original design with fixed API integration
+
+    const LOGO_SOURCES = {
+      ChatGPT: '/img/chatgpt-logo.png',
+      Claude: '/img/claude.jpeg',
+      Gemini: '/img/gemini-icon.svg',
+      Copilot: '/img/copilot.jpeg',
+      Perplexity: '/img/perplexity-logo.png',
+    };
+
+    function logoDivFor(engine){
+      const wrap = document.createElement('div'); 
+      wrap.className = 'llm-logo';
+      const p = LOGO_SOURCES[engine];
+      if (!p) {
+        wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
+        return wrap;
+      }
+      const img = document.createElement('img'); 
+      img.alt = `${engine} logo`; 
+      img.src = p;
+      img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
+      img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
+      return wrap;
+    }
+    
+    function transformAIInsights(root){
+      const title = [...root.querySelectorAll('h2,h3,h4,.section-title')].find(n => /ai\s*engine\s*insights?/i.test((n.textContent || '').trim()));
+      if (!title) return;
+      let ul = title.nextElementSibling;
+      while (ul && ul.tagName && ul.tagName.toLowerCase() !== 'ul') ul = ul.nextElementSibling;
+      if (!ul) return;
+      const bullets = [...ul.querySelectorAll('li')].map(li => (li.textContent || '').trim());
+      if (!bullets.length) return;
+      const engines = ['ChatGPT','Claude','Gemini','Copilot','Perplexity'];
+      const box = document.createElement('div'); 
+      box.className = 'llm-insights';
+      engines.forEach((e, i) => {
+        const t = bullets[i]; 
+        if (!t) return; 
+        const row = document.createElement('div'); 
+        row.className = 'llm-row'; 
+        row.appendChild(logoDivFor(e)); 
+        const p = document.createElement('p'); 
+        p.textContent = t; 
+        row.appendChild(p); 
+        box.appendChild(row);
+      });
+      ul.replaceWith(box);
+    }
+    
+    function renderScoreCard(total, pillars, highlights){
+      document.getElementById("scoreNumber").textContent = `${total}/100`;
+      document.getElementById("scoreBand").textContent =
+        total >= 70 ? "Rank: Highly Visible ★★★★☆" : 
+        total >= 55 ? "Rank: Partially Visible ★★★☆☆" : 
+        total >= 40 ? "Rank: Needs Work ★★☆☆☆" : 
+        "Rank: Low Visibility ★☆☆☆☆";
+      const grid = document.getElementById("pillarsGrid"); 
+      grid.innerHTML = "";
+      [
+        ["AI Access Readiness", pillars.access],
+        ["Trust & Verification Signals", pillars.trust],
+        ["LLM Interpretability & Clarity", pillars.clarity],
+        ["Prompt-Pattern Alignment", pillars.alignment]
+      ].forEach(([label, val]) => {
+        const d = document.createElement("div"); 
+        d.className = "pillar"; 
+        d.innerHTML = `<span class="label">${label}</span><span class="badge">${val}/25</span>`; 
+        grid.appendChild(d);
+      });
+      if (highlights && highlights.length) {
+        const ul = document.getElementById("highlightsList"); 
+        ul.innerHTML = ""; 
+        highlights.forEach(h => {
+          const li = document.createElement("li"); 
+          li.textContent = h; 
+          ul.appendChild(li);
+        }); 
+        document.getElementById("highlightsBlock").hidden = false;
+      }
+    }
+
+    // Extract target URL from query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUrl = urlParams.get("url");
+
+    // Robust domain extractor
+    function extractDomain(u){
+      if (!u) return '';
+      try {
+        const withProto = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+        const { hostname } = new URL(withProto);
+        return hostname.replace(/^www\./i,'');
+      } catch {
+        const m = String(u).match(/^(?:https?:\/\/)?([^\/?#]+)/i);
+        return (m ? m[1] : '').replace(/^www\./i,'');
+      }
+    }
+
+    // Modal controls
+    document.getElementById('breakdownBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('breakdown-modal').style.display = 'flex';
+    });
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('breakdown-modal').style.display = 'none';
+    });
+    document.getElementById('breakdown-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('breakdown-modal')) {
+        document.getElementById('breakdown-modal').style.display = 'none';
+      }
+    });
+
+    // Copy button
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const scoreText = document.getElementById("scoreNumber").textContent || "-/100";
+      const labels = [...document.querySelectorAll('.pillar .label')].map(el => el.textContent.trim());
+      const vals = [...document.querySelectorAll('.pillar .badge')].map(el => el.textContent.trim());
+      const highlights = [...document.querySelectorAll('#highlightsList li')].map(li => li.textContent.trim());
+      const txt = [
+        `Website: ${targetUrl}`,
+        `SnipeRank Score: ${scoreText}`,
+        `Pillars:`, ...labels.map((l, i) => `- ${l}: ${vals[i] || ''}`),
+        ``, `Highlights/Issues:`, ...highlights.map(h => `- ${h}`)
+      ].join("\n");
+      try { 
+        await navigator.clipboard.writeText(txt);
+        const b = document.getElementById("copyBtn"); 
+        const old = b.textContent; 
+        b.textContent = "Copied!"; 
+        setTimeout(() => b.textContent = old, 1500);
+      } catch { 
+        window.prompt("Copy the summary:", txt); 
+      }
+    });
+
+    // Form submission handler
+    document.getElementById('full-report-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name-input').value.trim();
+      const email = document.getElementById('email-input').value.trim();
+      const phone = document.getElementById('phone-input').value.trim();
+      const company = document.getElementById('company-input').value.trim();
+      const context = document.getElementById('context-input').value.trim();
+      const errorEl = document.getElementById('form-error');
+      const btn = document.getElementById('full-report-btn');
+
+      errorEl.style.display = 'none';
+      if (!name || !email || !targetUrl) {
+        errorEl.textContent = 'Please provide your name and email.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const domain = extractDomain(targetUrl);
+
+      // Keep sessionStorage for backup/additional data
+      sessionStorage.setItem('sniperank:name', name);
+      sessionStorage.setItem('sniperank:email', email);
+      sessionStorage.setItem('sniperank:phone', phone);
+      sessionStorage.setItem('sniperank:company', company);
+      sessionStorage.setItem('sniperank:context', context);
+      sessionStorage.setItem('sniperank:url', targetUrl);
+      sessionStorage.setItem('sniperank:domain', domain);
+
+      // Prevent double-clicks
+      btn.disabled = true; 
+      btn.textContent = 'Preparing Full Report...';
+
+      // Pass name and email as URL parameters to match full-report.html expectations
+      const q = new URLSearchParams({
+        url: targetUrl,
+        name: encodeURIComponent(name),
+        email: encodeURIComponent(email),
+        domain,
+        source: 'analyze'
+      }).toString();
+
+      console.log('Redirecting to full report with params:', q);
+      window.location.href = `full-report.html?${q}`;
+    });
+
+    // Load analysis on page load - FIXED TO USE /api/full WITH CORRECT FIELD NAMES
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!targetUrl) {
+        document.getElementById("current-url").textContent = "No URL provided";
+        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>No URL provided. Please go back to the homepage.</p>";
+        return;
+      }
+      
+      document.getElementById("current-url").textContent = targetUrl;
+
+      try {
+        const r = await fetch(`/api/full?url=${encodeURIComponent(targetUrl)}`);
+        const j = await r.json();
+        
+        if (j.success === false || !j.score) {
+          throw new Error(j.error || 'Analysis failed');
         }
+        
+        // Calculate pillars from score for UI compatibility
+        const pillarScore = Math.round(j.score / 4);
+        const pillars = {
+          access: pillarScore,
+          trust: pillarScore,
+          clarity: pillarScore,
+          alignment: pillarScore
+        };
+        
+        // Use first 5 items from needsAttention for highlights preview
+        const highlights = (j.needsAttention || []).slice(0, 5);
+        
+        renderScoreCard(j.score, pillars, highlights);
+        sessionStorage.setItem('sniperank:data', JSON.stringify(j));
+      } catch (e) {
+        console.error('Score error:', e);
+        // Show error in score card
+        document.getElementById("scoreNumber").textContent = "Error";
+        document.getElementById("scoreBand").textContent = "Analysis failed";
+      }
 
-        // Main function to fetch and display the report
-        async function fetchReport() {
-            const params = new URLSearchParams(window.location.search);
-            const url = params.get('url');
-            const scoreBox = document.getElementById('score-box');
-            const urlDisplay = document.getElementById('url-display');
-            const loading = document.getElementById('loading');
-            const reportContent = document.getElementById('report-content');
-            const errorDisplay = document.getElementById('error-display');
-
-            if (!url) {
-                errorDisplay.textContent = 'Error: No URL provided for analysis.';
-                errorDisplay.style.display = 'block';
-                loading.style.display = 'none';
-                return;
-            }
-
-            urlDisplay.textContent = `Analyzing: ${url}`;
-
-            try {
-                // 1. Initial Call for Full Report (mode=full is used for the full page)
-                const apiUrl = `${API_BASE_URL}?url=${encodeURIComponent(url)}&mode=full`;
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to fetch analysis report.');
-                }
-                
-                // 2. Display Score (The fixed, consistently low score)
-                const score = data.score;
-                scoreBox.textContent = score;
-                scoreBox.className = 'score-box ' + getScoreColorClass(score);
-
-                // 3. Display AI Summary
-                document.getElementById('summary').textContent = data.summary;
-
-                // 4. Display Core Metrics
-                const metricsGrid = document.getElementById('metrics-grid');
-                
-                // Helper to render a metric
-                const renderMetric = (label, value) => `
-                    <div class="metric-item">
-                        <strong>${value}</strong>
-                        <span>${label}</span>
-                    </div>
-                `;
-                
-                metricsGrid.innerHTML = `
-                    ${renderMetric('Performance', `${data.metrics.performance}/100`)}
-                    ${renderMetric('SEO', `${data.metrics.seo}/100`)}
-                    ${renderMetric('Accessibility', `${data.metrics.accessibility}/100`)}
-                    ${renderMetric('Largest Contentful Paint', data.metrics.lcp)}
-                    ${renderMetric('Cumulative Layout Shift', data.metrics.cls)}
-                    ${renderMetric('Total Blocking Time', data.metrics.tbt)}
-                `;
-
-                // 5. Display Action Plan
-                const actionsList = document.getElementById('actions');
-                actionsList.innerHTML = data.actions.map(action => `<li>${action}</li>`).join('');
-
-                // 6. Final UI Update
-                loading.style.display = 'none';
-                reportContent.style.display = 'block';
-
-            } catch (error) {
-                console.error('Report Error:', error);
-                // Based on image_1f8ef9.png, the API returned: "Error: Unexpected token 'A', "A server e"... is not valid JSON."
-                // Since the API failed to return valid JSON, display '00' score.
-                scoreBox.textContent = '00';
-                scoreBox.className = 'score-box red';
-                urlDisplay.textContent = `Analysis failed for: ${url}`;
-                errorDisplay.textContent = `Error: ${error.message}. Please check your console for details or try a different URL.`;
-                errorDisplay.style.display = 'block';
-                loading.style.display = 'none';
-            }
+      try {
+        // Generate preview content from /api/full data
+        const res = await fetch(`/api/full?url=${encodeURIComponent(targetUrl)}`);
+        const data = await res.json();
+        
+        let html = '';
+        
+        // What's Working section (first 5 items for preview)
+        if (data.whatsWorking && data.whatsWorking.length > 0) {
+          html += '<h3 class="section-title">What\'s Working (Preview)</h3>';
+          html += '<ul>';
+          data.whatsWorking.slice(0, 5).forEach(item => {
+            html += `<li>${item}</li>`;
+          });
+          if (data.whatsWorking.length > 5) {
+            html += `<li><em>...and ${data.whatsWorking.length - 5} more in the full report</em></li>`;
+          }
+          html += '</ul>';
         }
-
-        // Run analysis on page load
-        document.addEventListener('DOMContentLoaded', fetchReport);
-    </script>
+        
+        // Needs Attention section (first 10 items for preview)
+        if (data.needsAttention && data.needsAttention.length > 0) {
+          html += '<h3 class="section-title">Needs Attention (Preview)</h3>';
+          html += '<ul>';
+          data.needsAttention.slice(0, 10).forEach(item => {
+            html += `<li>${item}</li>`;
+          });
+          if (data.needsAttention.length > 10) {
+            html += `<li><em>...and ${data.needsAttention.length - 10} more detailed recommendations in the full report</em></li>`;
+          }
+          html += '</ul>';
+        }
+        
+        // AI Engine Insights section
+        if (data.engineInsights && data.engineInsights.length > 0) {
+          html += '<h3 class="section-title">AI Engine Insights</h3>';
+          html += '<ul>';
+          data.engineInsights.forEach(item => {
+            html += `<li>${item}</li>`;
+          });
+          html += '</ul>';
+        }
+        
+        const host = document.getElementById('summary-results'); 
+        host.innerHTML = html; 
+        transformAIInsights(host);
+      } catch {
+        document.getElementById('summary-results').innerHTML = "<p style='text-align:center;color:red'>Error loading analysis report.</p>";
+      }
+    });
+  </script>
 </body>
 </html>

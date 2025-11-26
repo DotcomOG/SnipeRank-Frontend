@@ -1,6 +1,6 @@
-/* api/full.js - v4.0.1 — Unified API with Real SEO Intelligence (FALLBACK FIX)
+/* api/full.js - v4.0.2 — Unified API with Real SEO Intelligence (STABILITY FIX)
   Purpose: Comprehensive AI SEO analysis that serves both the /api/score (small) and /api/full (large) payloads.
-  FIX: Improved fallback payload structure to ensure it always matches frontend contracts, preventing hangs/crashes.
+  FIX: Switched from the floating "gpt-4-turbo" preview model name to the STABLE production name "gpt-4-turbo-2024-04-09" to ensure reliable JSON output and prevent the 95% hang bug.
   ENV Required: OPENAI_API_KEY, PAGESPEED_API_KEY
 */
 
@@ -19,7 +19,7 @@ const PILLAR_WEIGHTS = {
   clarity: 0.20, // Content/Title/Meta/Headings
   alignment: 0.25 // Performance/CWV
 };
-const MODEL_NAME = "gpt-4-turbo";
+const MODEL_NAME = "gpt-4-turbo-2024-04-09";
 
 export default async function handler(req, res) {
   // Determine if this is a request for the small score payload or the full report

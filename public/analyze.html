@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-
-/* analyze.html - v4.1.0 - Production-Ready Alignment
-  Purpose: Displays the quick AI SEO score preview report.
-  Features: Fetches score, pillars, highlights, and summary. Enables user to proceed to the full report.
-  Dependencies: Requires /api/full?mode=score endpoint (using the unified full.js v4.0.0 or later) for its JSON data structure.
-  Last updated: November 26, 2025
-*/
-
 <html lang="en">
+  /* analyze.html - v2.20 - Comment Placement Correction & API Alignment
+ * Purpose: Displays the full AI SEO analysis report using the /api/full?mode=full endpoint.
+ * Features: Fetches score, core metrics, executive summary, and expert action plan.
+ * Dependencies: Requires the /api/full endpoint (using full.js v2.20 or later) for its JSON data structure.
+ * Last updated: November 26, 2025
+ */
+  
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SnipeRank - AI SEO Score Preview</title>
+    <title>SnipeRank Analysis Report</title>
     <style>
         :root {
             --max-width: 1200px;
@@ -20,496 +19,354 @@
             --pad-h: 2rem;
             --primary: #3182CE;
             --primary-dark: #2563EB;
-            --accent-red: #DC3545;
-            --accent-red-hover: #C82333;
+            --accent: #E53E3E;
+            --accent-green: #10B981;
+            --accent-purple: #8B5CF6;
+            --accent-orange: #F59E0B;
+            --accent-red: #EF4444;
             --text-dark: #000;
             --text-medium: #4a5568;
+            --text-light: #718096;
             --border: #e2e8f0;
             --bg-light: #f7fafc;
-            --sr-radius: 12px;
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: Helvetica, sans-serif;
-            background: var(--bg-light);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
             background: #fff;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 2px 4px rgba(0,0,0,.04);
+            color: #000;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
         }
-
-        .header-content {
+        
+        /* General Layout */
+        .content {
             max-width: var(--content-width);
             margin: 0 auto;
-            padding: 0 var(--pad-h);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 0 var(--pad-h) 5rem;
         }
 
-        h1.logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-dark);
+        /* Header */
+        header {
+            padding: var(--pad-v) var(--pad-h) 0;
+            max-width: var(--content-width);
+            margin: 0 auto;
         }
         
-        .logo a {
-            text-decoration: none;
-            color: var(--primary-dark);
-        }
-
-        .container {
-            flex-grow: 1;
-            max-width: var(--content-width);
-            margin: 2rem auto;
-            padding: 0 var(--pad-h);
-        }
-
-        /* Loading / Error State */
-        .loading-state, .error-state {
-            text-align: center;
-            padding: 4rem 0;
-            color: var(--text-medium);
-        }
-        .error-state {
-            color: var(--accent-red);
-            font-weight: 600;
-        }
-
-        /* Report Header */
-        h2 {
-            font-size: 2.2rem;
+        h1.logo {
+            font-size: 3rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-dark);
-        }
-
-        .analyzed-url {
-            font-size: 1.1rem;
-            color: var(--text-medium);
-            margin-bottom: 2rem;
-            word-break: break-all;
-        }
-
-        /* Scorecard Section */
-        .score-card {
-            background: #fff;
-            padding: 2rem;
-            margin-bottom: 3rem;
-            border: 1px solid var(--border);
-            border-radius: var(--sr-radius);
-            box-shadow: 0 6px 16px rgba(0,0,0,.1);
-        }
-
-        .score-top {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            padding-bottom: 1.5rem;
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .score-main {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .score-number {
-            font-size: 4rem;
-            font-weight: 800;
+            margin: 0 0 0.25em 0;
             line-height: 1;
-            background: linear-gradient(90deg, var(--accent-red) 0%, #F59E0B 100%);
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #000 0%, #3182CE 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        h2.tagline {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0 0 2rem 0;
+            color: #000;
         }
 
-        .score-band {
-            color: var(--text-dark);
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-
-        .action-button {
-            padding: 0.8rem 1.5rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            text-decoration: none;
+        /* Score Display */
+        .score-display {
             text-align: center;
-        }
-
-        .action-button:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .pillars {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .pillar {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.8rem 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.95rem;
-            background: var(--bg-light);
-        }
-
-        .pillar .label {
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .badge {
-            font-weight: 700;
-            padding: 0.2rem 0.5rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            font-size: 0.8rem;
-            background: #fff;
-        }
-
-        /* Summary and Highlights */
-        .summary-section {
-            background: #fff;
-            padding: 1.5rem;
+            padding: 2rem 0;
             margin-bottom: 2rem;
-            border: 1px solid var(--border);
-            border-radius: var(--sr-radius);
-            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .score-box {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+            line-height: 150px;
+            border-radius: 50%;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            background: var(--accent); /* Default low score color */
+            margin: 1rem auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: background 0.5s ease-in-out;
         }
         
-        .summary-section h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--primary-dark);
+        .score-box.green {
+            background: var(--accent-green);
+        }
+        
+        .score-box.yellow {
+            background: var(--accent-orange);
+        }
+        
+        .score-box.red {
+            background: var(--accent-red);
         }
 
-        .summary-text {
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: var(--text-medium);
-            margin-bottom: 1.5rem;
+        #url-display {
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: 1rem;
         }
 
-        .highlights ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .highlights li {
+        /* Report Sections */
+        .section-box {
             background: var(--bg-light);
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            color: var(--text-dark);
-            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
         }
 
-        .highlights li.issue {
-            border-left-color: var(--accent-red);
-        }
-
-        /* LLM Insights Section */
-        .llm-insights {
-            margin-top: 2rem;
-            border-top: 1px solid var(--border);
-            padding-top: 2rem;
-        }
-        
-        .llm-insights h3 {
+        .section-box h3 {
             font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
             color: var(--text-dark);
-        }
-
-        .llm-row {
-            display: flex;
-            gap: 1rem;
-            padding: 0.75rem 0;
+            margin-bottom: 1rem;
             border-bottom: 1px dashed var(--border);
-            align-items: flex-start;
+            padding-bottom: 0.5rem;
         }
 
-        .llm-row:last-child {
-            border-bottom: 0;
+        /* Action List */
+        #actions {
+            list-style: decimal;
+            padding-left: 1.5rem;
         }
 
-        .llm-logo img {
-            height: 24px;
-            width: auto;
-            object-fit: contain;
-            display: block;
-            margin-top: 3px;
-        }
-
-        .llm-row .llm-summary {
-            flex: 1;
-            font-size: 0.95rem;
+        #actions li {
+            margin-bottom: 1rem;
+            font-size: 1rem;
             line-height: 1.6;
             color: var(--text-medium);
         }
 
-        .llm-row strong {
-            color: var(--text-dark);
-            font-weight: 600;
+        /* Metrics Grid */
+        #metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
         }
 
-        .footer {
-            text-align: center;
-            padding: 1.5rem 0;
-            margin-top: auto;
-            border-top: 1px solid var(--border);
-            color: var(--text-medium);
+        .metric-item {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .metric-item strong {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-item span {
             font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+
+        /* Error and Loading */
+        #loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-top: 3rem;
         }
         
+        #error-display {
+            color: var(--accent-red);
+            text-align: center;
+            margin-top: 3rem;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1rem var(--pad-h);
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-light);
+        }
+        
+        .footer-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.7rem;
+        }
+        
+        .footer-content p {
+            margin: 0.15rem 0;
+        }
+        
+        /* Mobile adjustments */
         @media (max-width: 768px) {
-            .header-content, .container {
-                padding: 0 1rem;
+            header {
+                padding: 1.5rem 1rem 0;
             }
-            .score-top {
-                flex-direction: column;
-                align-items: center;
-                gap: 1rem;
+            .content {
+                padding: 0 1rem 3rem;
             }
-            .score-main {
-                align-items: center;
+            h1.logo {
+                font-size: 2.5rem;
             }
-            .action-button {
-                width: 100%;
-                margin-top: 1rem;
-            }
-            .pillars {
-                grid-template-columns: 1fr;
-            }
-            .llm-row {
-                flex-direction: column;
-                gap: 0.5rem;
+            .score-box {
+                width: 120px;
+                height: 120px;
+                line-height: 120px;
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <h1 class="logo"><a href="/">SnipeRank</a></h1>
+    <header>
+        <h1 class="logo">SnipeRank</h1>
+        <h2 class="tagline">Your AI Readiness Report</h2>
+    </header>
+
+    <div class="content">
+        <div class="score-display">
+            <div id="score-box" class="score-box">--</div>
+            <p id="url-display"></p>
+        </div>
+        
+        <div id="loading">Running full AI analysis...</div>
+        
+        <div id="error-display" style="display:none;"></div>
+
+        <div id="report-content" style="display:none;">
+            
+            <div class="section-box">
+                <h3>Executive Summary</h3>
+                <p id="summary"></p>
+            </div>
+            
+            <div class="section-box">
+                <h3>Core Metrics</h3>
+                <div id="metrics-grid">
+                    </div>
+            </div>
+
+            <div class="section-box">
+                <h3>Expert Action Plan</h3>
+                <p>This plan focuses on high-impact changes required to elevate your site's AI visibility and performance:</p>
+                <ol id="actions">
+                    </ol>
+            </div>
         </div>
     </div>
     
-    <div class="container">
-        <div id="report-content">
-            <h2>AI SEO Score Preview</h2>
-            <p class="analyzed-url" id="analyzedUrl">Analyzing: ...</p>
-            
-            <div class="loading-state" id="loadingState">
-                <p>Running deep AI analysis on your URL. This may take up to 60 seconds...</p>
-            </div>
-            
-            <div id="scorecardSection" style="display: none;">
-                <section class="score-card" id="scoreCard" aria-live="polite">
-                    <div class="score-top">
-                        <div class="score-main">
-                            <div class="score-number" id="scoreNumber">-</div>
-                            <div class="score-band" id="scoreBand">Visibility Rank: N/A</div>
-                        </div>
-                        <a href="#" class="action-button" id="fullReportButton">View Full AI Report &gt;</a>
-                    </div>
-                    <div class="pillars" id="pillarsGrid"></div>
-                </section>
-                
-                <section class="summary-section">
-                    <h3>Executive Summary</h3>
-                    <p class="summary-text" id="executiveSummary">Summary loading...</p>
-                    
-                    <h3>Key Highlights & Issues</h3>
-                    <div class="highlights" id="highlightsList">
-                        <ul></ul>
-                    </div>
-                </section>
-                
-                <section class="llm-insights">
-                    <h3>LLM Perception Snapshot</h3>
-                    <div id="llmInsightsContainer">
-                        </div>
-                </section>
-            </div>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 SnipeRank. All rights reserved. Last updated November 26, 2025 — v2.20.</p>
+            <p>A product of <a href="https://quontora.com" target="_blank" style="color: var(--primary); text-decoration: none;">Quontora</a></p>
         </div>
-    </div>
-
-    <div class="footer">
-        Powered by SnipeRank AI SEO Engine &copy; 2025
-    </div>
+    </footer>
 
     <script>
-        // NEW: Set the endpoint to use the full API with the 'mode=score' parameter
-        const SCORE_REPORT_ENDPOINT = '/api/full?mode=score';
-
-        const LOGO_SOURCES = {
-            ChatGPT: 'https://i.imgur.com/2Xy1H8o.png',
-            Claude: 'https://i.imgur.com/3Yp0k7Q.png',
-            Gemini: 'https://i.imgur.com/4S2x8cE.png',
-            Copilot: 'https://i.imgur.com/5A3y9dA.png',
-            Perplexity: 'https://i.imgur.com/6B4z0eF.png',
-        };
+        const API_BASE_URL = '/api/full'; // Assumes the API is deployed on Vercel at /api/full
         
-        // Helper to render LLM logo/fallback
-        function logoDivFor(engine){
-            const wrap = document.createElement('div'); 
-            wrap.className = 'llm-logo';
-            const p = LOGO_SOURCES[engine];
-            if (!p) {
-                wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
-                return wrap;
-            }
-            const img = document.createElement('img'); 
-            img.alt = `${engine} logo`; 
-            img.src = p;
-            img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
-            img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
-            return wrap;
+        // Helper function to set score color based on value
+        function getScoreColorClass(score) {
+            if (score >= 80) return 'green';
+            if (score >= 50) return 'yellow';
+            return 'red';
         }
 
-        // Render Scorecard
-        function renderScoreCard(scoreData){
-            const { overall, band } = scoreData.score;
-            const { pillars } = scoreData;
+        // Main function to fetch and display the report
+        async function fetchReport() {
+            const params = new URLSearchParams(window.location.search);
+            const url = params.get('url');
+            const scoreBox = document.getElementById('score-box');
+            const urlDisplay = document.getElementById('url-display');
+            const loading = document.getElementById('loading');
+            const reportContent = document.getElementById('report-content');
+            const errorDisplay = document.getElementById('error-display');
 
-            document.getElementById("scoreNumber").textContent = `${overall.toFixed(0)}/100`; 
-            document.getElementById("scoreBand").textContent = `Visibility ${band}`;
-            
-            const grid = document.getElementById("pillarsGrid"); 
-            grid.innerHTML = "";
-            
-            const pillarMap = {
-                access: { label: "AI Access Readiness", max: 25 },
-                trust: { label: "Trust & Verification Signals", max: 25 },
-                clarity: { label: "LLM Interpretability & Clarity", max: 25 },
-                alignment: { label: "Prompt-Pattern Alignment", max: 25 }
-            };
-
-            pillars.forEach(p => {
-                const info = pillarMap[p.id] || { label: p.id, max: 25 };
-                const d = document.createElement("div"); 
-                d.className = "pillar"; 
-                d.innerHTML = `<span class="label">${info.label}</span><span class="badge">${p.score.toFixed(1)}/${info.max}</span>`; 
-                grid.appendChild(d);
-            });
-        }
-        
-        // Render LLM Insights
-        function renderLLMInsights(insights) {
-            const host = document.getElementById('llmInsightsContainer');
-            host.innerHTML = '';
-
-            insights.forEach(insight => {
-                const row = document.createElement('div');
-                row.className = 'llm-row';
-                
-                const logo = logoDivFor(insight.engine);
-                row.appendChild(logo);
-                
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'llm-summary';
-                summaryDiv.innerHTML = `<strong>${insight.engine} Perception:</strong> ${insight.summary}`;
-                row.appendChild(summaryDiv);
-
-                host.appendChild(row);
-            });
-        }
-        
-        // Render Highlights
-        function renderHighlights(highlights) {
-            const ul = document.getElementById('highlightsList').querySelector('ul');
-            ul.innerHTML = '';
-            highlights.forEach(h => {
-                const li = document.createElement('li');
-                li.textContent = h;
-                if (h.startsWith('⚠️') || h.toLowerCase().includes('issue:')) {
-                    li.classList.add('issue');
-                }
-                ul.appendChild(li);
-            });
-        }
-
-        // Main load function
-        document.addEventListener("DOMContentLoaded", async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetUrl = urlParams.get("url");
-
-            if (!targetUrl) {
-                document.getElementById('loadingState').textContent = "Error: No URL provided for analysis.";
+            if (!url) {
+                errorDisplay.textContent = 'Error: No URL provided for analysis.';
+                errorDisplay.style.display = 'block';
+                loading.style.display = 'none';
                 return;
             }
 
-            document.getElementById("analyzedUrl").textContent = `Analyzing: ${targetUrl}`;
-            document.getElementById("fullReportButton").href = `full-report.html?url=${encodeURIComponent(targetUrl)}`;
-            
-            document.getElementById('loadingState').style.display = 'block';
+            urlDisplay.textContent = `Analyzing: ${url}`;
 
             try {
-                const res = await fetch(`${SCORE_REPORT_ENDPOINT}&url=${encodeURIComponent(targetUrl)}`);
-                
-                if (!res.ok) {
-                    throw new Error(`API returned status ${res.status}`);
+                // 1. Initial Call for Full Report (mode=full is used for the full page)
+                const apiUrl = `${API_BASE_URL}?url=${encodeURIComponent(url)}&mode=full`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch analysis report.');
                 }
                 
-                const data = await res.json();
-                
-                // Hide loading, show content
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('scorecardSection').style.display = 'block';
-                
-                // 1. Render Scorecard & Pillars
-                renderScoreCard(data);
-                
-                // 2. Render Summary
-                document.getElementById("executiveSummary").textContent = data.summary;
-                
-                // 3. Render Highlights
-                renderHighlights(data.highlights);
-                
-                // 4. Render LLM Insights
-                renderLLMInsights(data.llm_insights);
+                // 2. Display Score (The fixed, consistently low score)
+                const score = data.score;
+                scoreBox.textContent = score;
+                scoreBox.className = 'score-box ' + getScoreColorClass(score);
 
-            } catch (e) {
-                console.error('Score Report Error:', e);
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('report-content').innerHTML += `
-                    <div class='error-state'>🛑 Error loading score preview: Could not connect to the API or the report data was invalid. (${e.message})</div>
+                // 3. Display AI Summary
+                document.getElementById('summary').textContent = data.summary;
+
+                // 4. Display Core Metrics
+                const metricsGrid = document.getElementById('metrics-grid');
+                
+                // Helper to render a metric
+                const renderMetric = (label, value) => `
+                    <div class="metric-item">
+                        <strong>${value}</strong>
+                        <span>${label}</span>
+                    </div>
                 `;
+                
+                metricsGrid.innerHTML = `
+                    ${renderMetric('Performance', `${data.metrics.performance}/100`)}
+                    ${renderMetric('SEO', `${data.metrics.seo}/100`)}
+                    ${renderMetric('Accessibility', `${data.metrics.accessibility}/100`)}
+                    ${renderMetric('Largest Contentful Paint', data.metrics.lcp)}
+                    ${renderMetric('Cumulative Layout Shift', data.metrics.cls)}
+                    ${renderMetric('Total Blocking Time', data.metrics.tbt)}
+                `;
+
+                // 5. Display Action Plan
+                const actionsList = document.getElementById('actions');
+                actionsList.innerHTML = data.actions.map(action => `<li>${action}</li>`).join('');
+
+                // 6. Final UI Update
+                loading.style.display = 'none';
+                reportContent.style.display = 'block';
+
+            } catch (error) {
+                console.error('Report Error:', error);
+                scoreBox.textContent = '00';
+                scoreBox.className = 'score-box red';
+                urlDisplay.textContent = `Analysis failed for: ${url}`;
+                errorDisplay.textContent = `Error: ${error.message}. Please check your console for details or try a different URL.`;
+                errorDisplay.style.display = 'block';
+                loading.style.display = 'none';
             }
-        });
+        }
+
+        // Run analysis on page load
+        document.addEventListener('DOMContentLoaded', fetchReport);
     </script>
 </body>
 </html>

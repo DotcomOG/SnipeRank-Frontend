@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  /* analyze.html - v2.20 - Comment Placement Correction & API Alignment
+/* analyze.html - v2.20 - Comment Placement Correction & API Alignment
  * Purpose: Displays the full AI SEO analysis report using the /api/full?mode=full endpoint.
  * Features: Fetches score, core metrics, executive summary, and expert action plan.
  * Dependencies: Requires the /api/full endpoint (using full.js v2.20 or later) for its JSON data structure.
  * Last updated: November 26, 2025
  */
-  
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -235,6 +234,12 @@
     </style>
 </head>
 <body>
+    /* analyze.html - v2.20 - Comment Placement Correction & API Alignment
+     * Purpose: Displays the full AI SEO analysis report using the /api/full?mode=full endpoint.
+     * Features: Fetches score, core metrics, executive summary, and expert action plan.
+     * Dependencies: Requires the /api/full endpoint (using full.js v2.20 or later) for its JSON data structure.
+     * Last updated: November 26, 2025
+     */
     <header>
         <h1 class="logo">SnipeRank</h1>
         <h2 class="tagline">Your AI Readiness Report</h2>
@@ -356,6 +361,8 @@
 
             } catch (error) {
                 console.error('Report Error:', error);
+                // Based on image_1f8ef9.png, the API returned: "Error: Unexpected token 'A', "A server e"... is not valid JSON."
+                // Since the API failed to return valid JSON, display '00' score.
                 scoreBox.textContent = '00';
                 scoreBox.className = 'score-box red';
                 urlDisplay.textContent = `Analysis failed for: ${url}`;

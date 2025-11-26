@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/**/*.js": {
-      "includeFiles": "node_modules/**"
+      "runtime": "nodejs20.x",
+      "includeFiles": "node_modules/my-dependency/**"
     }
   }
 }

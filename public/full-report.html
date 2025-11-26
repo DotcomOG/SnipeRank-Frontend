@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnipeRank - Full AI SEO Report</title>
+    <style>
+        :root {
+            --max-width: 1200px;
+            --content-width: 760px;
+            --pad-v: 3vh;
+            --pad-h: 2rem;
+            --primary: #3182CE;
+            --primary-dark: #2563EB;
+            --accent-red: #DC3545;
+            --accent-red-hover: #C82333;
+            --text-dark: #000;
+            --text-medium: #4a5568;
+            --border: #e2e8f0;
+            --bg-light: #f7fafc;
+            --sr-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            background: #fff;
+            color: #000;
+            margin: 0;
+            padding: var(--pad-v) 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: var(--content-width);
+            margin: 0 auto;
+            padding: 0 var(--pad-h);
+        }
+
+        h1.logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0 0 0.25em 0;
+            line-height: 1;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #000 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text-dark);
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-meta {
+            margin-bottom: 2rem;
+            color: var(--text-medium);
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+        
+        .report-meta strong {
+            color: var(--text-dark);
+        }
+
+        /* Scorecard Section - Duplicated from analyze.html but visually cleaner */
+        .score-card {
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border);
+            border-radius: var(--sr-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            background: var(--bg-light);
+        }
+        .score-top {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .score-main {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .score-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent-red) 0%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .score-band {
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .pillars {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+        }
+        .pillar {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+        .pillar .label {
+            font-weight: 600;
+        }
+        .badge {
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            background: var(--bg-light);
+        }
+
+        /* Action Plan Section */
+        #action-items h3 {
+            color: var(--accent-red);
+            font-size: 1.6rem;
+            border-bottom: 1px solid var(--accent-red);
+            padding-bottom: 5px;
+        }
+        
+        .action-item {
+            border: 1px solid var(--border);
+            border-radius: var(--sr-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        }
+        .action-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .action-item p {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .action-item ul {
+            padding-left: 1.5rem;
+            margin-top: 0.75rem;
+        }
+        .action-item li {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-medium);
+            margin-bottom: 0.4rem;
+        }
+
+        /* LLM Insights Section */
+        .llm-insights {
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            border-radius: var(--sr-radius);
+            padding: 1.5rem;
+            background: #fdfdff;
+        }
+        .llm-insights h3 {
+            border-bottom: none;
+            color: var(--text-dark);
+            margin-top: 0;
+        }
+        .llm-row {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--border);
+            align-items: flex-start;
+        }
+        .llm-row:last-child {
+            border-bottom: 0;
+        }
+        .llm-logo img {
+            height: 24px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            margin-top: 3px;
+        }
+        .llm-row .llm-summary {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-medium);
+        }
+        .llm-row strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* Main Content Styling */
+        #full-report-content {
+            white-space: pre-line;
+        }
+        #full-report-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            border-bottom: 1px solid var(--primary-dark);
+            padding-bottom: 5px;
+            margin-top: 3rem;
+        }
+        #full-report-content ul {
+            padding-left: 2rem;
+            margin: 1rem 0;
+        }
+        #full-report-content li {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+        }
+        #full-report-content p {
+            margin-bottom: 1rem;
+        }
+
+        /* Loading/Error */
+        .loading-msg, .error-msg {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--text-medium);
+        }
+        .error-msg {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-medium);
+            font-size: 0.85rem;
+        }
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            .score-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .pillars {
+                grid-template-columns: 1fr;
+            }
+            .llm-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="logo">SnipeRank</h1>
+        <h2>Full AI SEO Report</h2>
+        
+        <div class="report-meta" id="reportMeta">
+            <p>
+                <strong>Report for:</strong> <span id="reportUrl">Loading...</span><br>
+                <strong>Generated For:</strong> <span id="reportName"></span> (<span id="reportEmail"></span>)<br>
+                <strong>Report Date:</strong> <span id="reportDate">Loading...</span>
+            </p>
+        </div>
+
+        <section class="score-card" id="scoreCard" aria-live="polite">
+            <div class="score-top">
+                <div class="score-main">
+                    <div class="score-number" id="scoreNumber">-</div>
+                    <div class="score-band" id="scoreBand">Loading Score...</div>
+                </div>
+            </div>
+            <div class="pillars" id="pillarsGrid"></div>
+        </section>
+
+        <section id="action-items">
+            <h3>🎯 Top 5 Action Items</h3>
+            <div id="actionItemsContainer">
+                <p class="loading-msg">Fetching detailed action plan...</p>
+            </div>
+        </section>
+
+        <section class="llm-insights">
+            <h3>🧠 LLM Perception Summary</h3>
+            <div id="llmInsightsContainer">
+                <p class="loading-msg">Analyzing AI engine insights...</p>
+            </div>
+        </section>
+
+        <section id="full-report-content">
+            <h2>Detailed Technical Analysis</h2>
+            <p class="loading-msg">Loading comprehensive report content...</p>
+        </section>
+        
+    </div>
+
+    <div class="footer">
+        © 2025 SnipeRank by <a href="https://quontora.com" target="_blank" rel="noopener">quontora.com</a>. Full Report Generated on <span id="footerDate"></span>.
+    </div>
+
+    <script>
+        const FULL_REPORT_ENDPOINT = '/api/full';
+        const LOGO_SOURCES = {
+            ChatGPT: 'https://i.imgur.com/2Xy1H8o.png',
+            Claude: 'https://i.imgur.com/3Yp0k7Q.png',
+            Gemini: 'https://i.imgur.com/4S2x8cE.png',
+            Copilot: 'https://i.imgur.com/5A3y9dA.png',
+            Perplexity: 'https://i.imgur.com/6B4z0eF.png',
+        };
+        
+        // Helper to render LLM logo/fallback
+        function logoDivFor(engine){
+            const wrap = document.createElement('div'); 
+            wrap.className = 'llm-logo';
+            const p = LOGO_SOURCES[engine];
+            if (!p) {
+                wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`;
+                return wrap;
+            }
+            const img = document.createElement('img'); 
+            img.alt = `${engine} logo`; 
+            img.src = p;
+            img.onload = () => {wrap.innerHTML = ''; wrap.appendChild(img)};
+            img.onerror = () => {wrap.innerHTML = `<span class="llm-fallback">${engine}</span>`};
+            return wrap;
+        }
+        
+        // Helper to format date
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+        
+        // Render Scorecard
+        function renderScoreCard(scoreData){
+            const { overall, band } = scoreData.score;
+            const { pillars } = scoreData;
+
+            document.getElementById("scoreNumber").textContent = `${overall.toFixed(0)}/100`; 
+            document.getElementById("scoreBand").textContent = `Rank: ${band}`;
+            
+            const grid = document.getElementById("pillarsGrid"); 
+            grid.innerHTML = "";
+            
+            const pillarMap = {
+                access: { label: "AI Access Readiness", max: 25 },
+                trust: { label: "Trust & Verification Signals", max: 25 },
+                clarity: { label: "LLM Interpretability & Clarity", max: 25 },
+                alignment: { label: "Prompt-Pattern Alignment", max: 25 }
+            };
+
+            pillars.forEach(p => {
+                const info = pillarMap[p.id] || { label: p.id, max: 25 };
+                const d = document.createElement("div"); 
+                d.className = "pillar"; 
+                d.innerHTML = `<span class="label">${info.label}</span><span class="badge">${p.score.toFixed(1)}/${info.max}</span>`; 
+                grid.appendChild(d);
+            });
+        }
+        
+        // Render LLM Insights
+        function renderLLMInsights(insights) {
+            const host = document.getElementById('llmInsightsContainer');
+            host.innerHTML = '';
+
+            insights.forEach(insight => {
+                const row = document.createElement('div');
+                row.className = 'llm-row';
+                
+                const logo = logoDivFor(insight.engine);
+                row.appendChild(logo);
+                
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'llm-summary';
+                summaryDiv.innerHTML = `<strong>${insight.engine} Perception:</strong> ${insight.summary}`;
+                row.appendChild(summaryDiv);
+
+                host.appendChild(row);
+            });
+        }
+        
+        // Render Action Items
+        function renderActionItems(actions) {
+            const host = document.getElementById('actionItemsContainer');
+            host.innerHTML = '';
+
+            actions.forEach(action => {
+                const item = document.createElement('div');
+                item.className = 'action-item';
+                
+                item.innerHTML = `
+                    <h4>${action.title}</h4>
+                    <p><strong>Impact:</strong> ${action.impact}</p>
+                    <p>${action.description}</p>
+                    <p><strong>Steps to Implement:</strong></p>
+                `;
+                
+                const ul = document.createElement('ul');
+                action.steps.forEach(step => {
+                    const li = document.createElement('li');
+                    li.textContent = step;
+                    ul.appendChild(li);
+                });
+                
+                item.appendChild(ul);
+                host.appendChild(item);
+            });
+        }
+        
+        // Render Full Report Content
+        function renderFullReportContent(content) {
+            const host = document.getElementById('full-report-content');
+            // This is a simple renderer. It assumes content is a string with section headings (###)
+            
+            // 1. Replace section headings
+            let htmlContent = content.replace(/###\s*(.*)/g, '<h3>$1</h3>');
+            
+            // 2. Wrap text blocks in paragraphs or lists
+            const lines = htmlContent.split('\n');
+            let finalHtml = '';
+            let inList = false;
+
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('<h3>')) {
+                    if (inList) finalHtml += '</ul>';
+                    inList = false;
+                    finalHtml += line + '\n';
+                } else if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
+                    if (!inList) finalHtml += '<ul>';
+                    inList = true;
+                    finalHtml += `<li>${trimmedLine.replace(/^[\*\-]\s*/, '')}</li>\n`;
+                } else if (trimmedLine) {
+                    if (inList) finalHtml += '</ul>';
+                    inList = false;
+                    finalHtml += `<p>${trimmedLine}</p>\n`;
+                }
+            });
+            if (inList) finalHtml += '</ul>';
+
+            host.innerHTML = `<h2>Detailed Technical Analysis</h2>${finalHtml}`;
+        }
+        
+        // Main load function
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUrl = urlParams.get("url");
+
+            // Retrieve form data from sessionStorage (set by analyze.html form)
+            const formDataString = sessionStorage.getItem('sniperank:form');
+            const formData = formDataString ? JSON.parse(formDataString) : {};
+
+            const reportUrlEl = document.getElementById("reportUrl");
+            const reportNameEl = document.getElementById("reportName");
+            const reportEmailEl = document.getElementById("reportEmail");
+            const reportDateEl = document.getElementById("reportDate");
+            const footerDateEl = document.getElementById("footerDate");
+            
+            const currentDate = formatDate(new Date());
+            
+            reportUrlEl.textContent = targetUrl || "N/A";
+            reportNameEl.textContent = formData.name || "Customer Name";
+            reportEmailEl.textContent = formData.email || "customer@email.com";
+            reportDateEl.textContent = currentDate;
+            footerDateEl.textContent = currentDate;
+
+
+            if (!targetUrl) {
+                document.getElementById('full-report-content').innerHTML = "<p class='error-msg'>No URL provided for full report.</p>";
+                return;
+            }
+
+            try {
+                // Fetch using the /api/full endpoint
+                const res = await fetch(`${FULL_REPORT_ENDPOINT}?url=${encodeURIComponent(targetUrl)}`);
+                
+                if (!res.ok) {
+                    throw new Error(`API returned status ${res.status}`);
+                }
+                
+                const data = await res.json();
+                
+                // 1. Render Scorecard & Pillars
+                renderScoreCard(data);
+                
+                // 2. Render Action Items
+                renderActionItems(data.action_items);
+                
+                // 3. Render LLM Insights
+                renderLLMInsights(data.llm_insights);
+
+                // 4. Render Full Content
+                renderFullReportContent(data.full_report_content);
+
+            } catch (e) {
+                console.error('Full Report Error:', e);
+                document.getElementById('full-report-content').innerHTML = `
+                    <p class='error-msg'>🛑 Error loading the Full Report: Could not connect to 
+                    ${FULL_REPORT_ENDPOINT} or the report data was invalid. (${e.message})</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
